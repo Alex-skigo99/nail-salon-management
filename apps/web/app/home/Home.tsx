@@ -4,15 +4,19 @@ import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { CACHE_TIME } from "@/const/cacheTime";
 
-interface WelcomeResponse {
-  message: string;
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: string;
 }
 
 export default function Home() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["welcome"],
     queryFn: async () => {
-      const response = await apiClient.get<WelcomeResponse>("/welcome");
+      const response = await apiClient.get<User[]>("/welcome");
       return response.data;
     },
     staleTime: CACHE_TIME,
@@ -41,7 +45,7 @@ export default function Home() {
   return (
     <>
       <div>{homeData || "Nail Salon Placeholder"}</div>
-      <div>{data?.message || "no message"}</div>
+      <div>{data ? JSON.stringify(data, null, 2) : "no message"}</div>
     </>
   );
 }

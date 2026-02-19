@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cors from "cors";
+import { prisma } from "./lib/prisma";
 
 dotenv.config();
 
@@ -29,8 +30,12 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello from Nail Salon Management API!");
 });
 
-app.get("/welcome", (req: Request, res: Response) => {
-  res.json({ message: "Welcome to Nail Salon Management API" });
+app.get("/welcome", async (req: Request, res: Response) => {
+  // Fetch all users with their posts
+  const allUsers = await prisma.user.findMany();
+  console.log("All users:", JSON.stringify(allUsers, null, 2));
+
+  res.json(allUsers);
 });
 
 // Start server
