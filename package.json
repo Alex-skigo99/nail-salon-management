@@ -1,1 +1,19 @@
-{\n  "name": "nail-salon-management",\n  "private": true,\n  "workspaces": [\n    "apps/*",\n    "packages/*"\n  ]\n}
+{
+  "name": "nail-salon-management",
+  "private": true,
+  "description": "Nail salon management system",
+  "workspaces": [
+    "apps/web",
+    "apps/api",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces",
+    "dev:web": "npm run dev -w apps/web",
+    "dev:api": "npm run dev -w apps/api",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "test:api": "npm run test -w apps/api",
+    "test:web": "npm run test -w apps/web"
+  }
+}

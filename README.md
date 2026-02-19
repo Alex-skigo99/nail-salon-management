@@ -6,7 +6,7 @@ This project is designed to manage the operations of a nail salon, including app
 ## Tech Stack
 - **Frontend:** React.js
 - **Backend:** Node.js, Express.js
-- **Database:** MongoDB
+- **Database:** PostgreSQL
 - **Styling:** Tailwind CSS
 - **Authentication:** JSON Web Tokens (JWT)
 

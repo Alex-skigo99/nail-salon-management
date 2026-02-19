@@ -1,0 +1,38 @@
+{
+  "contact": {
+    "pageTitle": "Свяжитесь с нами",
+    "pageDescription": "Свяжитесь с нашим велосипедным магазином",
+    "storeLocationsTitle": "Местоположение магазинов",
+    "storeLocationsDescription": "Посетите любой из наших филиалов",
+    "storeDowntownName": "Филиал в центре города",
+    "storeDowntownAddress": "123 Main Street, City Center",
+    "storeUptownName": "Филиал в верхней части города",
+    "storeUptownAddress": "456 Park Avenue, Uptown",
+    "storeWestName": "Филиал на западной стороне",
+    "storeWestAddress": "789 West Boulevard, West Side",
+    "phoneLabel": "Телефон:",
+    "hoursLabel": "Часы работы:",
+    "storeDowntownHours": "Пн-Пт 9:00-18:00, Сб 10:00-17:00",
+    "storeUptownHours": "Пн-Пт 10:00-19:00, Сб-Вс 10:00-18:00",
+    "storeWestHours": "Пн-Сб 9:00-17:00, Вс Закрыто",
+    "formTitle": "Отправьте нам сообщение",
+    "formDescription": "Мы ответим вам в ближайшее время",
+    "formNameLabel": "Имя",
+    "formNamePlaceholder": "Ваше имя",
+    "formEmailLabel": "Электронная почта",
+    "formEmailPlaceholder": "ваша@почта.com",
+    "formMessageLabel": "Сообщение",
+    "formMessagePlaceholder": "Ваше сообщение...",
+    "formSendButton": "Отправить сообщение"
+  },
+  "home": {
+    "pageTitle": "Управление салоном красоты",
+    "welcomeMessage": "Эффективно управляйте операциями вашего салона красоты"
+  },
+  "appSidebar": {
+    "title": "NailSalon",
+    "subtitle": "Управление салоном",
+    "contact": "Контакты",
+    "home": "Главная"
+  }
+}

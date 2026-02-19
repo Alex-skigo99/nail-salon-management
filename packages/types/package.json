@@ -1,1 +1,17 @@
-{\n  "name": "shared-types",\n  "version": "1.0.0",\n  "description": "Shared TypeScript types for projects",\n  "main": "index.js",\n  "types": "index.d.ts",\n  "scripts": {\n    "build": "tsc"\n  },\n  "devDependencies": {\n    "typescript": "^4.0.0"\n  }\n}
+{
+	"name": "shared-types",
+	"version": "1.0.0",
+	"description": "Shared TypeScript types for projects",
+	"main": "index.js",
+	"types": "index.d.ts",
+	"scripts": {
+		"build": "tsc"
+	},
+	"devDependencies": {
+		"typescript": "^4.0.0"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"type": "commonjs"
+}

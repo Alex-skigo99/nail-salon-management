@@ -1,13 +1,40 @@
-service: nail-salon-management
+service: nail-salon-api
+
+frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs20.x
+  region: us-east-1
+  environment:
+    DATABASE_URL: ${ssm:DATABASE_URL}
+    JWT_SECRET: ${ssm:JWT_SECRET}
+    FRONTEND_URL: https://yourdomain.vercel.app
+  vpc:
+    securityGroupIds:
+      - sg-xxxxx
+    subnetIds:
+      - subnet-xxxxx
+
 
 functions:
-  hello:
-    handler: handler.hello
+  api:
+    handler: dist/handler.handler
     events:
-      - http:
-          path: hello
-          method: get
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
+      - httpApi:
+          path: /
+          method: ANY
+
+
+plugins:
+  - serverless-plugin-tracing
+
+
+package:
+  individually: true
+  patterns:
+    - '!node_modules/**'
+    - '!.env'

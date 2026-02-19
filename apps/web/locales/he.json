@@ -1,0 +1,38 @@
+{
+  "contact": {
+    "pageTitle": "צור קשר",
+    "pageDescription": "פנה אלינו מחנות האופניים שלנו",
+    "storeLocationsTitle": "סניפי החנות",
+    "storeLocationsDescription": "בוא לבקר באחד הסניפים שלנו",
+    "storeDowntownName": "סניף מרכז העיר",
+    "storeDowntownAddress": "רחוב הראשי 123, מרכז העיר",
+    "storeUptownName": "סניף Uptown",
+    "storeUptownAddress": "שדרות הפארק 456, Uptown",
+    "storeWestName": "סניף West Side",
+    "storeWestAddress": "שדרות המערב 789, אזור מערב",
+    "phoneLabel": "טלפון:",
+    "hoursLabel": "שעות:",
+    "storeDowntownHours": "ב׳-ו׳ 9:00-18:00, ש׳ 10:00-17:00",
+    "storeUptownHours": "ב׳-ו׳ 10:00-19:00, ש׳-א׳ 10:00-18:00",
+    "storeWestHours": "ב׳-ש׳ 9:00-17:00, א׳ סגור",
+    "formTitle": "שלח לנו הודעה",
+    "formDescription": "נחזור אליך בהקדם",
+    "formNameLabel": "שם",
+    "formNamePlaceholder": "השם שלך",
+    "formEmailLabel": "אימייל",
+    "formEmailPlaceholder": "your@email.com",
+    "formMessageLabel": "הודעה",
+    "formMessagePlaceholder": "ההודעה שלך...",
+    "formSendButton": "שלח הודעה"
+  },
+  "home": {
+    "pageTitle": "ניהול סלון ציפורניים",
+    "welcomeMessage": "נהל את פעולות הסלון שלך ביעילות"
+  },
+  "appSidebar": {
+    "title": "NailSalon",
+    "subtitle": "ניהול סלון",
+    "contact": "צור קשר",
+    "home": "בית"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "contact": {
+    "pageTitle": "Contact Us",
+    "pageDescription": "Get in touch with our bicycle store",
+    "storeLocationsTitle": "Store Locations",
+    "storeLocationsDescription": "Visit us at any of our branches",
+    "storeDowntownName": "Downtown Branch",
+    "storeDowntownAddress": "123 Main Street, City Center",
+    "storeUptownName": "Uptown Branch",
+    "storeUptownAddress": "456 Park Avenue, Uptown",
+    "storeWestName": "West Side Branch",
+    "storeWestAddress": "789 West Boulevard, West Side",
+    "phoneLabel": "Phone:",
+    "hoursLabel": "Hours:",
+    "storeDowntownHours": "Mon-Fri 9AM-6PM, Sat 10AM-5PM",
+    "storeUptownHours": "Mon-Fri 10AM-7PM, Sat-Sun 10AM-6PM",
+    "storeWestHours": "Mon-Sat 9AM-5PM, Sun Closed",
+    "formTitle": "Send us a Message",
+    "formDescription": "We'll get back to you shortly",
+    "formNameLabel": "Name",
+    "formNamePlaceholder": "Your name",
+    "formEmailLabel": "Email",
+    "formEmailPlaceholder": "your@email.com",
+    "formMessageLabel": "Message",
+    "formMessagePlaceholder": "Your message...",
+    "formSendButton": "Send Message"
+  },
+  "home": {
+    "pageTitle": "Nail Salon Management",
+    "welcomeMessage": "Manage your nail salon operations efficiently"
+  },
+  "appSidebar": {
+    "title": "NailSalon",
+    "subtitle": "Salon Management",
+    "contact": "Contact",
+    "home": "Home"
+  }
+}

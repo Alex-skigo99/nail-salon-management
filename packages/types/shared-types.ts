@@ -1,22 +1,27 @@
 // Shared TypeScript interfaces and types
 
-// Example interface for a User
 export interface User {
-    id: number;
-    name: string;
-    email: string;
+  id: number;
+  email: string;
+  name: string;
+  role: 'admin' | 'staff' | 'client';
 }
 
-// Example interface for a Service
-export interface Service {
-    id: number;
-    name: string;
-    price: number;
+
+export interface Appointment {
+  id: number;
+  clientId: number;
+  staffId: number;
+  serviceId: number;
+  startTime: Date;
+  endTime: Date;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
 }
 
-// Example type for a Response
-export type ApiResponse<T> = {
-    status: string;
-    data: T;
-    message?: string;
-};
+
+export interface Client {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+}
