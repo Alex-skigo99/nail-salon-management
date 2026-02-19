@@ -3,12 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { CACHE_TIME } from "@/const/cacheTime";
-import { User } from "lucide-react";
 
 interface User {
   id: number;
   name: string;
   email: string;
+  role: string;
   createdAt: string;
 }
 
