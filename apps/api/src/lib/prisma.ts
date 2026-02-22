@@ -11,7 +11,12 @@ if (process.env.NODE_ENV !== "production") {
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {
-  throw new Error("DATABASE_URL environment variable is not set");
+  const message = "DATABASE_URL environment variable is not set";
+  if (process.env.NODE_ENV === "production") {
+    console.error(message);
+    throw new Error(message);
+  }
+  throw new Error(message);
 }
 
 // Create adapter with connection pooling for better Lambda performance
