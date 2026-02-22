@@ -11,7 +11,6 @@ apiClient.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  config.headers["Allow-Control-Allow-Origin"] = "*";
   return config;
 });
 

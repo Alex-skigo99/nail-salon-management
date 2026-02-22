@@ -39,9 +39,11 @@ app.get("/welcome", async (req: Request, res: Response) => {
   res.json(allUsers);
 });
 
-// Start server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+// Start server only in development (not in Lambda)
+if (process.env.NODE_ENV !== "production") {
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+}
 
 export default app;
