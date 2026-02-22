@@ -4,7 +4,10 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import { prisma } from "./lib/prisma";
 
-dotenv.config();
+// Only load .env in development; production uses Lambda environment variables
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
+}
 
 const app: Express = express();
 const port = process.env.PORT || 4000;
@@ -18,8 +21,6 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
-app.use(bodyParser.json());
 
 // Middleware
 app.use(express.json());
