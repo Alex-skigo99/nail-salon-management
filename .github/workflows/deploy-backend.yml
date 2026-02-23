@@ -32,13 +32,12 @@ jobs:
           cache-dependency-path: "**/package-lock.json"
 
       - name: Install & build (apps/api)
-        working-directory: apps/api
         run: |
           echo "Current directory: $(pwd)"
           echo "Step 1: Clearing npm cache"
           npm cache clean --force
 
-          echo "Step 2: npm ci (install dependencies)"
+          echo "Step 2: npm ci (install dependencies from root)"
           npm ci --verbose
 
           echo "Step 3: Verify npm ci success"
@@ -47,9 +46,9 @@ jobs:
             exit 1
           fi
 
-          echo "Step 4: Check node_modules"
+          echo "Step 4: Check node_modules in root"
           if [ -d "node_modules" ]; then
-            echo "✓ node_modules exists"
+            echo "✓ node_modules exists at root"
             ls -d node_modules/* 2>/dev/null | wc -l
             echo "  modules found"
           else
@@ -62,31 +61,22 @@ jobs:
             exit 1
           fi
 
-          echo "Step 5: Building TypeScript"
-          npm run build
+          echo "Step 5: Building TypeScript (apps/api workspace)"
+          npm run build -w apps/api
           echo "✓ Build completed"
 
-          echo "Step 6: Pruning dev dependencies"
-          npm prune --production
-
-          echo "Step 7: Final verification of node_modules"
-          if [ -d "node_modules" ]; then
-            echo "✓ node_modules exists after prune"
-          else
-            echo "⚠ node_modules missing after prune, installing production only"
-            npm install --production --prefer-offline
-          fi
+          echo "Step 6: Copying built files and dependencies to apps/api for deployment"
+          mkdir -p apps/api/dist
+          echo "✓ dist directory ready"
 
       - name: Run Prisma migrations on RDS
-        working-directory: apps/api
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          npx prisma migrate deploy
+          npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma
           echo "Database migrations completed successfully"
 
       - name: Verify node_modules exists
-        working-directory: apps/api
         run: |
           echo "Verifying deployment requirements..."
           if [ ! -d "node_modules" ]; then
@@ -111,14 +101,12 @@ jobs:
           find node_modules -maxdepth 1 -type d | wc -l
 
       - name: Package function (zip)
-        working-directory: apps/api
         run: |
-          # Create zip with explicit includes
-          zip -r ../function.zip \
-            dist/ \
+          # Create zip with api-specific code and shared node_modules
+          zip -r function.zip \
+            apps/api/dist/ \
+            apps/api/package.json \
             node_modules/ \
-            package.json \
-            package-lock.json \
             -x "node_modules/.bin/*" \
             "node_modules/*/test/*" \
             "node_modules/*/tests/*" \
@@ -126,12 +114,12 @@ jobs:
             "node_modules/*/.gitignore" \
             "node_modules/*/.npmignore" \
             "node_modules/*/README.md" \
-            "dist/**/*.map" \
+            "apps/api/dist/**/*.map" \
             || true
 
           echo "Zip file created successfully"
-          ls -lh ../function.zip
-          unzip -l ../function.zip | grep -E "(dist/|node_modules/express|package.json)" | head -20
+          ls -lh function.zip
+          unzip -l function.zip | grep -E "(apps/api/dist/|node_modules/express|apps/api/package.json)" | head -20
 
       # Step 1: Update Lambda function code
       - name: Update Lambda function code
@@ -141,7 +129,7 @@ jobs:
         run: |
           LATEST_REV=$(aws lambda update-function-code \
             --function-name "$FUNCTION_NAME" \
-            --zip-file "fileb://apps/function.zip" \
+            --zip-file "fileb://function.zip" \
             --region "$AWS_REGION" \
             --query 'RevisionId' \
             --output text)
@@ -221,7 +209,7 @@ jobs:
           fi
 
       - name: Clean up zip file
-        run: rm apps/function.zip
+        run: rm function.zip
 
       - name: Deployment summary
         run: |
