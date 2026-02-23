@@ -36,7 +36,6 @@ jobs:
           npm run build
           npm prune --production
 
-      # CRITICAL: Run database migrations BEFORE deploying new code
       - name: Run Prisma migrations on RDS
         working-directory: apps/api
         env:
