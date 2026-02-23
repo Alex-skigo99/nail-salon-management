@@ -2,7 +2,6 @@
 import app from "./index";
 import { prisma } from "./lib/prisma";
 
-// Wrap Express for Lambda
 import serverless from "serverless-http";
 
 // Run migrations on first Lambda invocation
@@ -11,6 +10,7 @@ let migrationsRun = false;
 export const handler = async (event: any, context: any) => {
   try {
     console.log("Lambda handler invoked with event:", JSON.stringify(event));
+
     if (!migrationsRun) {
       try {
         console.log("Verifying database connection...");
