@@ -27,7 +27,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "24" # change to required version
+          node-version: "24"
 
       - name: Install & build (apps/api)
         working-directory: apps/api
@@ -36,19 +36,113 @@ jobs:
           npm run build
           npm prune --production
 
+      # CRITICAL: Run database migrations BEFORE deploying new code
+      - name: Run Prisma migrations on RDS
+        working-directory: apps/api
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          npx prisma migrate deploy
+          echo "Database migrations completed successfully"
+
       - name: Package function (zip)
         run: |
           cd apps/api
-          # include everything needed for lambda: code, node_modules, built assets
           zip -r ../../function.zip .
 
-      - name: Deploy to Lambda (update code + publish version)
+      # Step 1: Update Lambda function code
+      - name: Update Lambda function code
         env:
           FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          aws lambda update-function-code --function-name "$FUNCTION_NAME" --zip-file "fileb://function.zip" --region "$AWS_REGION"
-          aws lambda publish-version --function-name "$FUNCTION_NAME" --region "$AWS_REGION"
+          LATEST_REV=$(aws lambda update-function-code \
+            --function-name "$FUNCTION_NAME" \
+            --zip-file "fileb://function.zip" \
+            --region "$AWS_REGION" \
+            --query 'RevisionId' \
+            --output text)
+          echo "UPDATE_REVISION=$LATEST_REV" >> $GITHUB_ENV
+          echo "Function code updated. Revision: $LATEST_REV"
+
+      # Step 2: Wait for Lambda update to complete (polling)
+      - name: Wait for Lambda update to complete
+        env:
+          FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          MAX_ATTEMPTS=60
+          ATTEMPT=0
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            STATE=$(aws lambda get-function-configuration \
+              --function-name "$FUNCTION_NAME" \
+              --region "$AWS_REGION" \
+              --query 'State' \
+              --output text)
+            
+            if [ "$STATE" = "Active" ]; then
+              echo "Lambda function is now Active and ready"
+              exit 0
+            fi
+            
+            echo "Waiting for Lambda update... State: $STATE (Attempt $((ATTEMPT + 1))/$MAX_ATTEMPTS)"
+            ATTEMPT=$((ATTEMPT + 1))
+            sleep 2
+          done
+
+          echo "ERROR: Lambda update did not complete in time"
+          exit 1
+
+      # Step 3: Publish new version after update is complete
+      - name: Publish Lambda version
+        env:
+          FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          VERSION=$(aws lambda publish-version \
+            --function-name "$FUNCTION_NAME" \
+            --region "$AWS_REGION" \
+            --query 'Version' \
+            --output text)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Published Lambda version: $VERSION"
+
+      # Step 4: Update alias to point to new version (optional but recommended)
+      - name: Update Lambda alias to new version
+        env:
+          FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ALIAS_NAME: "live"
+        run: |
+          # Check if alias exists
+          if aws lambda get-alias \
+            --function-name "$FUNCTION_NAME" \
+            --name "$ALIAS_NAME" \
+            --region "$AWS_REGION" 2>/dev/null; then
+            
+            # Update existing alias
+            aws lambda update-alias \
+              --function-name "$FUNCTION_NAME" \
+              --name "$ALIAS_NAME" \
+              --function-version "$VERSION" \
+              --region "$AWS_REGION"
+            echo "Updated alias '$ALIAS_NAME' to version $VERSION"
+          else
+            # Create new alias if it doesn't exist
+            aws lambda create-alias \
+              --function-name "$FUNCTION_NAME" \
+              --name "$ALIAS_NAME" \
+              --function-version "$VERSION" \
+              --region "$AWS_REGION"
+            echo "Created alias '$ALIAS_NAME' for version $VERSION"
+          fi
 
       - name: Clean up zip file
         run: rm function.zip
+
+      - name: Deployment summary
+        run: |
+          echo "✅ Deployment completed successfully"
+          echo "Function: ${{ secrets.FUNCTION_NAME }}"
+          echo "Version: $VERSION"
+          echo "Region: ${{ secrets.AWS_REGION }}"

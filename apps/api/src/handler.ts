@@ -10,10 +10,11 @@ let migrationsRun = false;
 
 export const handler = async (event: any, context: any) => {
   try {
+    console.log("Lambda handler invoked with event:", JSON.stringify(event));
     if (!migrationsRun) {
       try {
         console.log("Verifying database connection...");
-        await prisma.$executeRawUnsafe('SELECT 1');
+        await prisma.$executeRawUnsafe("SELECT 1");
         console.log("Database connection verified");
         migrationsRun = true;
       } catch (error) {
