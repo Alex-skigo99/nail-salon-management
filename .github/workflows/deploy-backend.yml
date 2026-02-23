@@ -44,10 +44,47 @@ jobs:
           npx prisma migrate deploy
           echo "Database migrations completed successfully"
 
-      - name: Package function (zip)
+      - name: Verify node_modules exists
+        working-directory: apps/api
         run: |
-          cd apps/api
-          zip -r ../../function.zip .
+          if [ -d "node_modules" ]; then
+            echo "✓ node_modules directory exists"
+            echo "✓ express module check:"
+            if [ -d "node_modules/express" ]; then
+              echo "  ✓ express module found"
+            else
+              echo "  ✗ ERROR: express module NOT found!"
+              find node_modules -maxdepth 1 -type d | head -20
+              exit 1
+            fi
+          else
+            echo "✗ ERROR: node_modules directory NOT found!"
+            ls -la
+            exit 1
+          fi
+
+      - name: Package function (zip)
+        working-directory: apps/api
+        run: |
+          # Create zip with explicit includes
+          zip -r ../function.zip \
+            dist/ \
+            node_modules/ \
+            package.json \
+            package-lock.json \
+            -x "node_modules/.bin/*" \
+            "node_modules/*/test/*" \
+            "node_modules/*/tests/*" \
+            "node_modules/*/.github/*" \
+            "node_modules/*/.gitignore" \
+            "node_modules/*/.npmignore" \
+            "node_modules/*/README.md" \
+            "dist/**/*.map" \
+            || true
+
+          echo "Zip file created successfully"
+          ls -lh ../function.zip
+          unzip -l ../function.zip | grep -E "(dist/|node_modules/express|package.json)" | head -20
 
       # Step 1: Update Lambda function code
       - name: Update Lambda function code
@@ -57,7 +94,7 @@ jobs:
         run: |
           LATEST_REV=$(aws lambda update-function-code \
             --function-name "$FUNCTION_NAME" \
-            --zip-file "fileb://function.zip" \
+            --zip-file "fileb://apps/function.zip" \
             --region "$AWS_REGION" \
             --query 'RevisionId' \
             --output text)
@@ -137,7 +174,7 @@ jobs:
           fi
 
       - name: Clean up zip file
-        run: rm function.zip
+        run: rm apps/function.zip
 
       - name: Deployment summary
         run: |
