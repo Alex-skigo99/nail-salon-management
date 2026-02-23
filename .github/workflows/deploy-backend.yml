@@ -32,9 +32,36 @@ jobs:
       - name: Install & build (apps/api)
         working-directory: apps/api
         run: |
+          echo "Step 1: npm ci (install dependencies)"
           npm ci
+          echo "✓ npm ci completed"
+
+          echo "Step 2: Verify node_modules after npm ci"
+          if [ -d "node_modules" ]; then
+            echo "✓ node_modules exists"
+            ls -la node_modules | head -20
+          else
+            echo "✗ ERROR: node_modules NOT found after npm ci!"
+            ls -la
+            exit 1
+          fi
+
+          echo "Step 3: Building TypeScript"
           npm run build
+          echo "✓ Build completed"
+
+          echo "Step 4: Pruning dev dependencies"
           npm prune --production
+          echo "✓ npm prune completed"
+
+          echo "Step 5: Final verification of node_modules"
+          if [ -d "node_modules" ]; then
+            echo "✓ node_modules still exists after prune"
+            wc -l < <(find node_modules -maxdepth 1 -type d)
+          else
+            echo "⚠ WARNING: node_modules missing after prune, installing production only"
+            npm install --production
+          fi
 
       - name: Run Prisma migrations on RDS
         working-directory: apps/api
@@ -47,21 +74,27 @@ jobs:
       - name: Verify node_modules exists
         working-directory: apps/api
         run: |
-          if [ -d "node_modules" ]; then
-            echo "✓ node_modules directory exists"
-            echo "✓ express module check:"
-            if [ -d "node_modules/express" ]; then
-              echo "  ✓ express module found"
-            else
-              echo "  ✗ ERROR: express module NOT found!"
-              find node_modules -maxdepth 1 -type d | head -20
-              exit 1
-            fi
-          else
-            echo "✗ ERROR: node_modules directory NOT found!"
+          echo "Verifying deployment requirements..."
+          if [ ! -d "node_modules" ]; then
+            echo "✗ CRITICAL ERROR: node_modules directory NOT found!"
+            echo "Current directory contents:"
             ls -la
             exit 1
           fi
+
+          echo "✓ node_modules directory exists"
+          echo "Checking for express module..."
+          if [ ! -d "node_modules/express" ]; then
+            echo "✗ ERROR: express module NOT found!"
+            echo "First 20 node_modules entries:"
+            find node_modules -maxdepth 1 -type d | head -20
+            exit 1
+          fi
+
+          echo "✓ express module found"
+          echo "Node modules stats:"
+          du -sh node_modules
+          find node_modules -maxdepth 1 -type d | wc -l
 
       - name: Package function (zip)
         working-directory: apps/api
