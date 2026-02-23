@@ -38,7 +38,7 @@ jobs:
           npm cache clean --force
 
           echo "Step 2: npm ci (install dependencies from root)"
-          npm ci --verbose
+          npm ci
 
           echo "Step 3: Verify npm ci success"
           if [ $? -ne 0 ]; then
@@ -73,7 +73,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma
+          npx prisma migrate deploy
           echo "Database migrations completed successfully"
 
       - name: Verify node_modules exists
