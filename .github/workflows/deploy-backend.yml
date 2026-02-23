@@ -27,40 +27,54 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "apps/api/package-lock.json"
 
       - name: Install & build (apps/api)
         working-directory: apps/api
         run: |
-          echo "Step 1: npm ci (install dependencies)"
-          npm ci
-          echo "✓ npm ci completed"
+          echo "Current directory: $(pwd)"
+          echo "Step 1: Clearing npm cache"
+          npm cache clean --force
 
-          echo "Step 2: Verify node_modules after npm ci"
-          if [ -d "node_modules" ]; then
-            echo "✓ node_modules exists"
-            ls -la node_modules | head -20
-          else
-            echo "✗ ERROR: node_modules NOT found after npm ci!"
-            ls -la
+          echo "Step 2: npm ci (install dependencies)"
+          npm ci --verbose
+
+          echo "Step 3: Verify npm ci success"
+          if [ $? -ne 0 ]; then
+            echo "✗ npm ci failed!"
             exit 1
           fi
 
-          echo "Step 3: Building TypeScript"
+          echo "Step 4: Check node_modules"
+          if [ -d "node_modules" ]; then
+            echo "✓ node_modules exists"
+            ls -d node_modules/* 2>/dev/null | wc -l
+            echo "  modules found"
+          else
+            echo "✗ ERROR: node_modules NOT found after npm ci!"
+            echo "Directory contents:"
+            ls -la
+            echo ""
+            echo "Disk usage:"
+            df -h
+            exit 1
+          fi
+
+          echo "Step 5: Building TypeScript"
           npm run build
           echo "✓ Build completed"
 
-          echo "Step 4: Pruning dev dependencies"
+          echo "Step 6: Pruning dev dependencies"
           npm prune --production
-          echo "✓ npm prune completed"
 
-          echo "Step 5: Final verification of node_modules"
+          echo "Step 7: Final verification of node_modules"
           if [ -d "node_modules" ]; then
-            echo "✓ node_modules still exists after prune"
-            wc -l < <(find node_modules -maxdepth 1 -type d)
+            echo "✓ node_modules exists after prune"
           else
-            echo "⚠ WARNING: node_modules missing after prune, installing production only"
-            npm install --production
+            echo "⚠ node_modules missing after prune, installing production only"
+            npm install --production --prefer-offline
           fi
 
       - name: Run Prisma migrations on RDS

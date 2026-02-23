@@ -2,7 +2,6 @@
 import app from "./index";
 import { prisma } from "./lib/prisma";
 
-// Wrap Express for Lambda
 import serverless from "serverless-http";
 
 // Run migrations on first Lambda invocation
