@@ -1,0 +1,34 @@
+{
+  "version": "50.0.0",
+  "files": {
+    "28360745a8c7a305817a420d4bae5bcf66389e225b2145a4b3f80ca609cf8a66": {
+      "displayName": "nail-saloon-backend/Code",
+      "source": {
+        "path": "asset.28360745a8c7a305817a420d4bae5bcf66389e225b2145a4b3f80ca609cf8a66",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "current_account-current_region-2052eef3": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "28360745a8c7a305817a420d4bae5bcf66389e225b2145a4b3f80ca609cf8a66.zip",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    },
+    "b5ee8981b617144243015bd3de7be373285032c0fe6be0099753509283858724": {
+      "displayName": "NailSalonStack Template",
+      "source": {
+        "path": "NailSalonStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "current_account-current_region-b587acf7": {
+          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}",
+          "objectKey": "b5ee8981b617144243015bd3de7be373285032c0fe6be0099753509283858724.json",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-${AWS::Region}"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

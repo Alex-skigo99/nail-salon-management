@@ -1,0 +1,22 @@
+{
+  "name": "nail-salon-cdk",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "synth": "cdk synth",
+    "deploy": "cdk deploy",
+    "diff": "cdk diff",
+    "watch": "tsc -p tsconfig.json -w"
+  },
+  "devDependencies": {
+    "aws-cdk": "^2.99.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4",
+    "@types/node": "^18.15.11"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.99.0",
+    "constructs": "^10.1.208"
+  }
+}

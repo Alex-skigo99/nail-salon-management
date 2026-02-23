@@ -5,215 +5,41 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "apps/api/**"
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - uses: actions/setup-node@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+          node-version: 20
           cache: "npm"
-          cache-dependency-path: "**/package-lock.json"
 
-      - name: Install & build (apps/api)
-        run: |
-          echo "Current directory: $(pwd)"
-          echo "Step 1: Clearing npm cache"
-          npm cache clean --force
+      - run: npm install
 
-          echo "Step 2: npm ci (install dependencies from root)"
-          npm ci
+      - run: npm run build --workspace=apps/api
 
-          echo "Step 3: Verify npm ci success"
-          if [ $? -ne 0 ]; then
-            echo "✗ npm ci failed!"
-            exit 1
-          fi
-
-          echo "Step 4: Check node_modules in root"
-          if [ -d "node_modules" ]; then
-            echo "✓ node_modules exists at root"
-            ls -d node_modules/* 2>/dev/null | wc -l
-            echo "  modules found"
-          else
-            echo "✗ ERROR: node_modules NOT found after npm ci!"
-            echo "Directory contents:"
-            ls -la
-            echo ""
-            echo "Disk usage:"
-            df -h
-            exit 1
-          fi
-
-          echo "Step 5: Building TypeScript (apps/api workspace)"
-          npm run build -w apps/api
-          echo "✓ Build completed"
-
-          echo "Step 6: Copying built files and dependencies to apps/api for deployment"
-          mkdir -p apps/api/dist
-          echo "✓ dist directory ready"
-
-      - name: Run Prisma migrations on RDS
+      - run: |
+          cd infra
+          npm install
+          npx cdk deploy --require-approval never
         env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: |
-          npx prisma migrate deploy
-          echo "Database migrations completed successfully"
 
-      - name: Verify node_modules exists
-        run: |
-          echo "Verifying deployment requirements..."
-          if [ ! -d "node_modules" ]; then
-            echo "✗ CRITICAL ERROR: node_modules directory NOT found!"
-            echo "Current directory contents:"
-            ls -la
-            exit 1
-          fi
-
-          echo "✓ node_modules directory exists"
-          echo "Checking for express module..."
-          if [ ! -d "node_modules/express" ]; then
-            echo "✗ ERROR: express module NOT found!"
-            echo "First 20 node_modules entries:"
-            find node_modules -maxdepth 1 -type d | head -20
-            exit 1
-          fi
-
-          echo "✓ express module found"
-          echo "Node modules stats:"
-          du -sh node_modules
-          find node_modules -maxdepth 1 -type d | wc -l
-
-      - name: Package function (zip)
-        run: |
-          # Create zip with api-specific code and shared node_modules
-          zip -r function.zip \
-            apps/api/dist/ \
-            apps/api/package.json \
-            node_modules/ \
-            -x "node_modules/.bin/*" \
-            "node_modules/*/test/*" \
-            "node_modules/*/tests/*" \
-            "node_modules/*/.github/*" \
-            "node_modules/*/.gitignore" \
-            "node_modules/*/.npmignore" \
-            "node_modules/*/README.md" \
-            "apps/api/dist/**/*.map" \
-            || true
-
-          echo "Zip file created successfully"
-          ls -lh function.zip
-          unzip -l function.zip | grep -E "(apps/api/dist/|node_modules/express|apps/api/package.json)" | head -20
-
-      # Step 1: Update Lambda function code
-      - name: Update Lambda function code
+      # Invoke migration lambda
+      - run: |
+          aws lambda invoke \
+            --function-name MigrationLambda \
+            --payload '{}' \
+            response.json
+          cat response.json
         env:
-          FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-        run: |
-          LATEST_REV=$(aws lambda update-function-code \
-            --function-name "$FUNCTION_NAME" \
-            --zip-file "fileb://function.zip" \
-            --region "$AWS_REGION" \
-            --query 'RevisionId' \
-            --output text)
-          echo "UPDATE_REVISION=$LATEST_REV" >> $GITHUB_ENV
-          echo "Function code updated. Revision: $LATEST_REV"
-
-      # Step 2: Wait for Lambda update to complete (polling)
-      - name: Wait for Lambda update to complete
-        env:
-          FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-        run: |
-          MAX_ATTEMPTS=60
-          ATTEMPT=0
-          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-            STATE=$(aws lambda get-function-configuration \
-              --function-name "$FUNCTION_NAME" \
-              --region "$AWS_REGION" \
-              --query 'State' \
-              --output text)
-            
-            if [ "$STATE" = "Active" ]; then
-              echo "Lambda function is now Active and ready"
-              exit 0
-            fi
-            
-            echo "Waiting for Lambda update... State: $STATE (Attempt $((ATTEMPT + 1))/$MAX_ATTEMPTS)"
-            ATTEMPT=$((ATTEMPT + 1))
-            sleep 2
-          done
-
-          echo "ERROR: Lambda update did not complete in time"
-          exit 1
-
-      # Step 3: Publish new version after update is complete
-      - name: Publish Lambda version
-        env:
-          FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-        run: |
-          VERSION=$(aws lambda publish-version \
-            --function-name "$FUNCTION_NAME" \
-            --region "$AWS_REGION" \
-            --query 'Version' \
-            --output text)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Published Lambda version: $VERSION"
-
-      # Step 4: Update alias to point to new version (optional but recommended)
-      - name: Update Lambda alias to new version
-        env:
-          FUNCTION_NAME: ${{ secrets.FUNCTION_NAME }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          ALIAS_NAME: "live"
-        run: |
-          # Check if alias exists
-          if aws lambda get-alias \
-            --function-name "$FUNCTION_NAME" \
-            --name "$ALIAS_NAME" \
-            --region "$AWS_REGION" 2>/dev/null; then
-            
-            # Update existing alias
-            aws lambda update-alias \
-              --function-name "$FUNCTION_NAME" \
-              --name "$ALIAS_NAME" \
-              --function-version "$VERSION" \
-              --region "$AWS_REGION"
-            echo "Updated alias '$ALIAS_NAME' to version $VERSION"
-          else
-            # Create new alias if it doesn't exist
-            aws lambda create-alias \
-              --function-name "$FUNCTION_NAME" \
-              --name "$ALIAS_NAME" \
-              --function-version "$VERSION" \
-              --region "$AWS_REGION"
-            echo "Created alias '$ALIAS_NAME' for version $VERSION"
-          fi
-
-      - name: Clean up zip file
-        run: rm function.zip
-
-      - name: Deployment summary
-        run: |
-          echo "✅ Deployment completed successfully"
-          echo "Function: ${{ secrets.FUNCTION_NAME }}"
-          echo "Version: $VERSION"
-          echo "Region: ${{ secrets.AWS_REGION }}"
