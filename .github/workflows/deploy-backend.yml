@@ -32,7 +32,7 @@ jobs:
 
       - name: Install production deps for apps/api
         working-directory: ./apps/api
-        run: npm ci --only=production
+        run: npm ci
 
       - name: Build apps/api
         working-directory: ./apps/api
