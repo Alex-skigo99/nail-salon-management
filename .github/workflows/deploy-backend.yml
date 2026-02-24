@@ -24,7 +24,7 @@ jobs:
         working-directory: ./apps/api
         run: |
           mkdir -p dist
-          cp package.json package-lock.json dist/
+          cp package.json dist/
           mkdir -p dist/prisma
           cp prisma/schema.prisma dist/prisma/
           cd dist
