@@ -28,7 +28,7 @@ jobs:
           mkdir -p dist/prisma
           cp prisma/schema.prisma dist/prisma/
           cd dist
-          npm ci --only=production
+          npm install --production
 
       - name: Build apps/api
         working-directory: ./apps/api
