@@ -11,16 +11,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "npm"
 
-      - run: npm install
+      - name: Install production deps for apps/api (ignore workspaces)
+        working-directory: ./apps/api
+        run: |
+          export NPM_CONFIG_WORKSPACES=false
+          npm ci --production
 
-      - run: npm run build --workspace=apps/api
+      - name: Build apps/api
+        working-directory: ./apps/api
+        run: npm run build --workspace=apps/api
 
       - run: |
           cd infra
