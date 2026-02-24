@@ -23,6 +23,7 @@ jobs:
       - name: Install production deps for apps/api (ignore workspaces)
         working-directory: ./apps/api
         run: |
+          mkdir -p dist
           cp package.json package-lock.json dist/
           mkdir -p dist/prisma
           cp prisma/schema.prisma dist/prisma/
