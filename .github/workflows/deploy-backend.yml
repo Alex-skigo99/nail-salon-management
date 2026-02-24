@@ -24,7 +24,7 @@ jobs:
         working-directory: ./apps/api
         run: |
           export NPM_CONFIG_WORKSPACES=false
-          npm ci --production
+          npm ci
 
       - name: Build apps/api
         working-directory: ./apps/api
