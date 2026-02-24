@@ -35,10 +35,32 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      # Invoke migration lambda
+      # Invoke migration lambda — resolve actual function name from CloudFormation
       - run: |
+          # Try exact logical id match first (works when CDK logical id is MigrationLambda)
+          FUNCTION_NAME=$(aws cloudformation describe-stack-resources \
+            --stack-name NailSalonStack \
+            --region $AWS_REGION \
+            --query "StackResources[?ResourceType=='AWS::Lambda::Function'].[LogicalResourceId,PhysicalResourceId]" --output text \
+            | awk '$1=="MigrationLambda" {print $2; exit}')
+
+          # Fallback: search physical names for the word 'migration' (case-insensitive)
+          if [ -z "$FUNCTION_NAME" ]; then
+            FUNCTION_NAME=$(aws cloudformation describe-stack-resources \
+              --stack-name NailSalonStack \
+              --region $AWS_REGION \
+              --query "StackResources[?ResourceType=='AWS::Lambda::Function'].PhysicalResourceId" --output text \
+              | tr '\t' '\n' | grep -i migration | head -n1 || true)
+          fi
+
+          if [ -z "$FUNCTION_NAME" ]; then
+            echo "Error: Migration Lambda not found in stack NailSalonStack" >&2
+            exit 1
+          fi
+
+          echo "Invoking function: $FUNCTION_NAME"
           aws lambda invoke \
-            --function-name MigrationLambda \
+            --function-name "$FUNCTION_NAME" \
             --payload '{}' \
             response.json
           cat response.json
