@@ -28,7 +28,7 @@ jobs:
 
       - name: Build apps/api
         working-directory: ./apps/api
-        run: npm run build --workspace=apps/api
+        run: npm run build
 
       - run: |
           cd infra
