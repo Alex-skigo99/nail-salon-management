@@ -20,7 +20,7 @@ jobs:
           node-version: 20
           cache: "npm"
 
-      - name: Install production deps for apps/api (ignore workspaces)
+      - name: Install production deps to dist
         working-directory: ./apps/api
         run: |
           mkdir -p dist
@@ -29,6 +29,10 @@ jobs:
           cp prisma/schema.prisma dist/prisma/
           cd dist
           npm install --production
+
+      - name: Install production deps for apps/api
+        working-directory: ./apps/api
+        run: npm ci --only=production
 
       - name: Build apps/api
         working-directory: ./apps/api
