@@ -1,17 +1,17 @@
-import { execSync } from "child_process";
+import { knex } from "./lib/db";
 
 export const handler = async () => {
   try {
-    execSync("npx prisma migrate deploy", {
-      stdio: "inherit",
-    });
+    await knex.migrate.latest();
 
     return {
       statusCode: 200,
       body: "Migration successful",
     };
   } catch (error) {
-    console.error(error);
+    console.error("Migration failed:", error);
     throw error;
+  } finally {
+    await knex.destroy();
   }
 };

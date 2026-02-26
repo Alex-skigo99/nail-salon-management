@@ -25,10 +25,9 @@ jobs:
         run: |
           mkdir -p dist
           cp package.json dist/
-          mkdir -p dist/prisma
-          cp prisma/schema.prisma dist/prisma/
+          cp -r migrations dist/
           cd dist
-          npm install --production
+          npm install --omit=dev
 
       - name: Install production deps for apps/api
         working-directory: ./apps/api

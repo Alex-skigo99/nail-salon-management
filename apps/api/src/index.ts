@@ -2,19 +2,15 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cors from "cors";
-import { prisma } from "./lib/prisma";
+import { knex } from "./lib/db";
 
-// Only load .env in development; production uses Lambda environment variables
 if (process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
 
 const app: Express = express();
-const port = process.env.PORT || 4000;
 const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
 
-// Middleware
-// Allow credentials (cookies/auth) from the frontend origin
 app.use(
   cors({
     origin: frontendUrl,
@@ -22,7 +18,6 @@ app.use(
   })
 );
 
-// Middleware
 app.use(express.json());
 app.use(bodyParser.json());
 
@@ -32,8 +27,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.get("/welcome", async (req: Request, res: Response) => {
-  // Fetch all users with their posts
-  const allUsers = await prisma.user.findMany();
+  const allUsers = await knex("users").select("*");
   console.log("All users:", JSON.stringify(allUsers, null, 2));
 
   res.json(allUsers);
@@ -41,6 +35,7 @@ app.get("/welcome", async (req: Request, res: Response) => {
 
 // Start server only in development (not in Lambda)
 if (process.env.NODE_ENV !== "production") {
+  const port = process.env.PORT || 4000;
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });

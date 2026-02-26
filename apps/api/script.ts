@@ -1,27 +1,24 @@
-import { prisma } from "./src/lib/prisma";
+import { knex } from "./src/lib/db";
 
 async function main() {
-  // Create a new user with a post
-  const user = await prisma.user.create({
-    data: {
-      name: "Alice",
-      email: "alice@prisma.io",
-      password: "password123",
+  const insertedUser = await knex("users").insert(
+    {
+      name: "Sasha",
+      email: "sasha.dev.dgs@gmail.com",
+      password: "pas123",
     },
-  });
-  console.log("Created user:", user);
+    ["id", "email", "name"]
+  );
 
-  // Fetch all users with their posts
-  const allUsers = await prisma.user.findMany();
-  console.log("All users:", JSON.stringify(allUsers, null, 2));
+  console.log("Inserted user:", JSON.stringify(insertedUser, null, 2));
 }
 
 main()
   .then(async () => {
-    await prisma.$disconnect();
+    await knex.destroy();
   })
   .catch(async (e) => {
     console.error(e);
-    await prisma.$disconnect();
+    await knex.destroy();
     process.exit(1);
   });

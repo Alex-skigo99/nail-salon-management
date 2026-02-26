@@ -1,7 +1,7 @@
-import { PrismaClient } from "../generated/prisma/client";
+import type { Knex } from "knex";
 
 declare global {
-  var prisma: PrismaClient | undefined;
+  var __db: Knex | undefined;
 }
 
 export {};

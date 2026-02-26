@@ -10,7 +10,7 @@ export class NailSalonStack extends cdk.Stack {
 
     const apiLambda = new lambda.Function(this, "nail-saloon-backend", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      handler: "handler.handler",
+      handler: "src/handler.handler",
       code: lambda.Code.fromAsset("../apps/api/dist"),
       memorySize: 512,
       timeout: cdk.Duration.seconds(15),
@@ -21,7 +21,7 @@ export class NailSalonStack extends cdk.Stack {
 
     const migrationLambda = new lambda.Function(this, "MigrationLambda", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      handler: "migrate.handler",
+      handler: "src/migrate.handler",
       code: lambda.Code.fromAsset("../apps/api/dist"),
       memorySize: 1024,
       timeout: cdk.Duration.minutes(5),
