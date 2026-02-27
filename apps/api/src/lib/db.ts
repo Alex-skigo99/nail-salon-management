@@ -17,6 +17,7 @@ if (!connectionString) {
 const migrationsDirectory = path.resolve(process.cwd(), "migrations");
 
 const isProduction = process.env.NODE_ENV === "production";
+console.log(`Running in ${isProduction ? "production" : "development"} mode`);
 
 const config: Knex.Config = {
   client: "pg",
