@@ -3,7 +3,7 @@ import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigatewayv2";
 import * as integrations from "aws-cdk-lib/aws-apigatewayv2-integrations";
-import * as ec2 from "aws-cdk-lib/aws-ec2";
+// import * as ec2 from "aws-cdk-lib/aws-ec2";
 
 export class NailSalonStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -85,7 +85,7 @@ export class NailSalonStack extends cdk.Stack {
       timeout: cdk.Duration.minutes(5),
     });
 
-    const frontendUrl = process.env.FRONTEND_URL;
+    const frontendUrl = process.env.FRONTEND_URL?.trim().replace(/\/+$/, "");
     if (!frontendUrl) {
       throw new Error("FRONTEND_URL must be set for the API CORS configuration");
     }
