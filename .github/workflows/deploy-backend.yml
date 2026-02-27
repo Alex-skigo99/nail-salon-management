@@ -25,6 +25,8 @@ jobs:
         run: |
           mkdir -p dist
           cp package.json dist/
+          cp db_names.js dist/
+          cp knexfile.js dist/
           cp -r migrations dist/
           cd dist
           npm install --omit=dev
