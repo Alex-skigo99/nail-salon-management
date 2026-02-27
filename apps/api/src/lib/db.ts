@@ -16,9 +16,14 @@ if (!connectionString) {
 
 const migrationsDirectory = path.resolve(process.cwd(), "migrations");
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const config: Knex.Config = {
   client: "pg",
-  connection: connectionString,
+  connection: {
+    connectionString,
+    ssl: isProduction ? { rejectUnauthorized: false } : false,
+  },
   pool: {
     min: 1,
     max: 5,
@@ -35,7 +40,7 @@ const globalRef = globalThis as typeof globalThis & { __db?: Knex };
 
 let instance: Knex;
 
-if (process.env.NODE_ENV === "production") {
+if (isProduction) {
   instance = globalRef.__db || createInstance();
   globalRef.__db = instance;
 } else {
