@@ -14,6 +14,15 @@ export class NailSalonStack extends cdk.Stack {
       throw new Error("DATABASE_URL must be set when deploying the NailSalonStack");
     }
 
+    const node_env = process.env.NODE_ENV || "development";
+    const frontendUrl = process.env.FRONTEND_URL?.trim().replace(/\/+$/, "");
+    if (!frontendUrl) {
+      throw new Error("FRONTEND_URL must be set for the API CORS configuration");
+    }
+    console.log(
+      `Deploying NailSalonStack in ${node_env} mode with DATABASE_URL=${databaseUrl} and FRONTEND_URL=${frontendUrl}`
+    );
+
     // const vpcId = this.node.tryGetContext("vpcId") ?? process.env.VPC_ID;
     // if (!vpcId) {
     //   throw new Error("VPC ID is required (provide via context key 'vpcId' or env var VPC_ID)");
@@ -63,6 +72,8 @@ export class NailSalonStack extends cdk.Stack {
       code: lambda.Code.fromAsset("../apps/api/dist"),
       environment: {
         DATABASE_URL: databaseUrl,
+        FRONTEND_URL: frontendUrl,
+        NODE_ENV: node_env,
       },
       // vpc,
       // securityGroups: [lambdaSecurityGroup],
@@ -84,11 +95,6 @@ export class NailSalonStack extends cdk.Stack {
       memorySize: 1024,
       timeout: cdk.Duration.minutes(5),
     });
-
-    const frontendUrl = process.env.FRONTEND_URL?.trim().replace(/\/+$/, "");
-    if (!frontendUrl) {
-      throw new Error("FRONTEND_URL must be set for the API CORS configuration");
-    }
 
     const httpApi = new apigateway.HttpApi(this, "HttpApi", {
       corsPreflight: {
