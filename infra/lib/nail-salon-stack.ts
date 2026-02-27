@@ -14,49 +14,49 @@ export class NailSalonStack extends cdk.Stack {
       throw new Error("DATABASE_URL must be set when deploying the NailSalonStack");
     }
 
-    const vpcId = this.node.tryGetContext("vpcId") ?? process.env.VPC_ID;
-    if (!vpcId) {
-      throw new Error("VPC ID is required (provide via context key 'vpcId' or env var VPC_ID)");
-    }
+    // const vpcId = this.node.tryGetContext("vpcId") ?? process.env.VPC_ID;
+    // if (!vpcId) {
+    //   throw new Error("VPC ID is required (provide via context key 'vpcId' or env var VPC_ID)");
+    // }
 
-    const dbSecurityGroupId = this.node.tryGetContext("dbSecurityGroupId") ?? process.env.DB_SECURITY_GROUP_ID;
-    if (!dbSecurityGroupId) {
-      throw new Error(
-        "Database security group ID is required (provide via context key 'dbSecurityGroupId' or env var DB_SECURITY_GROUP_ID)"
-      );
-    }
+    // const dbSecurityGroupId = this.node.tryGetContext("dbSecurityGroupId") ?? process.env.DB_SECURITY_GROUP_ID;
+    // if (!dbSecurityGroupId) {
+    //   throw new Error(
+    //     "Database security group ID is required (provide via context key 'dbSecurityGroupId' or env var DB_SECURITY_GROUP_ID)"
+    //   );
+    // }
 
-    const rawDbPort = this.node.tryGetContext("dbPort") ?? process.env.DB_PORT;
-    const dbPort = Number(rawDbPort ?? "5432");
-    if (!Number.isFinite(dbPort) || dbPort <= 0) {
-      throw new Error("dbPort must be a valid port number (default 5432)");
-    }
+    // const rawDbPort = this.node.tryGetContext("dbPort") ?? process.env.DB_PORT;
+    // const dbPort = Number(rawDbPort ?? "5432");
+    // if (!Number.isFinite(dbPort) || dbPort <= 0) {
+    //   throw new Error("dbPort must be a valid port number (default 5432)");
+    // }
 
-    const vpc = ec2.Vpc.fromLookup(this, "ExistingVpc", { vpcId });
-    const databaseSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
-      this,
-      "DatabaseSecurityGroup",
-      dbSecurityGroupId,
-      {
-        mutable: true,
-      }
-    );
-    const lambdaSecurityGroup = new ec2.SecurityGroup(this, "LambdaSecurityGroup", {
-      vpc,
-      allowAllOutbound: true,
-      description: "Allow backend Lambdas to reach the RDS instance",
-    });
+    // const vpc = ec2.Vpc.fromLookup(this, "ExistingVpc", { vpcId });
+    // const databaseSecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(
+    //   this,
+    //   "DatabaseSecurityGroup",
+    //   dbSecurityGroupId,
+    //   {
+    //     mutable: true,
+    //   }
+    // );
+    // const lambdaSecurityGroup = new ec2.SecurityGroup(this, "LambdaSecurityGroup", {
+    //   vpc,
+    //   allowAllOutbound: true,
+    //   description: "Allow backend Lambdas to reach the RDS instance",
+    // });
 
-    lambdaSecurityGroup.connections.allowTo(
-      databaseSecurityGroup,
-      ec2.Port.tcp(dbPort),
-      "Allow API Lambda outbound traffic to the database"
-    );
-    databaseSecurityGroup.connections.allowFrom(
-      lambdaSecurityGroup,
-      ec2.Port.tcp(dbPort),
-      "Allow database ingress from the API Lambda"
-    );
+    // lambdaSecurityGroup.connections.allowTo(
+    //   databaseSecurityGroup,
+    //   ec2.Port.tcp(dbPort),
+    //   "Allow API Lambda outbound traffic to the database"
+    // );
+    // databaseSecurityGroup.connections.allowFrom(
+    //   lambdaSecurityGroup,
+    //   ec2.Port.tcp(dbPort),
+    //   "Allow database ingress from the API Lambda"
+    // );
 
     const lambdaCommonProps = {
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -64,11 +64,11 @@ export class NailSalonStack extends cdk.Stack {
       environment: {
         DATABASE_URL: databaseUrl,
       },
-      vpc,
-      securityGroups: [lambdaSecurityGroup],
-      vpcSubnets: {
-        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-      },
+      // vpc,
+      // securityGroups: [lambdaSecurityGroup],
+      // vpcSubnets: {
+      //   subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+      // },
     };
 
     const apiLambda = new lambda.Function(this, "nail-saloon-backend", {
