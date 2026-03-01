@@ -1,3 +1,7 @@
-export const Tables = {
+const Tables = {
   USERS: "users",
+};
+
+module.exports = {
+  Tables,
 };
