@@ -1,0 +1,11 @@
+{
+  "files": [],
+  "references": [{ "path": "packages/types" }, { "path": "apps/api" }, { "path": "apps/web" }],
+  "compilerOptions": {
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@project/types": ["packages/types/src"]
+    }
+  }
+}

@@ -3,8 +3,6 @@ import { ReactNode } from "react";
 import Providers from "@/components/providers/Providers";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/sidebars/AppSidebar";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
 import { getDirection } from "@/lib/rtl";
@@ -36,13 +34,10 @@ export default async function RootLayout({ children }: Readonly<Props>) {
 
   return (
     <html lang={locale} dir={direction}>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}>
         <NextIntlClientProvider locale={locale}>
           <Providers>
-            <SidebarProvider>
-              <AppSidebar />
-              <main className="flex-1">{children}</main>
-            </SidebarProvider>
+            <main className="flex-1">{children}</main>
           </Providers>
         </NextIntlClientProvider>
       </body>
