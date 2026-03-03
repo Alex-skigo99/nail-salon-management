@@ -5,7 +5,6 @@
   "workspaces": [
     "apps/web",
     "apps/api",
-    "packages/*",
     "infra"
   ],
   "scripts": {
@@ -14,12 +13,8 @@
     "dev:web": "npm run dev -w apps/web",
     "dev:api": "npm run dev -w apps/api",
     "build": "npm run build --workspaces",
-    "build:types": "npm run build -w packages/types",
     "test": "npm run test --workspaces",
     "test:api": "npm run test -w apps/api",
     "test:web": "npm run test -w apps/web"
-  },
-  "devDependencies": {
-    "typescript": "^5.2.0"
   }
 }

@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { CACHE_TIME } from "@/const/cacheTime";
-import { User } from "@project/types";
+import { User } from "@/types/userTypes";
 
 export default function CalendarPage() {
   const { data, isLoading, error } = useQuery({
