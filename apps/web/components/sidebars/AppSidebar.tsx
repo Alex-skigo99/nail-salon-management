@@ -35,14 +35,14 @@ export function AppSidebar() {
 
   const menuItems: MenuItem[] = [
     {
-      label: t("home"),
-      href: "/home",
+      label: t("calendar"),
+      href: "/admin/calendar",
       icon: LayoutDashboard,
     },
     {
-      label: t("contact"),
-      href: "/contact",
-      icon: Mail,
+      label: t("home"),
+      href: "/home",
+      icon: LayoutDashboard,
     },
   ];
 

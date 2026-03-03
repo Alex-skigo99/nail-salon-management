@@ -1,51 +1,34 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import apiClient from "@/lib/api-client";
-import { CACHE_TIME } from "@/const/cacheTime";
+import { useTranslations } from "next-intl";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  createdAt: string;
-}
+import Header from "./_components/Header";
+import HeroSection from "./_components/HeroSection";
+import AboutSection from "./_components/AboutSection";
+import GallerySection from "./_components/GallerySection";
+import PricesSection from "./_components/PricesSection";
+import ScheduleSection from "./_components/ScheduleSection";
+import MapSection from "./_components/MapSection";
+import Footer from "./_components/Footer";
 
-export default function Home() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["welcome"],
-    queryFn: async () => {
-      const response = await apiClient.get<User[]>("/welcome");
-      return response.data;
-    },
-    staleTime: CACHE_TIME,
-  });
+type HomeProps = {
+  t: ReturnType<typeof useTranslations>;
+};
 
-  const {
-    data: homeData,
-    isLoading: homeLoading,
-    error: homeError,
-  } = useQuery({
-    queryKey: ["home"],
-    queryFn: async () => {
-      const response = await apiClient.get<string>("/");
-      return response.data;
-    },
-  });
-
-  if (homeLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (homeError) {
-    return <div>Error: {homeError instanceof Error ? homeError.message : "Failed to fetch"}</div>;
-  }
+export default function Home({ t }: HomeProps) {
+  const isMobile = useIsMobile();
 
   return (
-    <>
-      <div>{homeData || "Nail Salon Placeholder"}</div>
-      <div>{data ? JSON.stringify(data, null, 2) : "no message"}</div>
-    </>
+    <div className="min-h-screen bg-white">
+      <Header t={t} isMobile={isMobile} />
+      <HeroSection t={t} isMobile={isMobile} />
+      <AboutSection t={t} isMobile={isMobile} />
+      <GallerySection isMobile={isMobile} />
+      <PricesSection t={t} isMobile={isMobile} />
+      <ScheduleSection t={t} isMobile={isMobile} />
+      <MapSection t={t} isMobile={isMobile} />
+      <Footer t={t} isMobile={isMobile} />
+    </div>
   );
 }

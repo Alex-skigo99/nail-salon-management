@@ -1,10 +1,14 @@
 "use client";
 
-import Home from "./Home";
+import CalendarPage from "./CalendarPage";
 import { useTranslations } from "next-intl";
 
 export default function Dashboard() {
   const t = useTranslations("home");
 
-  return <Home t={t} />;
+  return (
+    <div className="flex-1 p-8">
+      <CalendarPage />
+    </div>
+  );
 }

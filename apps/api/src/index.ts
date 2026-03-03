@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { knex } from "./lib/db";
+import { User } from "@project/types";
 
 if (process.env.NODE_ENV !== "production") {
   dotenv.config();
@@ -27,7 +28,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.get("/welcome", async (req: Request, res: Response) => {
-  const allUsers = await knex("users").select("*");
+  const allUsers: User[] = await knex<User>("users").select("*");
   console.log("All users:", JSON.stringify(allUsers, null, 2));
 
   res.json(allUsers);
