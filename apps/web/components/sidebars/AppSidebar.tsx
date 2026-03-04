@@ -10,14 +10,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarFooter,
 } from "@/components/ui/sidebar";
 import { LayoutDashboard, Mail } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import LocaleSwitcher from "./LocaleSwitcher";
-import { Locale } from "next-intl";
-import { changeLocaleAction } from "@/utils/changeLocaleAction";
 import { isRTLLocale } from "@/lib/rtl";
 import { useTranslations } from "next-intl";
 
@@ -46,10 +42,6 @@ export function AppSidebar() {
     },
   ];
 
-  async function handleLocaleChange(locale: Locale) {
-    await changeLocaleAction(locale);
-  }
-
   return (
     <Sidebar side={sidebarSide}>
       <SidebarHeader className="border-b">
@@ -76,9 +68,6 @@ export function AppSidebar() {
           })}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter className="mb-12 border-t">
-        <LocaleSwitcher handleLocaleChange={handleLocaleChange} />
-      </SidebarFooter>
     </Sidebar>
   );
 }
