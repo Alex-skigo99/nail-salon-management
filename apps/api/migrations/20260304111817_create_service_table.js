@@ -8,6 +8,7 @@ exports.up = function (knex) {
   return knex.schema.createTable(Tables.SERVICES, (table) => {
     table.increments("id").primary();
     table.string("name").notNullable();
+    table.enum("category", ["manicure", "pedicure", "other"]).notNullable();
     table.text("description");
     table.decimal("price", 10, 2).notNullable();
     table.integer("duration_minutes").notNullable();

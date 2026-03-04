@@ -1,3 +1,4 @@
+// This file is used to run database migrations when deploying the API.
 import { knex } from "./lib/db";
 
 export const handler = async () => {

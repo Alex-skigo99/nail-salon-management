@@ -85,3 +85,5 @@ Add request validation (Zod) and sanitize inputs.
 Protect sensitive routes with auth + role-based authorization.
 Use async/await and consistent error handling; avoid swallowing errors.
 For long operations (reports, large imports) use a queue system and expose job endpoints.
+
+db tables name locate in src/types/dbSchemaTypes.ts
