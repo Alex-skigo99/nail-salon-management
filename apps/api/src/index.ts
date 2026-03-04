@@ -22,10 +22,6 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 // Routes
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello from Nail Salon Management API!");
-});
-
 app.get("/welcome", async (req: Request, res: Response) => {
   const allUsers = await knex("users").select("*");
   console.log("All users:", JSON.stringify(allUsers, null, 2));
