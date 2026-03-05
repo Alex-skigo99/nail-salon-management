@@ -13,7 +13,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { LayoutDashboard, Users, Menu } from "lucide-react";
+import { LayoutDashboard, Users, Menu, Scissors, HomeIcon } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isRTLLocale } from "@/lib/rtl";
@@ -47,9 +47,14 @@ export function AppSidebar() {
       icon: Users,
     },
     {
+      label: t("services"),
+      href: "/admin/services",
+      icon: Scissors,
+    },
+    {
       label: t("home"),
       href: "/home",
-      icon: LayoutDashboard,
+      icon: HomeIcon,
     },
   ];
 

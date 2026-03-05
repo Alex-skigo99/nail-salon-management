@@ -7,7 +7,7 @@ export type User = {
   role: "ADMIN" | "USER";
   last_login: string;
   password: string;
-  createdAt: string;
+  created_at: string;
 };
 
 export type Service = {
@@ -17,8 +17,8 @@ export type Service = {
   category: "manicure" | "pedicure" | "other";
   price: string;
   duration_minutes: number;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 };
 
 export type Master = {

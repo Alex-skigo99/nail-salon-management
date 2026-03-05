@@ -4,7 +4,7 @@ import * as serviceService from "../services/serviceService";
 
 const CreateServiceSchema = z.object({
   name: z.string().min(1),
-  description: z.string().optional(),
+  description: z.string().optional().nullable(),
   category: z.enum(["manicure", "pedicure", "other"]),
   price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
   duration_minutes: z.number().int().positive(),

@@ -101,10 +101,11 @@
     "tomorrow": "Завтра"
   },
   "appSidebar": {
-    "title": "NailSalon",
+    "title": "Xena Nails Studio",
     "subtitle": "Управление салоном",
     "home": "Главная",
     "calendar": "Календарь",
-    "masters": "Мастера"
+    "masters": "Мастера",
+    "services": "Услуги"
   }
 }

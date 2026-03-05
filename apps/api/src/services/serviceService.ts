@@ -16,7 +16,7 @@ export const createService = async (data: ServiceInput): Promise<Service> => {
 export const updateService = async (id: number, data: Partial<ServiceInput>): Promise<Service | null> => {
   const [service] = await knex(DB_TABLES.SERVICES)
     .where({ id })
-    .update({ ...data, updatedAt: new Date().toISOString() })
+    .update({ ...data, updated_at: new Date().toISOString() })
     .returning("*");
   return service ?? null;
 };
