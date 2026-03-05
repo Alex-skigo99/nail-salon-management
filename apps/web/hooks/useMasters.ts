@@ -2,14 +2,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { CACHE_TIME } from "@/const/cacheTime";
 import type { Master, CreateMasterInput, UpdateMasterInput } from "@/types/masterTypes";
+import { queryKeys } from "./queryKeys";
+import { apiRoutes } from "@/const/apiRouts";
 
-const MASTERS_QUERY_KEY = ["masters"];
+const MASTERS_QUERY_KEY = [queryKeys.masters];
 
 export function useMasters() {
   return useQuery({
     queryKey: MASTERS_QUERY_KEY,
     queryFn: async () => {
-      const res = await apiClient.get<Master[]>("/master");
+      const res = await apiClient.get<Master[]>(apiRoutes.masters);
       return res.data;
     },
     staleTime: CACHE_TIME,
@@ -21,7 +23,7 @@ export function useCreateMaster() {
 
   return useMutation({
     mutationFn: async (data: CreateMasterInput) => {
-      const res = await apiClient.post<Master>("/master", data);
+      const res = await apiClient.post<Master>(apiRoutes.masters, data);
       return res.data;
     },
     onSuccess: () => {
@@ -35,7 +37,7 @@ export function useUpdateMaster() {
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: UpdateMasterInput }) => {
-      const res = await apiClient.put<Master>(`/master/${id}`, data);
+      const res = await apiClient.put<Master>(`${apiRoutes.masters}/${id}`, data);
       return res.data;
     },
     onSuccess: () => {
@@ -49,7 +51,7 @@ export function useDeleteMaster() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      await apiClient.delete(`/master/${id}`);
+      await apiClient.delete(`${apiRoutes.masters}/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: MASTERS_QUERY_KEY });
