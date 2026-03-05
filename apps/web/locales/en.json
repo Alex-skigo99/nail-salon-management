@@ -47,31 +47,7 @@
     "aboutCard4Desc": "Every tool is sterilized and single-use items are discarded — your safety matters.",
     "pricesTitle": "Our Services & Prices",
     "pricesSubtitle": "Explore our range of treatments tailored just for you.",
-    "pricesCatManicure": "Manicure",
-    "pricesClassicManicure": "Classic Manicure",
-    "pricesClassicManicurePrice": "$30",
-    "pricesGelManicure": "Gel Manicure",
-    "pricesGelManicurePrice": "$45",
-    "pricesFrencManicure": "French Manicure",
-    "pricesFrenchManicurePrice": "$40",
-    "pricesNailArt": "Nail Art (per nail)",
-    "pricesNailArtPrice": "$5+",
-    "pricesCatPedicure": "Pedicure",
-    "pricesClassicPedicure": "Classic Pedicure",
-    "pricesClassicPedicurePrice": "$40",
-    "pricesGelPedicure": "Gel Pedicure",
-    "pricesGelPedicurePrice": "$55",
-    "pricesLuxuryPedicure": "Luxury Spa Pedicure",
-    "pricesLuxuryPedicurePrice": "$70",
-    "pricesCatExtensions": "Extensions & Extras",
-    "pricesAcrylicFull": "Acrylic Full Set",
-    "pricesAcrylicFullPrice": "$65",
-    "pricesAcrylicFill": "Acrylic Fill",
-    "pricesAcrylicFillPrice": "$40",
-    "pricesGelExtensions": "Gel Extensions",
-    "pricesGelExtensionsPrice": "$75",
-    "pricesRemoval": "Polish Removal",
-    "pricesRemovalPrice": "$10",
+
     "scheduleTitle": "Available Appointments",
     "scheduleSubtitle": "Grab one of the nearest open slots — limited availability!",
     "scheduleBook": "Book This Slot",
@@ -101,9 +77,11 @@
     "tomorrow": "Tomorrow"
   },
   "appSidebar": {
-    "title": "NailSalon",
+    "title": "Xena Nails Studio",
     "subtitle": "Salon Management",
     "home": "Home",
-    "calendar": "Calendar"
+    "calendar": "Calendar",
+    "masters": "Masters",
+    "services": "Services"
   }
 }

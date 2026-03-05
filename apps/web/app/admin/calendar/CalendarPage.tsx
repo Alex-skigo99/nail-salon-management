@@ -15,31 +15,14 @@ export default function CalendarPage() {
     staleTime: CACHE_TIME,
   });
 
-  const {
-    data: homeData,
-    isLoading: homeLoading,
-    error: homeError,
-  } = useQuery({
-    queryKey: ["home"],
-    queryFn: async () => {
-      const response = await apiClient.get<string>("/");
-      return response.data;
-    },
-  });
-
-  if (homeLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (homeError) {
-    return <div>Error: {homeError instanceof Error ? homeError.message : "Failed to fetch"}</div>;
+  if (error) {
+    return <div>Error: {error instanceof Error ? error.message : "Failed to fetch"}</div>;
   }
 
   return (
     <>
       <div>Calendar Page</div>
-      <div>{homeData || "Nail Salon Placeholder"}</div>
-      <div>{data ? JSON.stringify(data, null, 2) : "no message"}</div>
+      <div>{data ? JSON.stringify(data, null, 2) : "Nail Salon Placeholder"}</div>
     </>
   );
 }

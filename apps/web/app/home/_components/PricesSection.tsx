@@ -3,38 +3,37 @@
 import { useTranslations } from "next-intl";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Sparkles } from "lucide-react";
+import { useServices } from "@/hooks/useServices";
+import type { Service, ServiceCategory } from "@/types/serviceTypes";
 
 type Props = { t: ReturnType<typeof useTranslations>; isMobile: boolean };
 
+const CATEGORY_LABELS: Record<ServiceCategory, string> = {
+  manicure: "Manicure",
+  pedicure: "Pedicure",
+  other: "Extensions & Extras",
+};
+
+const CATEGORY_ORDER: ServiceCategory[] = ["manicure", "pedicure", "other"];
+
 export default function PricesSection({ t, isMobile }: Props) {
-  const categories = [
-    {
-      title: t("pricesCatManicure"),
-      items: [
-        { name: t("pricesClassicManicure"), price: t("pricesClassicManicurePrice") },
-        { name: t("pricesGelManicure"), price: t("pricesGelManicurePrice") },
-        { name: t("pricesFrencManicure"), price: t("pricesFrenchManicurePrice") },
-        { name: t("pricesNailArt"), price: t("pricesNailArtPrice") },
-      ],
+  const { data: services = [] } = useServices();
+
+  const groupedServices = services.reduce<Record<ServiceCategory, Service[]>>(
+    (acc, service) => {
+      if (!acc[service.category]) {
+        acc[service.category] = [];
+      }
+      acc[service.category].push(service);
+      return acc;
     },
-    {
-      title: t("pricesCatPedicure"),
-      items: [
-        { name: t("pricesClassicPedicure"), price: t("pricesClassicPedicurePrice") },
-        { name: t("pricesGelPedicure"), price: t("pricesGelPedicurePrice") },
-        { name: t("pricesLuxuryPedicure"), price: t("pricesLuxuryPedicurePrice") },
-      ],
-    },
-    {
-      title: t("pricesCatExtensions"),
-      items: [
-        { name: t("pricesAcrylicFull"), price: t("pricesAcrylicFullPrice") },
-        { name: t("pricesAcrylicFill"), price: t("pricesAcrylicFillPrice") },
-        { name: t("pricesGelExtensions"), price: t("pricesGelExtensionsPrice") },
-        { name: t("pricesRemoval"), price: t("pricesRemovalPrice") },
-      ],
-    },
-  ];
+    {} as Record<ServiceCategory, Service[]>
+  );
+
+  const categories = CATEGORY_ORDER.map((categoryKey) => ({
+    title: CATEGORY_LABELS[categoryKey],
+    items: groupedServices[categoryKey] || [],
+  }));
 
   return (
     <section id="prices" className="bg-linear-to-b from-white to-pink-50/50 py-20 sm:py-28">
@@ -48,7 +47,7 @@ export default function PricesSection({ t, isMobile }: Props) {
           <p className="mx-auto max-w-xl text-gray-500">{t("pricesSubtitle")}</p>
         </div>
 
-        <Accordion type="multiple" defaultValue={["cat-0"]} className="border-pink-200/50 shadow-lg">
+        <Accordion type="multiple" className="border-pink-200/50 shadow-lg">
           {categories.map((cat, ci) => (
             <AccordionItem key={ci} value={`cat-${ci}`}>
               <AccordionTrigger className="text-base font-semibold text-gray-800 hover:text-pink-600 hover:no-underline">
@@ -59,10 +58,15 @@ export default function PricesSection({ t, isMobile }: Props) {
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-3">
-                  {cat.items.map((item, ii) => (
-                    <div key={ii} className="flex items-center justify-between py-1">
-                      <span className="text-gray-700">{item.name}</span>
-                      <span className="ms-4 font-semibold whitespace-nowrap text-pink-600">{item.price}</span>
+                  {cat.items.map((item) => (
+                    <div key={item.id} className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-gray-700">{item.name}</span>
+                        <span className="ms-4 font-semibold whitespace-nowrap text-pink-600">
+                          ₪{parseFloat(item.price).toFixed(0)}
+                        </span>
+                      </div>
+                      {item.description && <p className="text-sm text-gray-500">{item.description}</p>}
                     </div>
                   ))}
                 </div>

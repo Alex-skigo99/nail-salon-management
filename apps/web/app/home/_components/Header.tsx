@@ -1,14 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { Locale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Menu, X } from "lucide-react";
+import LocaleSwitcher from "@/components/LocaleSwitcher";
+import { changeLocaleAction } from "@/utils/changeLocaleAction";
 
 type Props = { t: ReturnType<typeof useTranslations>; isMobile: boolean };
 
 export default function Header({ t, isMobile }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  async function handleLocaleChange(locale: Locale) {
+    await changeLocaleAction(locale);
+  }
 
   const navLinks = [
     { label: t("headerCustomer"), href: "/admin" },
@@ -37,6 +43,13 @@ export default function Header({ t, isMobile }: Props) {
                 {link.label}
               </a>
             ))}
+            <div className="flex items-center">
+              <LocaleSwitcher
+                handleLocaleChange={handleLocaleChange}
+                wrapperClassName="px-0"
+                triggerClassName="w-28 text-sm"
+              />
+            </div>
             <Button
               asChild
               size="sm"
@@ -70,6 +83,13 @@ export default function Header({ t, isMobile }: Props) {
               {link.label}
             </a>
           ))}
+          <div className="pt-1">
+            <LocaleSwitcher
+              handleLocaleChange={handleLocaleChange}
+              wrapperClassName="px-0 py-1"
+              triggerClassName="w-full text-sm"
+            />
+          </div>
           <Button asChild size="sm" className="w-full border-0 bg-linear-to-r from-pink-500 to-rose-500 text-white">
             <a href="#schedule" onClick={() => setMenuOpen(false)}>
               {t("heroBookBtn")}
