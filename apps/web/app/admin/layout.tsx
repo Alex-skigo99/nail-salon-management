@@ -15,9 +15,9 @@ export default function RootLayout({ children }: Readonly<Props>) {
   return (
     <SidebarProvider>
       {isMobile ? (
-        <div className="flex h-screen flex-col">
+        <div className="flex h-screen w-full flex-col">
           <AppSidebar />
-          <div className="flex-1 overflow-auto">{children}</div>
+          <div className="flex-1">{children}</div>
         </div>
       ) : (
         <>

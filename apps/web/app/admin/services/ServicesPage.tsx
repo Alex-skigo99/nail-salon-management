@@ -15,7 +15,7 @@ export default function ServicesPage() {
   return (
     <div className="flex flex-1 flex-col">
       {/* Page header */}
-      <div className="border-b px-6 py-5">
+      <div className="border-b px-3 py-3 md:px-6 md:py-5">
         <div className="flex items-center gap-3">
           <div className="bg-primary/10 text-primary flex h-10 w-10 items-center justify-center rounded-lg">
             <Scissors className="h-5 w-5" />
@@ -28,7 +28,7 @@ export default function ServicesPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 px-2 py-3 md:p-6">
         {isLoading ? (
           <div className="flex h-48 items-center justify-center">
             <Spinner className="h-6 w-6" />
@@ -39,7 +39,7 @@ export default function ServicesPage() {
             <p className="text-muted-foreground text-sm">Please try refreshing the page</p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-3 md:space-y-6">
             {SERVICE_CATEGORIES.map((category) => (
               <ServiceCategorySection key={category} category={category} services={servicesByCategory(category)} />
             ))}

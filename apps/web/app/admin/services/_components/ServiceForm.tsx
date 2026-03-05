@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ type Props = {
 
 export function ServiceForm({ open, onOpenChange, service, defaultCategory }: Props) {
   const isEditing = !!service;
+  const isMobile = useIsMobile();
   const createService = useCreateService();
   const updateService = useUpdateService();
 
@@ -65,7 +67,7 @@ export function ServiceForm({ open, onOpenChange, service, defaultCategory }: Pr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className={isMobile ? "w-[95vw]" : "sm:max-w-md"}>
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Service" : "Add Service"}</DialogTitle>
         </DialogHeader>
