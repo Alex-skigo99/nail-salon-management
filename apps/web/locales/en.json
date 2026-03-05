@@ -104,6 +104,7 @@
     "title": "NailSalon",
     "subtitle": "Salon Management",
     "home": "Home",
-    "calendar": "Calendar"
+    "calendar": "Calendar",
+    "masters": "Masters"
   }
 }

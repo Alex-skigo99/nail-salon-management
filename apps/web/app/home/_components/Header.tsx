@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Locale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Menu, X } from "lucide-react";
-import LocaleSwitcher from "@/components/sidebars/LocaleSwitcher";
+import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { changeLocaleAction } from "@/utils/changeLocaleAction";
 
 type Props = { t: ReturnType<typeof useTranslations>; isMobile: boolean };

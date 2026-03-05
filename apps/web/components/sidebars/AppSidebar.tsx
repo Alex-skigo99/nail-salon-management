@@ -11,7 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Mail } from "lucide-react";
+import { LayoutDashboard, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isRTLLocale } from "@/lib/rtl";
@@ -34,6 +34,11 @@ export function AppSidebar() {
       label: t("calendar"),
       href: "/admin/calendar",
       icon: LayoutDashboard,
+    },
+    {
+      label: t("masters"),
+      href: "/admin/masters",
+      icon: Users,
     },
     {
       label: t("home"),
