@@ -29,7 +29,6 @@ export default function PricesSection({ t, isMobile }: Props) {
     },
     {} as Record<ServiceCategory, Service[]>
   );
-  console.log("groupedServices", groupedServices); // DEBUG
 
   const categories = CATEGORY_ORDER.map((categoryKey) => ({
     title: CATEGORY_LABELS[categoryKey],
