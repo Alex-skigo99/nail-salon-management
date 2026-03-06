@@ -23,7 +23,7 @@ export class NailSalonStack extends cdk.Stack {
     );
 
     const lambdaCommonProps = {
-      runtime: lambda.Runtime.NODEJS_20_X,
+      runtime: lambda.Runtime.NODEJS_24_X,
       code: lambda.Code.fromAsset("../apps/api/dist"),
       environment: {
         DATABASE_URL: databaseUrl,
@@ -49,7 +49,18 @@ export class NailSalonStack extends cdk.Stack {
     const httpApi = new apigateway.HttpApi(this, "HttpApi", {
       corsPreflight: {
         allowOrigins: [frontendUrl],
-        allowHeaders: ["*"],
+        allowHeaders: [
+          "Content-Type",
+          "Authorization",
+          "X-Requested-With",
+          "Accept",
+          "Origin",
+          "Referer",
+          "Accept-Language",
+          "X-Amz-Date",
+          "X-Amz-Security-Token",
+          "X-Api-Key",
+        ],
         allowMethods: [
           apigateway.CorsHttpMethod.GET,
           apigateway.CorsHttpMethod.POST,
@@ -59,6 +70,7 @@ export class NailSalonStack extends cdk.Stack {
           apigateway.CorsHttpMethod.OPTIONS,
         ],
         allowCredentials: true,
+        maxAge: cdk.Duration.seconds(86400),
       },
     });
 
