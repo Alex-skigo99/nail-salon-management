@@ -2,6 +2,125 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import * as serviceService from "../services/serviceService";
 
+/**
+ * @openapi
+ * /services:
+ *   get:
+ *     summary: Get all services
+ *     tags:
+ *       - Services
+ *     responses:
+ *       200:
+ *         description: List of services
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Service'
+ *   post:
+ *     summary: Create a new service
+ *     tags:
+ *       - Services
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateService'
+ *     responses:
+ *       201:
+ *         description: Created service
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Service'
+ *
+ * /services/{id}:
+ *   put:
+ *     summary: Update a service
+ *     tags:
+ *       - Services
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateService'
+ *     responses:
+ *       200:
+ *         description: Updated service
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Service'
+ *       400:
+ *         description: Invalid request
+ *       404:
+ *         description: Service not found
+ *   delete:
+ *     summary: Delete a service
+ *     tags:
+ *       - Services
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: No content
+ *
+ * components:
+ *   schemas:
+ *     Service:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *           nullable: true
+ *         category:
+ *           type: string
+ *           enum: [manicure, pedicure, other]
+ *         price:
+ *           type: string
+ *           description: Price as string with two decimals
+ *         duration_minutes:
+ *           type: integer
+ *     CreateService:
+ *       type: object
+ *       required: [name, category, price, duration_minutes]
+ *       properties:
+ *         name:
+ *           type: string
+ *         description:
+ *           type: string
+ *           nullable: true
+ *         category:
+ *           type: string
+ *           enum: [manicure, pedicure, other]
+ *         price:
+ *           type: string
+ *           pattern: '^\\d+(\\.\\d{1,2})?$'
+ *         duration_minutes:
+ *           type: integer
+ *     UpdateService:
+ *       allOf:
+ *         - $ref: '#/components/schemas/CreateService'
+ *       nullable: true
+ */
+
 const CreateServiceSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional().nullable(),
