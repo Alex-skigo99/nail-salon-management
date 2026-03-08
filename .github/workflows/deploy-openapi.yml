@@ -1,5 +1,9 @@
 name: Build & Deploy API docs
 
+permissions:
+  contents: write
+  pages: write
+
 on:
   push:
     branches:
