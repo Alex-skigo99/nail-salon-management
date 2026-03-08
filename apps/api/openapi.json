@@ -1,0 +1,518 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API (apps/api)",
+    "version": "1.0.0",
+    "description": "OpenAPI spec for apps/api"
+  },
+  "servers": [
+    {
+      "url": "https://osc2zjnl43.execute-api.us-east-1.amazonaws.com"
+    }
+  ],
+  "paths": {
+    "/master": {
+      "get": {
+        "summary": "Retrieve a list of masters",
+        "tags": [
+          "Master"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of masters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Master"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new master",
+        "tags": [
+          "Master"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MasterCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created master",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Master"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/master/{id}": {
+      "put": {
+        "summary": "Update an existing master",
+        "tags": [
+          "Master"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "Numeric ID of the master to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MasterUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated master",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Master"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error or invalid id"
+          },
+          "404": {
+            "description": "Master not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a master",
+        "tags": [
+          "Master"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "Numeric ID of the master to delete"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content (deleted)"
+          },
+          "400": {
+            "description": "Invalid id"
+          },
+          "404": {
+            "description": "Master not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/services": {
+      "get": {
+        "summary": "Get all services",
+        "tags": [
+          "Services"
+        ],
+        "responses": {
+          "200": {
+            "description": "List of services",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Service"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new service",
+        "tags": [
+          "Services"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateService"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created service",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Service"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/services/{id}": {
+      "put": {
+        "summary": "Update a service",
+        "tags": [
+          "Services"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateService"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated service",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Service"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "404": {
+            "description": "Service not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a service",
+        "tags": [
+          "Services"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content"
+          }
+        }
+      }
+    },
+    "/working-hours": {
+      "get": {
+        "summary": "Get working hours for a master",
+        "tags": [
+          "WorkingHours"
+        ],
+        "parameters": [
+          {
+            "name": "master_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Working hours list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WorkingHoursRecord"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Replace working hours for a master",
+        "tags": [
+          "WorkingHours"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceWorkingHours"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created/Updated working hours",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WorkingHoursRecord"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete working hours for a master",
+        "tags": [
+          "WorkingHours"
+        ],
+        "parameters": [
+          {
+            "name": "master_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Master": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Senior nail technician"
+          }
+        }
+      },
+      "MasterCreate": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MasterUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Service": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "manicure",
+              "pedicure",
+              "other"
+            ]
+          },
+          "price": {
+            "type": "string",
+            "description": "Price as string with two decimals"
+          },
+          "duration_minutes": {
+            "type": "integer"
+          }
+        }
+      },
+      "CreateService": {
+        "type": "object",
+        "required": [
+          "name",
+          "category",
+          "price",
+          "duration_minutes"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "manicure",
+              "pedicure",
+              "other"
+            ]
+          },
+          "price": {
+            "type": "string",
+            "pattern": "^\\\\d+(\\\\.\\\\d{1,2})?$"
+          },
+          "duration_minutes": {
+            "type": "integer"
+          }
+        }
+      },
+      "UpdateService": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CreateService"
+          }
+        ],
+        "nullable": true
+      },
+      "WorkingHoursRecord": {
+        "type": "object",
+        "properties": {
+          "day_of_week": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 6
+          },
+          "start_time": {
+            "type": "string",
+            "pattern": "^\\\\d{2}:\\\\d{2}$"
+          },
+          "end_time": {
+            "type": "string",
+            "pattern": "^\\\\d{2}:\\\\d{2}$"
+          }
+        }
+      },
+      "ReplaceWorkingHours": {
+        "type": "object",
+        "required": [
+          "master_id",
+          "records"
+        ],
+        "properties": {
+          "master_id": {
+            "type": "integer"
+          },
+          "records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkingHoursRecord"
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}

@@ -15,6 +15,9 @@
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
     "test:api": "npm run test -w apps/api",
-    "test:web": "npm run test -w apps/web"
+    "test:web": "npm run test -w apps/web",
+    "gen:openapi": "node apps/api/scripts/generate-openapi.js",
+    "publish-docs:copy": "node scripts/copy-openapi-to-docs.js",
+    "build:docs": "npm run gen:openapi && npm run publish-docs:copy"
   }
 }

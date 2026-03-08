@@ -12,7 +12,8 @@
     "db:migrate": "knex --knexfile knexfile.js migrate:latest",
     "db:rollback": "knex --knexfile knexfile.js migrate:rollback",
     "db:make": "knex --knexfile knexfile.js migrate:make",
-    "deploy": "npm run build && serverless deploy"
+    "deploy": "npm run build && serverless deploy",
+    "gen:openapi": "node scripts/generate-openapi.js"
   },
   "keywords": [],
   "author": "",
@@ -41,6 +42,8 @@
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

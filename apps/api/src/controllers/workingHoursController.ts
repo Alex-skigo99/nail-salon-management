@@ -2,6 +2,90 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import * as workingHoursService from "../services/workingHoursService";
 
+/**
+ * @openapi
+ * /working-hours:
+ *   get:
+ *     summary: Get working hours for a master
+ *     tags:
+ *       - WorkingHours
+ *     parameters:
+ *       - name: master_id
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Working hours list
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/WorkingHoursRecord'
+ *
+ *   post:
+ *     summary: Replace working hours for a master
+ *     tags:
+ *       - WorkingHours
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ReplaceWorkingHours'
+ *     responses:
+ *       201:
+ *         description: Created/Updated working hours
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/WorkingHoursRecord'
+ *
+ *   delete:
+ *     summary: Delete working hours for a master
+ *     tags:
+ *       - WorkingHours
+ *     parameters:
+ *       - name: master_id
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: No content
+ *
+ * components:
+ *   schemas:
+ *     WorkingHoursRecord:
+ *       type: object
+ *       properties:
+ *         day_of_week:
+ *           type: integer
+ *           minimum: 0
+ *           maximum: 6
+ *         start_time:
+ *           type: string
+ *           pattern: '^\\d{2}:\\d{2}$'
+ *         end_time:
+ *           type: string
+ *           pattern: '^\\d{2}:\\d{2}$'
+ *     ReplaceWorkingHours:
+ *       type: object
+ *       required: [master_id, records]
+ *       properties:
+ *         master_id:
+ *           type: integer
+ *         records:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/WorkingHoursRecord'
+ */
+
 const WorkingHoursRecordSchema = z.object({
   day_of_week: z.number().int().min(0).max(6),
   start_time: z.string().regex(/^\d{2}:\d{2}$/, "Format must be HH:MM"),
