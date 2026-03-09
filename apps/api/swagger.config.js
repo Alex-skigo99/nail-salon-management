@@ -10,5 +10,5 @@ module.exports = {
     servers: [{ url: "https://osc2zjnl43.execute-api.us-east-1.amazonaws.com" }],
   },
   // Read JSDoc comments from TypeScript source files
-  apis: ["./src/controllers/**/*.ts", "./src/routes/**/*.ts"],
+  apis: ["./src/controllers/**/*.ts", "./src/routes/**/*.ts", "./src/types/**/*.ts"],
 };

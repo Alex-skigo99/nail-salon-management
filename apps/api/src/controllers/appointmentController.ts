@@ -1,0 +1,612 @@
+import { Request, Response } from "express";
+import { z } from "zod";
+import * as appointmentService from "../services/appointmentService";
+import type { AvailabilityResult } from "../types/appointmentTypes";
+
+// ─────────────────────────────────────────────
+// Validation schemas
+// ─────────────────────────────────────────────
+
+const AppointmentStatusEnum = z.enum(["new", "confirmed", "reserved", "pending", "rejected"]);
+
+const CreateAppointmentSchema = z.object({
+  master_id: z.number().int().positive(),
+  user_id: z.number().int().positive().optional().nullable(),
+  user_name: z.string().optional().nullable(),
+  whatsapp_phone: z.string().optional().nullable(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
+  time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "time must be HH:MM or HH:MM:SS"),
+  duration_minutes: z.number().int().positive(),
+  services: z.string().optional().nullable(),
+  comments: z.string().optional().nullable(),
+  status: AppointmentStatusEnum.optional(),
+});
+
+const UpdateAppointmentSchema = z.object({
+  user_name: z.string().optional().nullable(),
+  whatsapp_phone: z.string().optional().nullable(),
+  services: z.string().optional().nullable(),
+  comments: z.string().optional().nullable(),
+  status: AppointmentStatusEnum.optional(),
+});
+
+const RescheduleSchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
+  time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "time must be HH:MM or HH:MM:SS"),
+  duration_minutes: z.number().int().positive().optional(),
+});
+
+// ─────────────────────────────────────────────
+// OpenAPI Component Schemas
+// ─────────────────────────────────────────────
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     AppointmentCreate:
+ *       type: object
+ *       required:
+ *         - master_id
+ *         - date
+ *         - time
+ *         - duration_minutes
+ *       properties:
+ *         master_id:
+ *           type: integer
+ *           example: 1
+ *         user_id:
+ *           type: integer
+ *           nullable: true
+ *           example: null
+ *         user_name:
+ *           type: string
+ *           nullable: true
+ *           example: "John Doe"
+ *         whatsapp_phone:
+ *           type: string
+ *           nullable: true
+ *           example: "+1234567890"
+ *         date:
+ *           type: string
+ *           format: date
+ *           example: "2026-03-15"
+ *         time:
+ *           type: string
+ *           example: "10:00"
+ *           description: "Time in HH:MM or HH:MM:SS format"
+ *         duration_minutes:
+ *           type: integer
+ *           example: 60
+ *         services:
+ *           type: string
+ *           nullable: true
+ *           example: "Manicure, Pedicure"
+ *         comments:
+ *           type: string
+ *           nullable: true
+ *           example: "Any special requests"
+ *         status:
+ *           type: string
+ *           enum: ["new", "confirmed", "reserved", "pending", "rejected"]
+ *           default: "new"
+ *     AppointmentUpdate:
+ *       type: object
+ *       properties:
+ *         user_name:
+ *           type: string
+ *           nullable: true
+ *           example: "John Doe"
+ *         whatsapp_phone:
+ *           type: string
+ *           nullable: true
+ *           example: "+1234567890"
+ *         services:
+ *           type: string
+ *           nullable: true
+ *           example: "Manicure, Pedicure"
+ *         comments:
+ *           type: string
+ *           nullable: true
+ *           example: "Any special requests"
+ *         status:
+ *           type: string
+ *           enum: ["new", "confirmed", "reserved", "pending", "rejected"]
+ *     AppointmentReschedule:
+ *       type: object
+ *       required:
+ *         - date
+ *         - time
+ *       properties:
+ *         date:
+ *           type: string
+ *           format: date
+ *           example: "2026-03-15"
+ *         time:
+ *           type: string
+ *           example: "10:00"
+ *           description: "Time in HH:MM or HH:MM:SS format"
+ *         duration_minutes:
+ *           type: integer
+ *           nullable: true
+ *           example: 60
+ *     TimeSlot:
+ *       type: object
+ *       required:
+ *         - date
+ *         - time
+ *       properties:
+ *         date:
+ *           type: string
+ *           format: date
+ *           example: "2026-03-15"
+ *         time:
+ *           type: string
+ *           example: "10:00"
+ */
+
+// ─────────────────────────────────────────────
+
+/**
+ * @openapi
+ * /appointment:
+ *   post:
+ *     summary: Create a new appointment
+ *     tags: [Appointment]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AppointmentCreate'
+ *     responses:
+ *       201:
+ *         description: Created appointment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Appointment'
+ *       400:
+ *         description: Validation error or slot unavailable
+ *       409:
+ *         description: The requested time slot is not available
+ *       500:
+ *         description: Internal server error
+ */
+export const create = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const parsed = CreateAppointmentSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.flatten() });
+      return;
+    }
+    const appt = await appointmentService.createAppointment(parsed.data);
+    res.status(201).json(appt);
+  } catch (err: any) {
+    if (err?.message === "SLOT_UNAVAILABLE") {
+      res.status(409).json({ error: "The requested time slot is not available" });
+      return;
+    }
+    console.error("Error creating appointment:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * @openapi
+ * /appointment/{id}:
+ *   put:
+ *     summary: Update non-scheduling fields of an appointment
+ *     tags: [Appointment]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema: { type: integer }
+ *         required: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AppointmentUpdate'
+ *     responses:
+ *       200:
+ *         description: Updated appointment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Appointment'
+ *       400:
+ *         description: Validation error or invalid id
+ *       404:
+ *         description: Appointment not found
+ *       500:
+ *         description: Internal server error
+ */
+export const update = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ error: "Invalid id" });
+      return;
+    }
+    const parsed = UpdateAppointmentSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.flatten() });
+      return;
+    }
+    const appt = await appointmentService.updateAppointment(id, parsed.data);
+    if (!appt) {
+      res.status(404).json({ error: "Appointment not found" });
+      return;
+    }
+    res.json(appt);
+  } catch (err) {
+    console.error("Error updating appointment:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * @openapi
+ * /appointment/{id}/reschedule:
+ *   put:
+ *     summary: Move appointment to a new date/time (checks availability)
+ *     tags: [Appointment]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema: { type: integer }
+ *         required: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AppointmentReschedule'
+ *     responses:
+ *       200:
+ *         description: Rescheduled appointment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Appointment'
+ *       400:
+ *         description: Validation error or invalid id
+ *       404:
+ *         description: Appointment not found
+ *       409:
+ *         description: Slot unavailable
+ *       500:
+ *         description: Internal server error
+ */
+export const reschedule = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ error: "Invalid id" });
+      return;
+    }
+    const parsed = RescheduleSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.flatten() });
+      return;
+    }
+    const appt = await appointmentService.rescheduleAppointment(id, parsed.data);
+    res.json(appt);
+  } catch (err: any) {
+    if (err?.message === "APPOINTMENT_NOT_FOUND") {
+      res.status(404).json({ error: "Appointment not found" });
+      return;
+    }
+    if (err?.message === "SLOT_UNAVAILABLE") {
+      res.status(409).json({ error: "The requested time slot is not available" });
+      return;
+    }
+    console.error("Error rescheduling appointment:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * @openapi
+ * /appointment/{id}:
+ *   delete:
+ *     summary: Delete an appointment
+ *     tags: [Appointment]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema: { type: integer }
+ *         required: true
+ *     responses:
+ *       204:
+ *         description: Deleted successfully (no content)
+ *       400:
+ *         description: Invalid id
+ *       404:
+ *         description: Appointment not found
+ *       500:
+ *         description: Internal server error
+ */
+export const remove = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ error: "Invalid id" });
+      return;
+    }
+    const deleted = await appointmentService.deleteAppointment(id);
+    if (!deleted) {
+      res.status(404).json({ error: "Appointment not found" });
+      return;
+    }
+    res.status(204).send();
+  } catch (err) {
+    console.error("Error deleting appointment:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * @openapi
+ * /appointment/master/{masterId}:
+ *   get:
+ *     summary: Get all appointments for a master within a date range
+ *     tags: [Appointment]
+ *     parameters:
+ *       - in: path
+ *         name: masterId
+ *         schema: { type: integer }
+ *         required: true
+ *       - in: query
+ *         name: from
+ *         schema: { type: string, example: "2026-03-01" }
+ *         required: true
+ *       - in: query
+ *         name: to
+ *         schema: { type: string, example: "2026-03-31" }
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Array of appointments
+ *         content:
+ *          application/json:
+ *            schema:
+ *             type: array
+ *             items:
+ *               $ref: '#/components/schemas/Appointment'
+ *       400:
+ *         description: Missing or invalid parameters
+ *       500:
+ *         description: Internal server error
+ */
+export const getMasterAppointments = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const masterId = Number(req.params.masterId);
+    if (isNaN(masterId)) {
+      res.status(400).json({ error: "Invalid masterId" });
+      return;
+    }
+    const { from, to } = req.query;
+    if (!from || !to || typeof from !== "string" || typeof to !== "string") {
+      res.status(400).json({ error: "Query params 'from' and 'to' (YYYY-MM-DD) are required" });
+      return;
+    }
+    const appointments = await appointmentService.getAppointmentsForMaster(masterId, from, to);
+    res.json(appointments);
+  } catch (err) {
+    console.error("Error fetching master appointments:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * @openapi
+ * /appointment/master/{masterId}/slots:
+ *   get:
+ *     summary: Get slot map for a master over a date range
+ *     description: >
+ *       Returns one entry per day containing the date, working hours, slot duration,
+ *       slot count, and an array of slots where each slot has status:
+ *       empty | book | part_book | reserved | none.
+ *     tags: [Appointment]
+ *     parameters:
+ *       - in: path
+ *         name: masterId
+ *         schema: { type: integer }
+ *         required: true
+ *       - in: query
+ *         name: from
+ *         schema: { type: string, example: "2026-03-01" }
+ *         required: true
+ *       - in: query
+ *         name: to
+ *         schema: { type: string, example: "2026-03-07" }
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Array of DaySlots objects
+ *         content:
+ *          application/json:
+ *            schema:
+ *             type: array
+ *             items:
+ *               $ref: '#/components/schemas/DaySlots'
+ *       400:
+ *         description: Missing or invalid parameters
+ *       500:
+ *         description: Internal server error
+ */
+export const getSlotsMap = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const masterId = Number(req.params.masterId);
+    if (isNaN(masterId)) {
+      res.status(400).json({ error: "Invalid masterId" });
+      return;
+    }
+    const { from, to } = req.query;
+    if (!from || !to || typeof from !== "string" || typeof to !== "string") {
+      res.status(400).json({ error: "Query params 'from' and 'to' (YYYY-MM-DD) are required" });
+      return;
+    }
+    const slotsMap = await appointmentService.getSlotsMap(masterId, from, to);
+    res.json(slotsMap);
+  } catch (err) {
+    console.error("Error fetching slots map:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * @openapi
+ * /appointment/slots/available:
+ *   get:
+ *     summary: Check if a slot is available; if not, return suggestions
+ *     description: >
+ *       Checks whether the requested masterId/date/time/duration slot is free.
+ *       If occupied, returns suggestions: same-day slots just before & after the
+ *       requested time, plus the nearest available days that have the same time.
+ *     tags: [Appointment]
+ *     parameters:
+ *       - in: query
+ *         name: masterId
+ *         schema: { type: integer }
+ *         required: true
+ *       - in: query
+ *         name: date
+ *         schema: { type: string, example: "2026-03-10" }
+ *         required: true
+ *       - in: query
+ *         name: time
+ *         schema: { type: string, example: "10:00" }
+ *         required: true
+ *       - in: query
+ *         name: duration
+ *         schema: { type: integer, example: 60 }
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Availability result - either available slot or suggestions for alternatives
+ *         content:
+ *           application/json:
+ *             schema:
+ *               oneOf:
+ *                 - type: object
+ *                   required: [available, slot]
+ *                   properties:
+ *                     available:
+ *                       type: boolean
+ *                       enum: [true]
+ *                     slot:
+ *                       $ref: '#/components/schemas/TimeSlot'
+ *                   additionalProperties: false
+ *                 - type: object
+ *                   required: [available, suggestions]
+ *                   properties:
+ *                     available:
+ *                       type: boolean
+ *                       enum: [false]
+ *                     suggestions:
+ *                       type: object
+ *                       required: [same_day, same_time]
+ *                       properties:
+ *                         same_day:
+ *                           type: object
+ *                           required: [before, after]
+ *                           properties:
+ *                             before:
+ *                               oneOf:
+ *                                 - type: "null"
+ *                                 - $ref: '#/components/schemas/TimeSlot'
+ *                             after:
+ *                               oneOf:
+ *                                 - type: "null"
+ *                                 - $ref: '#/components/schemas/TimeSlot'
+ *                         same_time:
+ *                           type: object
+ *                           required: [before, after]
+ *                           properties:
+ *                             before:
+ *                               oneOf:
+ *                                 - type: "null"
+ *                                 - $ref: '#/components/schemas/TimeSlot'
+ *                             after:
+ *                               oneOf:
+ *                                 - type: "null"
+ *                                 - $ref: '#/components/schemas/TimeSlot'
+ *                   additionalProperties: false
+ *       400:
+ *         description: Missing or invalid parameters
+ *       500:
+ *         description: Internal server error
+ */
+export const checkAvailability = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { masterId, date, time, duration } = req.query;
+
+    if (!masterId || !date || !time || !duration) {
+      res.status(400).json({ error: "Query params 'masterId', 'date', 'time', and 'duration' are required" });
+      return;
+    }
+
+    const masterIdNum = Number(masterId);
+    const durationNum = Number(duration);
+
+    if (isNaN(masterIdNum) || isNaN(durationNum)) {
+      res.status(400).json({ error: "'masterId' and 'duration' must be numbers" });
+      return;
+    }
+
+    const result = await appointmentService.checkAvailability(masterIdNum, String(date), String(time), durationNum);
+
+    res.json(result);
+  } catch (err) {
+    console.error("Error checking availability:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * @openapi
+ * /appointment/suggestions:
+ *   get:
+ *     summary: Get up to 6 appointment slot suggestions for the home page
+ *     description: >
+ *       Returns up to 6 upcoming empty time slots starting from today.
+ *       Strategy per day: 2 nearest (earliest) empty slots + 1 near end of day.
+ *       Continues to the next day if fewer than 3 are available today.
+ *     tags: [Appointment]
+ *     parameters:
+ *       - in: query
+ *         name: masterId
+ *         schema: { type: integer }
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Array of time slot suggestions (max 6)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/TimeSlot'
+ *       400:
+ *         description: Missing or invalid masterId
+ *       500:
+ *         description: Internal server error
+ */
+export const getSuggestions = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const masterId = Number(req.query.masterId);
+    if (isNaN(masterId)) {
+      res.status(400).json({ error: "Query param 'masterId' is required and must be a number" });
+      return;
+    }
+    const suggestions = await appointmentService.getHomeSuggestions(masterId);
+    res.json(suggestions);
+  } catch (err) {
+    console.error("Error fetching suggestions:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

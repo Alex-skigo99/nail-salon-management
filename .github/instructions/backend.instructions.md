@@ -1,6 +1,6 @@
 ---
 description: Describe when these instructions should be loaded
-applyTo: "apps/api/**/*.ts, apps/api/**/*.js, apps/api/**/*.tsx" # when provided, instructions will automatically be added to the request context when the pattern matches an attached file
+applyTo: "apps/api/**/*.ts, apps/api/**/*.js, apps/api/**/*.tsx"
 ---
 
 Below is a concise explanation of each folder/file in the tree you provided, what responsibilities they typically hold in an Express + TypeScript API, and a few practical notes / best practices.
@@ -37,11 +37,6 @@ inventory.ts
 Routes for inventory management (if this system tracks consumables, products, parts).
 Typical endpoints:
 Services usually handle transactional updates and interactions with the database/warehouse APIs.
-staff.ts
-Routes for staff / employee management and scheduling.
-Typical endpoints:
-Role and permission assignment endpoints.
-Secure these routes with authorization checks (only admins or managers allowed).
 reports.ts
 Routes for generating, viewing, and exporting reports.
 Reports often involve longer-running jobs; consider queuing (background workers) and providing a job status endpoint.
@@ -84,6 +79,6 @@ Use typed request/response DTOs from src/types to ensure compile-time correctnes
 Add request validation (Zod) and sanitize inputs.
 Protect sensitive routes with auth + role-based authorization.
 Use async/await and consistent error handling; avoid swallowing errors.
-For long operations (reports, large imports) use a queue system and expose job endpoints.
+Make openAPI/Swagger documentation for your endpoints to improve maintainability and client integration.
 
 db tables name locate in src/types/dbSchemaTypes.ts

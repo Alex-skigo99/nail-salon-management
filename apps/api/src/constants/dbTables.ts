@@ -3,4 +3,6 @@ export const DB_TABLES = {
   SERVICES: "services",
   MASTERS: "masters",
   WORKING_HOURS: "working_hours",
+  APPOINTMENTS: "appointments",
+  SETTINGS: "settings",
 };
