@@ -217,10 +217,13 @@ export async function getSlotsMap(masterId: number, from: string, to: string): P
     .whereBetween("date", [from, to])
     .whereNot({ status: "rejected" });
 
+  console.log("Appointments fetched for slots map:", appointments); // Debug log to check fetched appointments
   // Group appointments by date string
   const apptByDate = new Map<string, Appointment[]>();
   for (const appt of appointments) {
-    const d = String(appt.date).split("T")[0]; // normalize from DB date type
+    const utcDate = new Date(appt.date);
+    const d = utcDate.toLocaleDateString("en-CA"); // normalize from DB date type
+    console.log("Processing appointment for date:", d); // Debug log to check appointment processing
     if (!apptByDate.has(d)) apptByDate.set(d, []);
     apptByDate.get(d)!.push(appt);
   }
@@ -248,6 +251,8 @@ export async function getSlotsMap(masterId: number, from: string, to: string): P
       const endMin = timeToMinutes(wh.end_time);
       const dayAppts = apptByDate.get(dateStr) ?? [];
       const slots: Slot[] = [];
+
+      console.log("dayAppts for", dateStr, dayAppts); // Debug log to check appointments for the day
 
       for (let t = startMin; t + slotDuration <= endMin; t += slotDuration) {
         const slotStartStr = minutesToTime(t);

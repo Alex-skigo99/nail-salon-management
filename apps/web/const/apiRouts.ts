@@ -3,4 +3,5 @@ export const apiRoutes = {
   workingHours: "/working_hours",
   welcome: "/welcome",
   service: "/service",
+  appointment: "/appointment",
 };
