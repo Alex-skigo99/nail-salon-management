@@ -81,16 +81,22 @@ export function MonthView({ days, isLoading, currentDate, onWeekClick }: MonthVi
 
                   {/* Slot lines */}
                   {!isOff && dayData && (
-                    <div className="flex flex-col gap-0.5">
+                    <div className="flex flex-col">
                       {dayData.slots.map((slot: Slot, i: number) => {
                         const clientName = slot.appointment_data?.user_name || "No client";
-                        const tooltipText = `${formatTimeToHHMM(slot.start_time)} – ${slot.status} (${clientName})`;
+                        const slotStatus = slot.appointment_data?.status;
+                        const isPartBook = slot.status === "part_book";
+                        const tooltipText = `${formatTimeToHHMM(slot.start_time)} – ${slotStatus} (${clientName})`;
+                        let dotColor = STATUS_DOT_COLORS[slot.status];
+                        if (isPartBook && i !== 0) {
+                          let ii = i;
+                          do {
+                            ii--;
+                          } while (ii > 0 && dayData.slots[ii].status === "part_book");
+                          dotColor = STATUS_DOT_COLORS[dayData.slots[ii].status];
+                        }
                         return (
-                          <div
-                            key={i}
-                            className={cn("h-1.5 rounded-sm", STATUS_DOT_COLORS[slot.status])}
-                            title={tooltipText}
-                          />
+                          <div key={i} className={cn("h-1.5", dotColor, !isPartBook && "mt-0.5")} title={tooltipText} />
                         );
                       })}
                     </div>

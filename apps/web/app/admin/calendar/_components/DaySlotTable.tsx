@@ -10,6 +10,7 @@ import { StatusBadge } from "./StatusBadge";
 import { TruncatedText } from "./TruncatedText";
 import type { DaySlots, Slot, SlotStatus } from "@/types/appointmentTypes";
 import { isPastDate, parseLocalDate, formatShortDate, isSameDay } from "@/utils/dateUtils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type DaySlotTableProps = {
   daySlots: DaySlots;
@@ -32,6 +33,7 @@ export function DaySlotTable({ daySlots, onSlotClick, defaultOpen = true }: DayS
   const dayName = DAY_NAMES[date.getDay()];
   const past = isPastDate(daySlots.date);
   const statusCounts = countStatuses(daySlots.slots);
+  const isMobile = useIsMobile();
   const isOff = daySlots.slots.length === 0 || daySlots.slots.every((s) => s.status === "none");
 
   return (
@@ -78,48 +80,76 @@ export function DaySlotTable({ daySlots, onSlotClick, defaultOpen = true }: DayS
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-muted/30 border-b">
-                  <th className="w-20 px-3 py-2 text-left font-medium">Status</th>
+                  <th className="w-18 px-3 py-2 text-left font-medium">Status</th>
                   <th className="w-18 px-3 py-2 text-left font-medium">Time</th>
                   <th className="w-15 px-3 py-2 text-left font-medium">Dur.</th>
-                  <th className="px-3 py-2 text-left font-medium">Services</th>
-                  <th className="hidden px-3 py-2 text-left font-medium md:table-cell">Info</th>
+                  <th className={cn("px-3 py-2 text-left font-medium", isMobile && "hidden")}>Services</th>
+                  <th className="px-3 py-2 text-left font-medium">Client</th>
+                  <th className={cn("px-3 py-2 text-left font-medium", !isMobile && "hidden md:table-cell")}>Phone</th>
+                  <th className="hidden px-3 py-2 text-left font-medium lg:table-cell">Comments</th>
+                  <th className="hidden px-3 py-2 text-left font-medium sm:table-cell">Created</th>
                 </tr>
               </thead>
               <tbody>
-                {daySlots.slots.map((slot, idx) => (
-                  <tr
-                    key={idx}
-                    className={cn(
-                      "hover:bg-muted/40 cursor-pointer border-b transition-colors last:border-b-0",
-                      past && "opacity-60"
-                    )}
-                    onClick={() => onSlotClick(slot, daySlots.date)}
-                  >
-                    <td className="px-3 py-1.5">
-                      <StatusBadge status={slot.appointment_data ? slot.appointment_data.status : slot.status} />
-                    </td>
-                    <td className="px-3 py-1.5 font-mono text-xs">{formatTimeToHHMM(slot.start_time)}</td>
-                    <td className="text-muted-foreground px-3 py-1.5 text-xs">
-                      {slot.appointment_data
-                        ? `${slot.appointment_data.duration_minutes}m`
-                        : `${daySlots.slot_duration}m`}
-                    </td>
-                    <td className="px-3 py-1.5">
-                      <TruncatedText text={slot.appointment_data?.services} />
-                    </td>
-                    <td className="hidden px-3 py-1.5 md:table-cell">
-                      <TruncatedText
-                        text={
-                          slot.appointment_data
-                            ? [slot.appointment_data.user_name, slot.appointment_data.comments]
-                                .filter(Boolean)
-                                .join(" · ") || null
-                            : null
-                        }
-                      />
-                    </td>
-                  </tr>
-                ))}
+                {daySlots.slots.map((slot, idx) => {
+                  const appointmentData = slot.appointment_data;
+                  const isPartBook = slot.status === "part_book";
+
+                  return (
+                    <tr
+                      key={idx}
+                      className={cn(
+                        "hover:bg-muted/40 cursor-pointer border-b transition-colors last:border-b-0",
+                        past && "opacity-60",
+                        isPartBook && "border-t-0"
+                      )}
+                      onClick={() => onSlotClick(slot, daySlots.date)}
+                    >
+                      <td className="px-3 py-1.5">
+                        <StatusBadge status={appointmentData ? appointmentData.status : slot.status} />
+                      </td>
+                      <td className="px-3 py-1.5 font-mono text-xs">{formatTimeToHHMM(slot.start_time)}</td>
+
+                      {!isPartBook && (
+                        <>
+                          <td className="text-muted-foreground px-3 py-1.5 text-xs">
+                            {appointmentData ? `${appointmentData.duration_minutes}m` : `${daySlots.slot_duration}m`}
+                          </td>
+                          <td className={cn("px-3 py-1.5", isMobile && "hidden")}>
+                            <TruncatedText text={appointmentData?.services} />
+                          </td>
+                          <td className={cn("px-3 py-1.5", isMobile && "text-xs")}>
+                            <TruncatedText text={appointmentData?.user_name} />
+                          </td>
+                          <td className={cn("px-3 py-1.5 text-xs", !isMobile && "hidden text-sm md:table-cell")}>
+                            <TruncatedText text={appointmentData?.whatsapp_phone} />
+                          </td>
+                          <td className={cn("hidden px-3 py-1.5 lg:table-cell", isMobile && "text-xs")}>
+                            <TruncatedText text={appointmentData?.comments} />
+                          </td>
+                          <td className={cn("hidden px-3 py-1.5 sm:table-cell", isMobile && "text-xs")}>
+                            <TruncatedText
+                              text={
+                                appointmentData?.created_at
+                                  ? new Date(appointmentData.created_at)
+                                      .toLocaleDateString("en-CA", {
+                                        year: "numeric",
+                                        month: "2-digit",
+                                        day: "2-digit",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        hour12: false,
+                                      })
+                                      .replace(",", "")
+                                  : null
+                              }
+                            />
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

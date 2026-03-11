@@ -67,10 +67,10 @@ export type DisplayMode = "table" | "graph";
 export const APPOINTMENT_STATUSES: AppointmentStatus[] = ["new", "confirmed", "reserved", "pending", "rejected"];
 
 export const STATUS_COLORS: Record<SlotStatus | AppointmentStatus, string> = {
-  empty: "bg-gray-100 text-gray-500",
+  empty: "bg-gray-100 text-blue-500",
   reserved: "bg-amber-100 text-amber-700",
   none: "bg-gray-50 text-gray-400",
-  part_book: "bg-blue-100 text-blue-700",
+  part_book: "bg-gray-100 text-gray-500",
   book: "bg-green-100 text-green-700",
   new: "bg-sky-100 text-sky-700",
   confirmed: "bg-green-100 text-green-700",
