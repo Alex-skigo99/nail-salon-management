@@ -43,7 +43,7 @@ export function ServiceForm({ open, onOpenChange, service, defaultCategory }: Pr
   }, [open, service, defaultCategory]);
 
   const isPending = createService.isPending || updateService.isPending;
-  const isValid = name.trim() && price.trim() && duration.trim() && Number(duration) > 0;
+  const isValid = name.trim() && price.trim() && duration.trim() && Number(duration) >= 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,7 +118,7 @@ export function ServiceForm({ open, onOpenChange, service, defaultCategory }: Pr
               <Input
                 id="service-duration"
                 type="number"
-                min={1}
+                min={0}
                 placeholder="e.g. 60"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}

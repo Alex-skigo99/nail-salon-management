@@ -6,6 +6,7 @@ import "./globals.css";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
 import { getDirection } from "@/lib/rtl";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -38,6 +39,7 @@ export default async function RootLayout({ children }: Readonly<Props>) {
         <NextIntlClientProvider locale={locale}>
           <Providers>
             <main className="flex-1">{children}</main>
+            <Toaster richColors position="top-center" />
           </Providers>
         </NextIntlClientProvider>
       </body>

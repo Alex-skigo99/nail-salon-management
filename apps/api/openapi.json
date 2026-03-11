@@ -11,6 +11,498 @@
     }
   ],
   "paths": {
+    "/appointment": {
+      "post": {
+        "summary": "Create a new appointment",
+        "tags": [
+          "Appointment"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created appointment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Appointment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error or slot unavailable"
+          },
+          "409": {
+            "description": "The requested time slot is not available"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/appointment/{id}": {
+      "put": {
+        "summary": "Update non-scheduling fields of an appointment",
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated appointment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Appointment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error or invalid id"
+          },
+          "404": {
+            "description": "Appointment not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an appointment",
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted successfully (no content)"
+          },
+          "400": {
+            "description": "Invalid id"
+          },
+          "404": {
+            "description": "Appointment not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/appointment/{id}/reschedule": {
+      "put": {
+        "summary": "Move appointment to a new date/time (checks availability)",
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentReschedule"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rescheduled appointment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Appointment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error or invalid id"
+          },
+          "404": {
+            "description": "Appointment not found"
+          },
+          "409": {
+            "description": "Slot unavailable"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/appointment/master/{masterId}": {
+      "get": {
+        "summary": "Get all appointments for a master within a date range",
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "masterId",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string",
+              "example": "2026-03-01"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string",
+              "example": "2026-03-31"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of appointments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Appointment"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid parameters"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/appointment/master/{masterId}/slots": {
+      "get": {
+        "summary": "Get slot map for a master over a date range",
+        "description": "Returns one entry per day containing the date, working hours, slot duration, slot count, and an array of slots where each slot has status: empty | book | part_book | reserved | none.\n",
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "masterId",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string",
+              "example": "2026-03-01"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string",
+              "example": "2026-03-07"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of DaySlots objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DaySlots"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid parameters"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/appointment/slots/available": {
+      "get": {
+        "summary": "Check if a slot is available; if not, return suggestions",
+        "description": "Checks whether the requested masterId/date/time/duration slot is free. If occupied, returns suggestions: same-day slots just before & after the requested time, plus the nearest available days that have the same time.\n",
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "masterId",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "date",
+            "schema": {
+              "type": "string",
+              "example": "2026-03-10"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "time",
+            "schema": {
+              "type": "string",
+              "example": "10:00"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "duration",
+            "schema": {
+              "type": "integer",
+              "example": 60
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Availability result - either available slot or suggestions for alternatives",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "required": [
+                        "available",
+                        "slot"
+                      ],
+                      "properties": {
+                        "available": {
+                          "type": "boolean",
+                          "enum": [
+                            true
+                          ]
+                        },
+                        "slot": {
+                          "$ref": "#/components/schemas/TimeSlot"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "available",
+                        "suggestions"
+                      ],
+                      "properties": {
+                        "available": {
+                          "type": "boolean",
+                          "enum": [
+                            false
+                          ]
+                        },
+                        "suggestions": {
+                          "type": "object",
+                          "required": [
+                            "same_day",
+                            "same_time"
+                          ],
+                          "properties": {
+                            "same_day": {
+                              "type": "object",
+                              "required": [
+                                "before",
+                                "after"
+                              ],
+                              "properties": {
+                                "before": {
+                                  "oneOf": [
+                                    {
+                                      "type": "null"
+                                    },
+                                    {
+                                      "$ref": "#/components/schemas/TimeSlot"
+                                    }
+                                  ]
+                                },
+                                "after": {
+                                  "oneOf": [
+                                    {
+                                      "type": "null"
+                                    },
+                                    {
+                                      "$ref": "#/components/schemas/TimeSlot"
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            "same_time": {
+                              "type": "object",
+                              "required": [
+                                "before",
+                                "after"
+                              ],
+                              "properties": {
+                                "before": {
+                                  "oneOf": [
+                                    {
+                                      "type": "null"
+                                    },
+                                    {
+                                      "$ref": "#/components/schemas/TimeSlot"
+                                    }
+                                  ]
+                                },
+                                "after": {
+                                  "oneOf": [
+                                    {
+                                      "type": "null"
+                                    },
+                                    {
+                                      "$ref": "#/components/schemas/TimeSlot"
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid parameters"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/appointment/suggestions": {
+      "get": {
+        "summary": "Get up to 6 appointment slot suggestions for the home page",
+        "description": "Returns up to 6 upcoming empty time slots starting from today. Strategy per day: 2 nearest (earliest) empty slots + 1 near end of day. Continues to the next day if fewer than 3 are available today.\n",
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "masterId",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of time slot suggestions (max 6)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TimeSlot"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid masterId"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/master": {
       "get": {
         "summary": "Retrieve a list of masters",
@@ -358,6 +850,148 @@
   },
   "components": {
     "schemas": {
+      "AppointmentCreate": {
+        "type": "object",
+        "required": [
+          "master_id",
+          "date",
+          "time",
+          "duration_minutes"
+        ],
+        "properties": {
+          "master_id": {
+            "type": "integer",
+            "example": 1
+          },
+          "user_id": {
+            "type": "integer",
+            "nullable": true,
+            "example": null
+          },
+          "user_name": {
+            "type": "string",
+            "nullable": true,
+            "example": "John Doe"
+          },
+          "whatsapp_phone": {
+            "type": "string",
+            "nullable": true,
+            "example": "+1234567890"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-03-15"
+          },
+          "time": {
+            "type": "string",
+            "example": "10:00",
+            "description": "Time in HH:MM or HH:MM:SS format"
+          },
+          "duration_minutes": {
+            "type": "integer",
+            "example": 60
+          },
+          "services": {
+            "type": "string",
+            "nullable": true,
+            "example": "Manicure, Pedicure"
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true,
+            "example": "Any special requests"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "confirmed",
+              "reserved",
+              "pending",
+              "rejected"
+            ],
+            "default": "new"
+          }
+        }
+      },
+      "AppointmentUpdate": {
+        "type": "object",
+        "properties": {
+          "user_name": {
+            "type": "string",
+            "nullable": true,
+            "example": "John Doe"
+          },
+          "whatsapp_phone": {
+            "type": "string",
+            "nullable": true,
+            "example": "+1234567890"
+          },
+          "services": {
+            "type": "string",
+            "nullable": true,
+            "example": "Manicure, Pedicure"
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true,
+            "example": "Any special requests"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "confirmed",
+              "reserved",
+              "pending",
+              "rejected"
+            ]
+          }
+        }
+      },
+      "AppointmentReschedule": {
+        "type": "object",
+        "required": [
+          "date",
+          "time"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-03-15"
+          },
+          "time": {
+            "type": "string",
+            "example": "10:00",
+            "description": "Time in HH:MM or HH:MM:SS format"
+          },
+          "duration_minutes": {
+            "type": "integer",
+            "nullable": true,
+            "example": 60
+          }
+        }
+      },
+      "TimeSlot": {
+        "type": "object",
+        "required": [
+          "date",
+          "time"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-03-15"
+          },
+          "time": {
+            "type": "string",
+            "example": "10:00"
+          }
+        }
+      },
       "Master": {
         "type": "object",
         "properties": {
@@ -508,6 +1142,130 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/WorkingHoursRecord"
+            }
+          }
+        }
+      },
+      "Appointment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "master_id": {
+            "type": "integer"
+          },
+          "user_id": {
+            "type": "integer",
+            "nullable": true
+          },
+          "user_name": {
+            "type": "string",
+            "nullable": true
+          },
+          "whatsapp_phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "time": {
+            "type": "string",
+            "format": "time"
+          },
+          "duration_minutes": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "new",
+              "confirmed",
+              "reserved",
+              "pending",
+              "rejected"
+            ]
+          },
+          "services": {
+            "type": "string",
+            "nullable": true
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Slot": {
+        "type": "object",
+        "properties": {
+          "start_time": {
+            "type": "string",
+            "format": "time"
+          },
+          "end_time": {
+            "type": "string",
+            "format": "time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "empty",
+              "reserved",
+              "none",
+              "part_book",
+              "book"
+            ]
+          },
+          "appointment_data": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Appointment"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "DaySlots": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "time",
+            "nullable": true
+          },
+          "end_time": {
+            "type": "string",
+            "format": "time",
+            "nullable": true
+          },
+          "slot_duration": {
+            "type": "integer"
+          },
+          "slots_count": {
+            "type": "integer"
+          },
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Slot"
             }
           }
         }

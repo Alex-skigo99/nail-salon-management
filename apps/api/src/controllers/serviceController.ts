@@ -126,7 +126,7 @@ const CreateServiceSchema = z.object({
   description: z.string().optional().nullable(),
   category: z.enum(["manicure", "pedicure", "other"]),
   price: z.string().regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
-  duration_minutes: z.number().int().positive(),
+  duration_minutes: z.number().int().min(0),
 });
 
 const UpdateServiceSchema = CreateServiceSchema.partial();
