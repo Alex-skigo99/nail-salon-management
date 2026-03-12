@@ -4,4 +4,11 @@ export const apiRoutes = {
   welcome: "/welcome",
   service: "/service",
   appointment: "/appointment",
+  auth: {
+    register: "/auth/register",
+    login: "/auth/login",
+    google: "/auth/google",
+    me: "/auth/me",
+    logout: "/auth/logout",
+  },
 };

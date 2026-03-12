@@ -27,6 +27,7 @@
   },
   "home": {
     "salonName": "Xena Nails Studio",
+    "headerShop": "Shop",
     "headerBooking": "Book Now",
     "headerPrices": "Prices",
     "headerCustomer": "My Account",
@@ -62,6 +63,13 @@
     "bookingConfirm": "Confirm Booking",
     "bookingClose": "Close",
     "bookingComingSoon": "Online booking coming soon! Please call us to schedule.",
+
+    "shopSection": {
+      "title": "Shop Our Products",
+      "description": "Discover our exclusive line of nail care products, available for purchase in-store and online.",
+      "buttonText": "Shop Now",
+      "comingSoon": "Online shop coming soon! Visit us in-store to browse our products."
+    },
     "mapTitle": "Visit Our Salon",
     "mapSubtitle": "Conveniently located in the heart of the city.",
     "mapAddress": "Jabotinsky St 43, Ramat Gan, Israel",

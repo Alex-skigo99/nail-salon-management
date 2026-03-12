@@ -6,7 +6,9 @@ export type User = {
   email: string;
   role: "ADMIN" | "USER";
   last_login: string;
-  password: string;
+  password: string | null;
+  google_id: string | null;
+  image: string | null;
   created_at: string;
 };
 

@@ -5,8 +5,9 @@ export const UserSchema = z.object({
   name: z.string(),
   email: z.email(),
   role: z.enum(["ADMIN", "USER"]),
-  last_login: z.string(),
-  password: z.string(),
+  last_login: z.string().nullable(),
+  image: z.string().nullable().optional(),
+  google_id: z.string().nullable().optional(),
   createdAt: z.string(),
 });
 

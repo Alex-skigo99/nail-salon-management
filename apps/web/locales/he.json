@@ -27,6 +27,7 @@
   },
   "home": {
     "salonName": "קסנה ניילס סטודיו",
+    "headerShop": "חנות",
     "headerBooking": "קבע/י תור",
     "headerPrices": "מחירים",
     "headerCustomer": "החשבון שלי",
@@ -62,6 +63,12 @@
     "bookingConfirm": "אשר הזמנה",
     "bookingClose": "סגור",
     "bookingComingSoon": "הזמנה אונליין בקרוב! אנא התקשרו לקביעת תור.",
+    "shopSection": {
+      "title": "קנו את המוצרים שלנו",
+      "description": "גלו את קו מוצרי הטיפוח הבלעדי שלנו, זמין לרכישה בחנות ובאינטרנט.",
+      "buttonText": "קנה עכשיו",
+      "comingSoon": "חנות אונליין בקרוב! בקרו אותנו בחנות כדי לגלות את המוצרים שלנו."
+    },
     "mapTitle": "בקרו בסלון שלנו",
     "mapSubtitle": "ממוקם בנוחות בלב העיר.",
     "mapAddress": "ז'בוטינסקי 43, רמת גן, ישראל",

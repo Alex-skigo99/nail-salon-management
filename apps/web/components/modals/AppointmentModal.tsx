@@ -35,7 +35,7 @@ import { CalendarClock, Trash2 } from "lucide-react";
 const gap = 30; // minimum time gap in minutes between appointments
 
 const appointmentSchema = z.object({
-  userName: z.string().optional(),
+  userName: z.string().min(1, "Client name is required"),
   phone: z
     .string()
     .optional()
@@ -179,15 +179,9 @@ export function AppointmentModal({ open, onOpenChange, slot, date, masterId }: A
       if (svc) totalDuration += svc.duration_minutes;
     }
 
-    if (totalDuration > 0) {
-      // Use watch and manually update if needed via form state
-      const currentDuration = watch("duration");
-      // Only auto-update if user hasn't manually set it
-      if (currentDuration === gap || (currentDuration && Math.abs(currentDuration - totalDuration) < 1)) {
-        setValue("duration", totalDuration, { shouldDirty: true });
-      }
-    }
-  }, [serviceManicureId, servicePedicureId, serviceOtherId, servicesByCategory, watch, setValue]);
+    const currentDuration = watch("duration");
+    setValue("duration", totalDuration || currentDuration, { shouldDirty: true });
+  }, [serviceManicureId, servicePedicureId, serviceOtherId, servicesByCategory, setValue]);
 
   const createMutation = useCreateAppointment();
   const updateMutation = useUpdateAppointment();
@@ -433,8 +427,8 @@ export function AppointmentModal({ open, onOpenChange, slot, date, masterId }: A
                     <Input
                       id="duration"
                       type="number"
-                      min={15}
-                      step={15}
+                      min={gap}
+                      step={gap}
                       {...field}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />
@@ -477,8 +471,8 @@ export function AppointmentModal({ open, onOpenChange, slot, date, masterId }: A
                     <Input
                       id="rDur"
                       type="number"
-                      min={15}
-                      step={15}
+                      min={gap}
+                      step={gap}
                       {...field}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                     />

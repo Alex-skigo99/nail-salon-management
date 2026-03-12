@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Menu, X } from "lucide-react";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { changeLocaleAction } from "@/utils/changeLocaleAction";
+import { UserMenu } from "@/components/UserMenu";
 
 type Props = { t: ReturnType<typeof useTranslations>; isMobile: boolean };
 
@@ -17,14 +18,14 @@ export default function Header({ t, isMobile }: Props) {
   }
 
   const navLinks = [
-    { label: t("headerCustomer"), href: "/admin" },
+    { label: t("headerShop"), href: "#shop" },
     { label: t("headerPrices"), href: "#prices" },
     { label: t("headerLocation"), href: "#map" },
   ];
 
   return (
     <header className="fixed top-0 right-0 left-0 z-50 border-b border-pink-100 bg-white/80 shadow-sm backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-350 items-center justify-between px-4 sm:px-6">
         <a href="#hero" className="flex items-center gap-2">
           <Sparkles className="size-6 text-pink-500" />
           <span className="bg-linear-to-r from-pink-600 to-rose-400 bg-clip-text text-lg font-bold text-transparent">
@@ -47,7 +48,7 @@ export default function Header({ t, isMobile }: Props) {
               <LocaleSwitcher
                 handleLocaleChange={handleLocaleChange}
                 wrapperClassName="px-0"
-                triggerClassName="w-28 text-sm"
+                triggerClassName="w-36 text-sm"
               />
             </div>
             <Button
@@ -57,6 +58,9 @@ export default function Header({ t, isMobile }: Props) {
             >
               <a href="#schedule">{t("heroBookBtn")}</a>
             </Button>
+            <div className="w-60">
+              <UserMenu />
+            </div>
           </nav>
         )}
 
@@ -95,6 +99,7 @@ export default function Header({ t, isMobile }: Props) {
               {t("heroBookBtn")}
             </a>
           </Button>
+          <UserMenu />
         </div>
       )}
     </header>
