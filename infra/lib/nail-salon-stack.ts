@@ -21,6 +21,17 @@ export class NailSalonStack extends cdk.Stack {
     console.log(
       `Deploying NailSalonStack in ${node_env} mode with DATABASE_URL=${databaseUrl} and FRONTEND_URL=${frontendUrl}`
     );
+    const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@mail.com";
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin";
+    const ADMIN_NAME = process.env.ADMIN_NAME || "admin";
+    if (node_env === "production") {
+      if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+        throw new Error(
+          "ADMIN_EMAIL and ADMIN_PASSWORD environment variables must be set in production for admin user creation"
+        );
+      }
+      console.log(`Admin user will be created with email: ${ADMIN_EMAIL}`);
+    }
 
     const lambdaCommonProps = {
       runtime: lambda.Runtime.NODEJS_24_X,
@@ -29,6 +40,9 @@ export class NailSalonStack extends cdk.Stack {
         DATABASE_URL: databaseUrl,
         FRONTEND_URL: frontendUrl,
         NODE_ENV: node_env,
+        ADMIN_EMAIL: ADMIN_EMAIL,
+        ADMIN_PASSWORD: ADMIN_PASSWORD,
+        ADMIN_NAME: ADMIN_NAME,
       },
     };
 

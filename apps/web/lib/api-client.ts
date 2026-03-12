@@ -5,13 +5,16 @@ const apiClient: AxiosInstance = axios.create({
   withCredentials: true, // For JWT cookies
 });
 
-// Add auth token to requests
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+/**
+ * Set the Authorization header for all subsequent API requests.
+ * Called when a session is established with an access token.
+ */
+export function setAuthToken(token: string | null) {
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    delete apiClient.defaults.headers.common["Authorization"];
   }
-  return config;
-});
+}
 
 export default apiClient;

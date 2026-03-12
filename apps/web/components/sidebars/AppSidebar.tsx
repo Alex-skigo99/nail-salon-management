@@ -8,6 +8,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
+  SidebarFooter,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -20,6 +21,7 @@ import { isRTLLocale } from "@/lib/rtl";
 import { useTranslations } from "next-intl";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
+import { UserMenu } from "@/components/UserMenu";
 
 type MenuItem = {
   label: string;
@@ -100,6 +102,9 @@ export function AppSidebar() {
               </SheetTitle>
             </SheetHeader>
             <MenuContent />
+            <div className="mt-auto border-t pt-4">
+              <UserMenu />
+            </div>
           </SheetContent>
         </Sheet>
       </div>
@@ -117,6 +122,9 @@ export function AppSidebar() {
       <SidebarContent>
         <MenuContent />
       </SidebarContent>
+      <SidebarFooter className="border-t">
+        <UserMenu />
+      </SidebarFooter>
     </Sidebar>
   );
 }

@@ -2,11 +2,13 @@ import express, { Express } from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import masterRouter from "./routes/master";
 import workingHoursRouter from "./routes/workingHours";
 import serviceRouter from "./routes/service";
 import welcomeRouter from "./routes/welcome";
 import appointmentRouter from "./routes/appointment";
+import authRouter from "./routes/auth";
 
 if (process.env.NODE_ENV !== "production") {
   dotenv.config();
@@ -24,8 +26,10 @@ app.use(
 
 app.use(express.json());
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 // Routes
+app.use("/auth", authRouter);
 app.use("/welcome", welcomeRouter);
 app.use("/master", masterRouter);
 app.use("/working_hours", workingHoursRouter);

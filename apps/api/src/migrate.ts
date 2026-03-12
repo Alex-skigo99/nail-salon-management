@@ -1,9 +1,11 @@
 // This file is used to run database migrations when deploying the API.
 import { knex } from "./lib/db";
+import { createAdmin } from "./create-admin";
 
 export const handler = async () => {
   try {
     await knex.migrate.latest();
+    await createAdmin();
 
     return {
       statusCode: 200,
