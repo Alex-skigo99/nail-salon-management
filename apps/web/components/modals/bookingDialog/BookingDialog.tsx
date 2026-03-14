@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -22,10 +23,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import SelectInput from "@/components/inputs/SelectInput";
-import { PhoneFormInput, phoneSchemaOptional, phoneSchemaRequired } from "@/components/inputs/PhoneFormInput";
+import { PhoneFormInput, phoneSchemaRequired } from "@/components/inputs/PhoneFormInput";
+import InfoUserDialog from "@/components/modals/InfoUserDialog";
 import { useServices } from "@/hooks/useServices";
 import { useCreateAppointment } from "@/hooks/useAppointments";
 import type { Service } from "@/types/serviceTypes";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/hooks/queryKeys";
 
 type Props = {
   open: boolean;
@@ -44,7 +48,7 @@ type Props = {
 };
 
 const authFormSchema = z.object({
-  phone: phoneSchemaOptional,
+  phone: phoneSchemaRequired,
   rememberPhone: z.boolean(),
 });
 
@@ -62,16 +66,29 @@ type GuestFormValues = z.infer<typeof guestFormSchema>;
 
 const DEFAULT_DURATION = 30;
 
+type FeedbackDialogState = {
+  open: boolean;
+  type: "error" | "info";
+  title: string;
+  infoText: string;
+};
+
 export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobile }: Props) {
+  const t = useTranslations("bookingDialog");
   const { data: session, status } = useSession();
+  const queryClient = useQueryClient();
   const isAuthenticated = status === "authenticated";
   const userId = session?.user?.id ? Number(session.user.id) : null;
   const userPhone = session?.user?.phone ?? null;
   const needsPhone = isAuthenticated && !userPhone;
 
   const [showGuestForm, setShowGuestForm] = useState(false);
-  const [requestError, setRequestError] = useState<string | null>(null);
-  const [requestSuccess, setRequestSuccess] = useState<string | null>(null);
+  const [feedbackDialog, setFeedbackDialog] = useState<FeedbackDialogState>({
+    open: false,
+    type: "info",
+    title: "",
+    infoText: "",
+  });
 
   const createAppointment = useCreateAppointment();
   const { data: services = [] } = useServices();
@@ -138,8 +155,7 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
   useEffect(() => {
     if (!open) {
       setShowGuestForm(false);
-      setRequestError(null);
-      setRequestSuccess(null);
+      setFeedbackDialog((prev) => ({ ...prev, open: false }));
       authForm.reset({ phone: "", rememberPhone: true });
       guestForm.reset({
         userName: "",
@@ -157,21 +173,19 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
     }
   }, [open, userPhone, authForm, guestForm]);
 
+  const openFeedbackDialog = (type: "error" | "info", title: string, infoText: string) => {
+    setFeedbackDialog({
+      open: true,
+      type,
+      title,
+      infoText,
+    });
+  };
+
   const handleAuthenticatedSubmit = authForm.handleSubmit(async (values) => {
     if (!selectedSlot || !isAuthenticated || !userId) return;
 
-    setRequestError(null);
-    setRequestSuccess(null);
-
     const normalizedPhone = (values.phone || "").trim();
-
-    if (needsPhone) {
-      const phoneValidation = phoneSchemaRequired.safeParse(normalizedPhone);
-      if (!phoneValidation.success) {
-        setRequestError(phoneValidation.error.issues[0]?.message ?? "Phone is required");
-        return;
-      }
-    }
 
     try {
       await createAppointment.mutateAsync({
@@ -188,28 +202,22 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
         status: "new",
       });
 
-      setRequestSuccess(
-        "Your registration request has been registered. You need to receive confirmation. Tip: Create an account to track your registrations."
-      );
+      openFeedbackDialog("info", t("feedback.infoTitle"), t("feedback.authSuccess"));
     } catch (error: any) {
       if (error?.response?.status === 409) {
-        setRequestError(
-          "Unfortunately, booking for the services (duration) you selected is unavailable. Please try a different appointment time."
-        );
+        queryClient.invalidateQueries({ queryKey: [queryKeys.appointmentSuggestions] });
+        openFeedbackDialog("error", t("feedback.conflictTitle"), t("feedback.conflictError"));
         return;
       }
-      setRequestError("Failed to create appointment. Please try again.");
+      openFeedbackDialog("error", t("feedback.errorTitle"), t("feedback.genericError"));
     }
   });
 
   const handleGuestSubmit = guestForm.handleSubmit(async (values) => {
     if (!selectedSlot) return;
 
-    setRequestError(null);
-    setRequestSuccess(null);
-
     if (selectedGuestServices.duration <= 0) {
-      setRequestError("Please choose one service in each category.");
+      openFeedbackDialog("error", t("feedback.errorTitle"), t("feedback.selectAllCategories"));
       return;
     }
 
@@ -226,19 +234,21 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
         status: "new",
       });
 
-      setRequestSuccess(
-        "Your appointment request is registered. You need to get confirmation. Tip: create an account to track your appointments"
-      );
+      openFeedbackDialog("info", t("feedback.infoTitle"), t("feedback.guestSuccess"));
     } catch (error: any) {
       if (error?.response?.status === 409) {
-        setRequestError(
-          "Unfortunately the appointment with selected services (duration) is not available. Try to choose another appointment time"
-        );
+        queryClient.invalidateQueries({ queryKey: [queryKeys.appointmentSuggestions] });
+        openFeedbackDialog("error", t("feedback.conflictTitle"), t("feedback.conflictError"));
         return;
       }
-      setRequestError("Failed to create appointment. Please try again.");
+      openFeedbackDialog("error", t("feedback.errorTitle"), t("feedback.genericError"));
     }
   });
+
+  const onFeedbackDialogClose = (dialogOpen: boolean) => {
+    setFeedbackDialog((prev) => ({ ...prev, open: dialogOpen }));
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -407,9 +417,6 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
           <p className="text-sm text-red-600">All service categories are required.</p>
         )}
 
-        {requestError && <p className="text-sm text-red-600">{requestError}</p>}
-        {requestSuccess && <p className="text-sm text-green-700">{requestSuccess}</p>}
-
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Close
@@ -437,6 +444,14 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
           )}
         </DialogFooter>
       </DialogContent>
+
+      <InfoUserDialog
+        open={feedbackDialog.open}
+        onOpenChange={onFeedbackDialogClose}
+        type={feedbackDialog.type}
+        title={feedbackDialog.title}
+        infoText={feedbackDialog.infoText}
+      />
     </Dialog>
   );
 }

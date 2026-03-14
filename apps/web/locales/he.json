@@ -96,5 +96,28 @@
     "calendar": "לוח שנה",
     "masters": "מאסטרים",
     "services": "שירותים"
+  },
+  "dialogs": {
+    "infoUserDialog": {
+      "ok": "אישור",
+      "cancel": "ביטול",
+      "confirm": "אישור",
+      "defaultErrorTitle": "שגיאה קריטית",
+      "defaultInfoTitle": "מידע",
+      "defaultConfirmTitle": "נא לאשר"
+    }
+  },
+  "bookingDialog": {
+    "feedback": {
+      "infoTitle": "מידע",
+      "errorTitle": "שגיאה קריטית",
+      "conflictTitle": "השעה שנבחרה אינה זמינה",
+      "authSuccess": "התור שלך נקבע בהצלחה! נשלח אישור למייל שלך.",
+      "guestSuccess": "בקשת הרישום שלך נקלטה. יש להמתין לאישור. טיפ: צרו חשבון כדי לעקוב אחרי הרישומים שלכם.",
+      "conflictError": "לצערנו, הזמנה עבור השירותים (משך הזמן) שבחרת אינה זמינה. נא לנסות שעה אחרת.",
+      "genericError": "יצירת התור נכשלה. נא לנסות שוב.",
+      "phoneRequired": "נדרש מספר טלפון",
+      "selectAllCategories": "נא לבחור שירות אחד בכל קטגוריה."
+    }
   }
 }

@@ -97,5 +97,28 @@
     "calendar": "Calendar",
     "masters": "Masters",
     "services": "Services"
+  },
+  "dialogs": {
+    "infoUserDialog": {
+      "ok": "OK",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "defaultErrorTitle": "Critical Error",
+      "defaultInfoTitle": "Information",
+      "defaultConfirmTitle": "Please Confirm"
+    }
+  },
+  "bookingDialog": {
+    "feedback": {
+      "infoTitle": "Information",
+      "errorTitle": "Critical Error",
+      "conflictTitle": "Selected time is unavailable",
+      "authSuccess": "Your appointment has been created. You can track the status of your appointment on your account page.",
+      "guestSuccess": "Your registration request has been registered. You need to receive confirmation. Tip: Create an account to track your registrations.",
+      "conflictError": "Unfortunately, booking for the services (duration) you selected is unavailable. Please try a different appointment time.",
+      "genericError": "Failed to create appointment. Please try again.",
+      "phoneRequired": "Phone is required",
+      "selectAllCategories": "Please choose one service in each category."
+    }
   }
 }
