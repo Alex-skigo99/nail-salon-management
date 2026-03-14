@@ -22,6 +22,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import SelectInput from "@/components/inputs/SelectInput";
+import { PhoneFormInput, phoneSchemaOptional, phoneSchemaRequired } from "@/components/inputs/PhoneFormInput";
 import { useServices } from "@/hooks/useServices";
 import { useCreateAppointment } from "@/hooks/useAppointments";
 import type { Service } from "@/types/serviceTypes";
@@ -42,26 +43,21 @@ type Props = {
   isMobile: boolean;
 };
 
-const phoneSchema = z
-  .string()
-  .min(7, "Phone is required")
-  .refine((value) => /^\+?[0-9\-\s()]+$/.test(value), "Invalid phone format");
-
 const authFormSchema = z.object({
-  phone: z.string().optional(),
+  phone: phoneSchemaOptional,
   rememberPhone: z.boolean(),
 });
 
 const guestFormSchema = z.object({
   userName: z.string().min(1, "Name is required"),
-  phone: phoneSchema,
+  phone: phoneSchemaRequired,
   serviceManicure: z.string().min(1, "Manicure service is required"),
   servicePedicure: z.string().min(1, "Pedicure service is required"),
   serviceOther: z.string().min(1, "Other service is required"),
   comments: z.string().optional(),
 });
 
-type AuthFormValues = z.infer<typeof authFormSchema>;
+type AuthFormValues = z.input<typeof authFormSchema>;
 type GuestFormValues = z.infer<typeof guestFormSchema>;
 
 const DEFAULT_DURATION = 30;
@@ -170,7 +166,7 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
     const normalizedPhone = (values.phone || "").trim();
 
     if (needsPhone) {
-      const phoneValidation = phoneSchema.safeParse(normalizedPhone);
+      const phoneValidation = phoneSchemaRequired.safeParse(normalizedPhone);
       if (!phoneValidation.success) {
         setRequestError(phoneValidation.error.issues[0]?.message ?? "Phone is required");
         return;
@@ -273,15 +269,7 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
 
             {needsPhone && (
               <div className="space-y-3 rounded-xl border border-gray-200 p-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="auth-phone">Phone</Label>
-                  <Input
-                    id="auth-phone"
-                    placeholder="+972-..."
-                    {...authForm.register("phone")}
-                    className="rounded-xl"
-                  />
-                </div>
+                <PhoneFormInput control={authForm.control} name="phone" id="auth-phone" inputClassName="rounded-xl" />
                 <label className="flex items-center gap-2 text-sm text-gray-700">
                   <Controller
                     name="rememberPhone"
@@ -337,10 +325,7 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
               />
             </div>
 
-            <div className="grid gap-1.5">
-              <Label htmlFor="guest-phone">Phone</Label>
-              <Input id="guest-phone" placeholder="+972-..." {...guestForm.register("phone")} className="rounded-xl" />
-            </div>
+            <PhoneFormInput control={guestForm.control} name="phone" id="guest-phone" inputClassName="rounded-xl" />
 
             <div className="space-y-3 rounded-xl border border-gray-200 p-4">
               <div className="grid gap-1.5">
@@ -412,14 +397,8 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
           </div>
         )}
 
-        {(authForm.formState.errors.phone ||
-          guestForm.formState.errors.userName ||
-          guestForm.formState.errors.phone) && (
-          <p className="text-sm text-red-600">
-            {authForm.formState.errors.phone?.message ||
-              guestForm.formState.errors.userName?.message ||
-              guestForm.formState.errors.phone?.message}
-          </p>
+        {guestForm.formState.errors.userName && (
+          <p className="text-sm text-red-600">{guestForm.formState.errors.userName?.message}</p>
         )}
 
         {(guestForm.formState.errors.serviceManicure ||

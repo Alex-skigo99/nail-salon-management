@@ -72,6 +72,7 @@ export interface RegisterInput {
   email: string;
   password: string;
   name: string;
+  phone: string;
 }
 
 export async function register(input: RegisterInput): Promise<{ user: SafeUser; token: string }> {
@@ -87,6 +88,7 @@ export async function register(input: RegisterInput): Promise<{ user: SafeUser; 
       email: input.email.toLowerCase().trim(),
       password: hashedPassword,
       name: input.name.trim(),
+      phone: input.phone.trim(),
       role: "USER", // new registrations are always USER
     })
     .returning(SAFE_COLUMNS);

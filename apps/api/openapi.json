@@ -1232,7 +1232,8 @@
         "required": [
           "email",
           "password",
-          "name"
+          "name",
+          "phone"
         ],
         "properties": {
           "email": {
@@ -1245,6 +1246,11 @@
           },
           "name": {
             "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 7,
+            "example": "+972-54-123-4567"
           }
         }
       },

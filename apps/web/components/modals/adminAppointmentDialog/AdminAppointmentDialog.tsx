@@ -30,21 +30,14 @@ import { APPOINTMENT_STATUSES } from "@/types/appointmentTypes";
 import { formatTimeToHHMM } from "@/utils/formatTime";
 import { formatDateForInput } from "@/utils/dateUtils";
 import { CalendarClock, Trash2 } from "lucide-react";
+import { PhoneFormInput, phoneSchemaOptional } from "@/components/inputs/PhoneFormInput";
 
 // TODO: fetch gap from server or config, and enforce on backend as well. For now we just use a constant and validate on frontend.
 const gap = 30; // minimum time gap in minutes between appointments
 
 const appointmentSchema = z.object({
   userName: z.string().min(1, "Client name is required"),
-  phone: z
-    .string()
-    .optional()
-    .refine((val) => {
-      if (!val) return true; // optional
-      // Basic phone validation (can be improved)
-      const digits = val.replace(/\D/g, "");
-      return /^\+?[0-9-]+$/.test(val) && digits.length >= 7 && digits.length <= 15;
-    }, "Invalid phone number format"),
+  phone: phoneSchemaOptional,
   serviceManicure: z.string().optional(),
   servicePedicure: z.string().optional(),
   serviceOther: z.string().optional(),
@@ -56,7 +49,7 @@ const appointmentSchema = z.object({
   rescheduleDuration: z.number().min(gap).multipleOf(gap).optional(),
 });
 
-type AppointmentFormData = z.infer<typeof appointmentSchema>;
+type AppointmentFormData = z.input<typeof appointmentSchema>;
 
 type AdminAppointmentDialogProps = {
   open: boolean;
@@ -324,14 +317,13 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
               />
             </div>
 
-            <div className="grid gap-1.5">
-              <Label htmlFor="phone">WhatsApp Phone</Label>
-              <Controller
-                name="phone"
-                control={control}
-                render={({ field }) => <Input id="phone" {...field} placeholder="+1234567890" />}
-              />
-            </div>
+            <PhoneFormInput
+              control={control}
+              name="phone"
+              id="phone"
+              label="WhatsApp Phone"
+              placeholder="+1234567890"
+            />
 
             {/* Services by Category */}
             <div className="bg-background rounded-lg border p-4">

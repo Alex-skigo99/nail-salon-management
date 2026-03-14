@@ -6,10 +6,21 @@ import * as authService from "../services/authService";
 // Validation schemas
 // ─────────────────────────────────────────────
 
+const PhoneSchema = z
+  .string()
+  .trim()
+  .min(7, "Phone number must be at least 7 characters")
+  .regex(/^\+?[0-9\-\s()]+$/, "Invalid phone format")
+  .refine((value) => {
+    const digits = value.replace(/\D/g, "");
+    return digits.length >= 7 && digits.length <= 15;
+  }, "Phone number must contain 7 to 15 digits");
+
 const RegisterSchema = z.object({
   email: z.email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   name: z.string().min(1, "Name is required").max(100),
+  phone: PhoneSchema,
 });
 
 const LoginSchema = z.object({
@@ -83,7 +94,7 @@ function setTokenCookie(res: Response, token: string) {
  *           description: JWT access token
  *     RegisterInput:
  *       type: object
- *       required: [email, password, name]
+ *       required: [email, password, name, phone]
  *       properties:
  *         email:
  *           type: string
@@ -93,6 +104,10 @@ function setTokenCookie(res: Response, token: string) {
  *           minLength: 8
  *         name:
  *           type: string
+ *         phone:
+ *           type: string
+ *           minLength: 7
+ *           example: +972-54-123-4567
  *     LoginInput:
  *       type: object
  *       required: [email, password]
