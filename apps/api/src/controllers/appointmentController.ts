@@ -14,6 +14,7 @@ const CreateAppointmentSchema = z.object({
   user_id: z.number().int().positive().optional().nullable(),
   user_name: z.string().optional().nullable(),
   whatsapp_phone: z.string().optional().nullable(),
+  need_store_phone: z.boolean().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
   time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "time must be HH:MM or HH:MM:SS"),
   duration_minutes: z.number().int().positive(),
@@ -67,6 +68,10 @@ const RescheduleSchema = z.object({
  *           type: string
  *           nullable: true
  *           example: "+1234567890"
+ *         need_store_phone:
+ *           type: boolean
+ *           description: Save provided whatsapp_phone to the user profile when user_id is present
+ *           example: true
  *         date:
  *           type: string
  *           format: date
@@ -571,39 +576,52 @@ export const checkAvailability = async (req: Request, res: Response): Promise<vo
  * @openapi
  * /appointment/suggestions:
  *   get:
- *     summary: Get up to 6 appointment slot suggestions for the home page
+ *     summary: Get up to 6 appointment slot suggestions grouped by master
  *     description: >
- *       Returns up to 6 upcoming empty time slots starting from today.
- *       Strategy per day: 2 nearest (earliest) empty slots + 1 near end of day.
- *       Continues to the next day if fewer than 3 are available today.
+ *       Returns upcoming empty time slots grouped by master.
+ *       If masterId is provided, returns only that master.
  *     tags: [Appointment]
  *     parameters:
  *       - in: query
  *         name: masterId
  *         schema: { type: integer }
- *         required: true
+ *         required: false
  *     responses:
  *       200:
- *         description: Array of time slot suggestions (max 6)
+ *         description: Array of grouped suggestions by master
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/TimeSlot'
+ *                 type: object
+ *                 required: [master, slots]
+ *                 properties:
+ *                   master:
+ *                     $ref: '#/components/schemas/Master'
+ *                   slots:
+ *                     type: array
+ *                     items:
+ *                       $ref: '#/components/schemas/TimeSlot'
  *       400:
- *         description: Missing or invalid masterId
+ *         description: Invalid masterId
  *       500:
  *         description: Internal server error
  */
 export const getSuggestions = async (req: Request, res: Response): Promise<void> => {
   try {
-    const masterId = Number(req.query.masterId);
-    if (isNaN(masterId)) {
-      res.status(400).json({ error: "Query param 'masterId' is required and must be a number" });
-      return;
+    const queryMasterId = req.query.masterId;
+    let masterId: number | undefined;
+
+    if (queryMasterId !== undefined) {
+      masterId = Number(queryMasterId);
+      if (isNaN(masterId)) {
+        res.status(400).json({ error: "Query param 'masterId' must be a number" });
+        return;
+      }
     }
-    const suggestions = await appointmentService.getHomeSuggestions(masterId);
+
+    const suggestions = await appointmentService.getSuggestionsByMaster(masterId);
     res.json(suggestions);
   } catch (err) {
     console.error("Error fetching suggestions:", err);

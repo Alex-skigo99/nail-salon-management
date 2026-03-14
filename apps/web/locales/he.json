@@ -49,10 +49,16 @@
     "pricesTitle": "השירותים והמחירים שלנו",
     "pricesSubtitle": "גלו את מגוון הטיפולים המותאמים במיוחד עבורכם.",
 
-    "scheduleTitle": "תורים פנויים",
+    "scheduleTitle": "תורים חמים זמינים",
     "scheduleSubtitle": "תפסו אחד מהתורים הקרובים — זמינות מוגבלת!",
+    "loadingSlots": "טוען תורים פנויים...",
+    "loadingError": "טעינת התורים הפנויים נכשלה. אנא נסו שוב בעוד רגע.",
     "scheduleBook": "קבע תור",
     "scheduleNoSlots": "אין תורים פנויים כרגע. אנא בדקו שוב מאוחר יותר!",
+    "scheduleAvailableSpecialist": "מומחה זמין",
+    "scheduleSlotBooked": "תור זה כבר הוזמן. אנא בחר תור אחר.",
+    "scheduleNoSlotsForMaster": "אין תורים זמינים כרגע עבור מאסטר זה.",
+
     "bookingModalTitle": "קבע/י תור",
     "bookingModalDesc": "מלאו את הפרטים לאישור התור. נשלח אישור.",
     "bookingName": "שם מלא",

@@ -31,6 +31,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             id: String(data.user.id),
             name: data.user.name,
             email: data.user.email,
+            phone: data.user.phone,
             image: data.user.image,
             role: data.user.role,
             accessToken: data.token,
@@ -80,6 +81,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           // Attach DB user data to the user object for the jwt callback
           user.id = String(data.user.id);
           (user as any).role = data.user.role;
+          (user as any).phone = data.user.phone;
           (user as any).accessToken = data.token;
 
           return true;
@@ -95,6 +97,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         token.id = user.id;
         token.role = (user as any).role;
+        token.phone = (user as any).phone;
         token.accessToken = (user as any).accessToken;
       }
       return token;
@@ -105,6 +108,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string;
         (session.user as any).role = token.role;
+        (session.user as any).phone = token.phone;
         (session as any).accessToken = token.accessToken;
       }
       return session;

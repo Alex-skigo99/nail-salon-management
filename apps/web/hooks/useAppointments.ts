@@ -8,6 +8,7 @@ import type {
   AppointmentUpdate,
   AppointmentReschedule,
   DaySlots,
+  MasterSuggestion,
 } from "@/types/appointmentTypes";
 
 // ─── Queries ──────────────────────────────────────────
@@ -35,6 +36,18 @@ export function useMasterAppointments(masterId: number | null, from: string, to:
       return res.data;
     },
     enabled: !!masterId && !!from && !!to,
+  });
+}
+
+export function useAppointmentSuggestions(masterId?: number) {
+  return useQuery({
+    queryKey: [queryKeys.appointmentSuggestions, masterId ?? null],
+    queryFn: async () => {
+      const res = await apiClient.get<MasterSuggestion[]>(`${apiRoutes.appointment}/suggestions`, {
+        params: masterId ? { masterId } : undefined,
+      });
+      return res.data;
+    },
   });
 }
 

@@ -58,7 +58,7 @@ const appointmentSchema = z.object({
 
 type AppointmentFormData = z.infer<typeof appointmentSchema>;
 
-type AppointmentModalProps = {
+type AdminAppointmentDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   slot: Slot | null;
@@ -66,7 +66,7 @@ type AppointmentModalProps = {
   masterId: number;
 };
 
-export function AppointmentModal({ open, onOpenChange, slot, date, masterId }: AppointmentModalProps) {
+export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterId }: AdminAppointmentDialogProps) {
   const isExisting = !!slot?.appointment_data;
   const apt = slot?.appointment_data;
 

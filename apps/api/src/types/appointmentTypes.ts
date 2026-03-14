@@ -9,6 +9,7 @@ export type CreateAppointmentInput = {
   user_id?: number | null;
   user_name?: string | null;
   whatsapp_phone?: string | null;
+  need_store_phone?: boolean;
   date: string;
   time: string;
   duration_minutes: number;
@@ -65,4 +66,13 @@ export type AvailabilityResult =
 export type SlotSuggestion = {
   date: string;
   time: string;
+};
+
+export type MasterSuggestions = {
+  master: {
+    id: number;
+    name: string;
+    description?: string | null;
+  };
+  slots: SlotSuggestion[];
 };

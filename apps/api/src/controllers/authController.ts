@@ -57,6 +57,9 @@ function setTokenCookie(res: Response, token: string) {
  *           type: string
  *         email:
  *           type: string
+ *         phone:
+ *           type: string
+ *           nullable: true
  *         role:
  *           type: string
  *           enum: [USER, ADMIN]

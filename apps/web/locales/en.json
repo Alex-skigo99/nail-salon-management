@@ -49,10 +49,16 @@
     "pricesTitle": "Our Services & Prices",
     "pricesSubtitle": "Explore our range of treatments tailored just for you.",
 
-    "scheduleTitle": "Available Appointments",
+    "scheduleTitle": "Hot Slots Available",
     "scheduleSubtitle": "Grab one of the nearest open slots — limited availability!",
+    "loadingSlots": "Loading available slots...",
+    "loadingError": "Failed to load available slots. Please try again in a moment.",
     "scheduleBook": "Book This Slot",
     "scheduleNoSlots": "No available slots right now. Please check back later!",
+    "scheduleAvailableSpecialist": "Available specialist",
+    "scheduleSlotBooked": "This slot has already been booked. Please choose another one.",
+    "scheduleNoSlotsForMaster": "No current slots for this master.",
+
     "bookingModalTitle": "Book Your Appointment",
     "bookingModalDesc": "Fill in your details to confirm the booking. We'll send you a confirmation.",
     "bookingName": "Full Name",

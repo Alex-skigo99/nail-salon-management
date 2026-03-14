@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { DaySlotTable } from "./DaySlotTable";
-import { AppointmentModal } from "@/components/modals/AppointmentModal";
+import { AdminAppointmentDialog } from "@/components/modals/adminAppointmentDialog/AdminAppointmentDialog";
 import type { DaySlots, Slot } from "@/types/appointmentTypes";
 import { isPastDate } from "@/utils/dateUtils";
 
@@ -57,7 +57,7 @@ export function WeekView({ days, isLoading, masterId, isCurrentWeek = true }: We
         ))}
       </div>
 
-      <AppointmentModal
+      <AdminAppointmentDialog
         open={modalOpen}
         onOpenChange={setModalOpen}
         slot={selectedSlot}

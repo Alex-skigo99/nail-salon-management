@@ -4,6 +4,7 @@ export type User = {
   id: number;
   name: string;
   email: string;
+  phone: string | null;
   role: "ADMIN" | "USER";
   last_login: string;
   password: string | null;

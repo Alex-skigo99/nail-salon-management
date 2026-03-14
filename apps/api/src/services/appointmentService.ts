@@ -1,6 +1,6 @@
 import { knex } from "../lib/db";
 import { DB_TABLES } from "../constants/dbTables";
-import { Appointment, WorkingHours, Slot, SlotStatus } from "../types/dbSchemaTypes";
+import { Appointment, WorkingHours, Slot, SlotStatus, Master } from "../types/dbSchemaTypes";
 import { SETTINGS_KEYS } from "../constants/settings";
 import type {
   CreateAppointmentInput,
@@ -8,6 +8,7 @@ import type {
   RescheduleInput,
   AvailabilityResult,
   SlotSuggestion,
+  MasterSuggestions,
   DaySlots,
 } from "../types/appointmentTypes";
 
@@ -148,10 +149,23 @@ export async function createAppointment(data: CreateAppointmentInput): Promise<A
     throw new Error("SLOT_UNAVAILABLE");
   }
 
-  const [appt] = await knex(DB_TABLES.APPOINTMENTS)
-    .insert({ ...data, status: data.status ?? "new" })
-    .returning("*");
-  return appt;
+  const result = await knex.transaction(async (trx) => {
+    const { need_store_phone, ...appointmentData } = data;
+
+    const [appt] = await trx(DB_TABLES.APPOINTMENTS)
+      .insert({ ...appointmentData, status: appointmentData.status ?? "new" })
+      .returning("*");
+
+    if (appointmentData.user_id && appointmentData.whatsapp_phone && need_store_phone) {
+      await trx(DB_TABLES.USERS)
+        .where({ id: appointmentData.user_id })
+        .update({ phone: appointmentData.whatsapp_phone });
+    }
+
+    return appt;
+  });
+
+  return result;
 }
 
 export async function updateAppointment(id: number, data: UpdateAppointmentInput): Promise<Appointment | null> {
@@ -402,4 +416,30 @@ export async function getHomeSuggestions(masterId: number): Promise<SlotSuggesti
   }
 
   return suggestions.slice(0, 6);
+}
+
+export async function getSuggestionsByMaster(masterId?: number): Promise<MasterSuggestions[]> {
+  const mastersQuery = knex(DB_TABLES.MASTERS).select<Master[]>("id", "name", "description").orderBy("id", "asc");
+
+  if (masterId) {
+    mastersQuery.where({ id: masterId });
+  }
+
+  const masters = await mastersQuery;
+
+  if (masters.length === 0) {
+    return [];
+  }
+
+  const result = await Promise.all(
+    masters.map(async (master) => {
+      const slots = await getHomeSuggestions(master.id);
+      return {
+        master,
+        slots,
+      };
+    })
+  );
+
+  return result;
 }

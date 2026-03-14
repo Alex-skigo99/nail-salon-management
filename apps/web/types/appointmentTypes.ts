@@ -23,12 +23,27 @@ export type AppointmentCreate = {
   user_id?: number | null;
   user_name?: string | null;
   whatsapp_phone?: string | null;
+  need_store_phone?: boolean;
   date: string;
   time: string;
   duration_minutes: number;
   services?: string | null;
   comments?: string | null;
   status?: AppointmentStatus;
+};
+
+export type TimeSlot = {
+  date: string;
+  time: string;
+};
+
+export type MasterSuggestion = {
+  master: {
+    id: number;
+    name: string;
+    description?: string | null;
+  };
+  slots: TimeSlot[];
 };
 
 export type AppointmentUpdate = {
