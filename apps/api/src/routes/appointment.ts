@@ -1,5 +1,6 @@
 import express from "express";
 import * as appointmentController from "../controllers/appointmentController";
+import { requireRole } from "../middleware/auth";
 
 const router = express.Router();
 
@@ -16,8 +17,11 @@ router.get("/suggestions", appointmentController.getSuggestions);
 // GET /appointment/master/:masterId?from=&to=
 router.get("/master/:masterId", appointmentController.getMasterAppointments);
 
-// GET /appointment/master/:masterId/slots?from=&to=
-router.get("/master/:masterId/slots", appointmentController.getSlotsMap);
+// GET /appointment/master/:masterId/slots?from=&to= (ADMIN only)
+router.get("/master/:masterId/slots", requireRole("ADMIN"), appointmentController.getSlotsMap);
+
+// GET /appointment/master/:masterId/empty_slots?from=&to=
+router.get("/master/:masterId/empty_slots", appointmentController.getEmptySlots);
 
 // ── CRUD ──
 

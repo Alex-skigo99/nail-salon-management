@@ -241,6 +241,64 @@
     "/appointment/master/{masterId}/slots": {
       "get": {
         "summary": "Get slot map for a master over a date range",
+        "description": "Returns one entry per day containing the date, working hours, slot duration, slot count, and an array of slots where each slot has status: empty | book | part_book | reserved | none. Only ADMIN can access this endpoint.\n",
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "masterId",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string",
+              "example": "2026-03-01"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string",
+              "example": "2026-03-07"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of DaySlots objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DaySlots"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid parameters"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/appointment/master/{masterId}/empty_slots": {
+      "get": {
+        "summary": "Get empty slots for a master over a date range",
         "description": "Returns one entry per day containing the date, working hours, slot duration, slot count, and an array of slots where each slot has status: empty | book | part_book | reserved | none.\n",
         "tags": [
           "Appointment"
