@@ -41,9 +41,17 @@ function formatDateLabel(date: string, t: ReturnType<typeof useTranslations>): s
 export default function ScheduleSection({ isMobile, t }: Props) {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
-  const [openMasters, setOpenMasters] = useState<Record<number, boolean>>({});
 
   const { data: suggestions = [], isLoading, isError } = useAppointmentSuggestions();
+  const [openMasters, setOpenMasters] = useState<Record<number, boolean>>(
+    suggestions.reduce(
+      (acc, item, idx) => {
+        acc[item.master.id] = idx === 0 ? true : false; // open first master by default
+        return acc;
+      },
+      {} as Record<number, boolean>
+    )
+  );
 
   const suggestionGroups = useMemo(() => {
     return suggestions.map((item) => ({
@@ -117,7 +125,6 @@ export default function ScheduleSection({ isMobile, t }: Props) {
                       </p>
                     </div>
                     <div className="flex items-center gap-3 text-sm text-gray-500">
-                      <span>{group.slots.length} slots</span>
                       <ChevronsUpDown className="size-4" />
                     </div>
                   </CollapsibleTrigger>
