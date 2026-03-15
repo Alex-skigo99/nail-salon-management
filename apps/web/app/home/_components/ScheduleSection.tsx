@@ -1,15 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { CalendarDays, ChevronRight, Clock, ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Spinner } from "@/components/ui/spinner";
 import { useAppointmentSuggestions } from "@/hooks/useAppointments";
 import type { MasterSuggestion, TimeSlot } from "@/types/appointmentTypes";
 import BookingDialog from "@/components/modals/bookingDialog/BookingDialog";
-import { isSameDay } from "@/utils/dateUtils";
 import { useTranslations } from "next-intl";
+import HotSlots from "./scheduleSection/HotSlots";
+import DayEmptySlots from "./scheduleSection/DayEmptySlots";
 
 type Props = { isMobile: boolean; t: ReturnType<typeof useTranslations> };
 
@@ -20,29 +20,12 @@ type SelectedSlot = {
   time: string;
 };
 
-function formatDateLabel(date: string, t: ReturnType<typeof useTranslations>): string {
-  const d = new Date(date);
-  const label = d.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
-
-  const today = new Date();
-
-  if (isSameDay(d, today)) return `${label} (${t("today")})`;
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
-  if (isSameDay(d, tomorrow)) return `${label} (${t("tomorrow")})`;
-
-  return label;
-}
-
 export default function ScheduleSection({ isMobile, t }: Props) {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<SelectedSlot | null>(null);
 
   const { data: suggestions = [], isLoading, isError } = useAppointmentSuggestions();
+
   const [openMasters, setOpenMasters] = useState<Record<number, boolean>>(
     suggestions.reduce(
       (acc, item, idx) => {
@@ -52,6 +35,9 @@ export default function ScheduleSection({ isMobile, t }: Props) {
       {} as Record<number, boolean>
     )
   );
+
+  // Tracks which masters are in "day view" (DayEmptySlots) vs "hot slots" view
+  const [dayViewMasters, setDayViewMasters] = useState<Record<number, boolean>>({});
 
   const suggestionGroups = useMemo(() => {
     return suggestions.map((item) => ({
@@ -64,20 +50,16 @@ export default function ScheduleSection({ isMobile, t }: Props) {
   }, [suggestions]);
 
   const handleBookSlot = (master: MasterSuggestion["master"], slot: TimeSlot & { id: string }) => {
-    setSelectedSlot({
-      id: slot.id,
-      master,
-      date: slot.date,
-      time: slot.time,
-    });
+    setSelectedSlot({ id: slot.id, master, date: slot.date, time: slot.time });
     setBookingOpen(true);
   };
 
   const toggleMaster = (masterId: number) => {
-    setOpenMasters((prev) => ({
-      ...prev,
-      [masterId]: !prev[masterId],
-    }));
+    setOpenMasters((prev) => ({ ...prev, [masterId]: !prev[masterId] }));
+  };
+
+  const toggleDayView = (masterId: number) => {
+    setDayViewMasters((prev) => ({ ...prev, [masterId]: !prev[masterId] }));
   };
 
   return (
@@ -109,6 +91,7 @@ export default function ScheduleSection({ isMobile, t }: Props) {
           <div className="space-y-4">
             {suggestionGroups.map((group) => {
               const isOpen = openMasters[group.master.id] ?? true;
+              const isDayView = dayViewMasters[group.master.id] ?? false;
 
               return (
                 <Collapsible
@@ -130,36 +113,28 @@ export default function ScheduleSection({ isMobile, t }: Props) {
                   </CollapsibleTrigger>
 
                   <CollapsibleContent className="px-4 pb-4">
-                    <div className={`grid gap-3 ${isMobile ? "grid-cols-1" : "grid-cols-2 xl:grid-cols-3"}`}>
-                      {group.slots.length > 0 ? (
-                        group.slots.map((slot) => (
-                          <Card
-                            key={slot.id}
-                            className="group cursor-pointer border-pink-100 transition-all duration-300 hover:border-pink-300 hover:shadow-lg"
-                            onClick={() => handleBookSlot(group.master, slot)}
-                          >
-                            <CardContent className="flex items-center justify-between py-4">
-                              <div className="flex items-center gap-3">
-                                <div className="flex size-12 items-center justify-center rounded-xl bg-pink-50 transition-colors group-hover:bg-pink-100">
-                                  <CalendarDays className="size-5 text-pink-500" />
-                                </div>
-                                <div>
-                                  <p className="text-sm font-semibold text-gray-900">{formatDateLabel(slot.date, t)}</p>
-                                  <p className="flex items-center gap-1 font-medium text-pink-600">
-                                    <Clock className="size-3.5" />
-                                    {slot.time}
-                                  </p>
-                                </div>
-                              </div>
-                              <ChevronRight className="size-5 text-gray-300 transition-colors group-hover:text-pink-400" />
-                            </CardContent>
-                          </Card>
-                        ))
-                      ) : (
-                        <p className="col-span-full py-3 text-center text-sm text-gray-400">
-                          {t("scheduleNoSlotsForMaster")}
-                        </p>
-                      )}
+                    {isDayView ? (
+                      <DayEmptySlots master={group.master} isMobile={isMobile} t={t} onBook={handleBookSlot} />
+                    ) : (
+                      <HotSlots
+                        slots={group.slots}
+                        master={group.master}
+                        isMobile={isMobile}
+                        t={t}
+                        onBook={handleBookSlot}
+                      />
+                    )}
+
+                    <div className="mt-4 flex justify-start">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleDayView(group.master.id);
+                        }}
+                        className="text-sm font-medium text-pink-500 underline-offset-2 hover:text-pink-700 hover:underline"
+                      >
+                        {isDayView ? t("scheduleBackToHotSlots") : t("scheduleMoreSlots")}
+                      </button>
                     </div>
                   </CollapsibleContent>
                 </Collapsible>

@@ -58,6 +58,13 @@
     "scheduleAvailableSpecialist": "Available specialist",
     "scheduleSlotBooked": "This slot has already been booked. Please choose another one.",
     "scheduleNoSlotsForMaster": "No current slots for this master.",
+    "scheduleMoreSlots": "More slots...",
+    "scheduleBackToHotSlots": "Back to hot slots",
+    "scheduleSelectDate": "Select date",
+    "schedulePrevDay": "Previous day",
+    "scheduleNextDay": "Next day",
+    "scheduleLoadingEmptySlots": "Loading slots...",
+    "scheduleNoEmptySlotsForDay": "No available slots for this day.",
 
     "bookingModalTitle": "Book Your Appointment",
     "bookingModalDesc": "Fill in your details to confirm the booking. We'll send you a confirmation.",

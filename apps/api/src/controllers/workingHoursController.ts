@@ -6,7 +6,7 @@ import * as workingHoursService from "../services/workingHoursService";
  * @openapi
  * /working-hours:
  *   get:
- *     summary: Get working hours for a master
+ *     summary: Get working hours for a master (ADMIN only)
  *     tags:
  *       - WorkingHours
  *     parameters:
@@ -26,7 +26,7 @@ import * as workingHoursService from "../services/workingHoursService";
  *                 $ref: '#/components/schemas/WorkingHoursRecord'
  *
  *   post:
- *     summary: Replace working hours for a master
+ *     summary: Replace working hours for a master (ADMIN only)
  *     tags:
  *       - WorkingHours
  *     requestBody:
@@ -46,7 +46,7 @@ import * as workingHoursService from "../services/workingHoursService";
  *                 $ref: '#/components/schemas/WorkingHoursRecord'
  *
  *   delete:
- *     summary: Delete working hours for a master
+ *     summary: Delete working hours for a master (ADMIN only)
  *     tags:
  *       - WorkingHours
  *     parameters:

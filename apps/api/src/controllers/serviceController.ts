@@ -19,7 +19,7 @@ import * as serviceService from "../services/serviceService";
  *               items:
  *                 $ref: '#/components/schemas/Service'
  *   post:
- *     summary: Create a new service
+ *     summary: Create a new service (ADMIN only)
  *     tags:
  *       - Services
  *     requestBody:
@@ -38,7 +38,7 @@ import * as serviceService from "../services/serviceService";
  *
  * /services/{id}:
  *   put:
- *     summary: Update a service
+ *     summary: Update a service (ADMIN only)
  *     tags:
  *       - Services
  *     parameters:
@@ -65,7 +65,7 @@ import * as serviceService from "../services/serviceService";
  *       404:
  *         description: Service not found
  *   delete:
- *     summary: Delete a service
+ *     summary: Delete a service (ADMIN only)
  *     tags:
  *       - Services
  *     parameters:

@@ -113,3 +113,18 @@ export function formatDateForInput(dateStr: string): string {
     return dateStr;
   }
 }
+
+/** Format YYYY-MM-DD → Date, and shift by `days`. Returns YYYY-MM-DD string. */
+export function shiftDate(dateStr: string, days: number): string {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + days);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/** Today as YYYY-MM-DD */
+export function todayStr(): string {
+  return shiftDate(new Date().toISOString().slice(0, 10), 0);
+}

@@ -58,6 +58,13 @@
     "scheduleAvailableSpecialist": "מומחה זמין",
     "scheduleSlotBooked": "תור זה כבר הוזמן. אנא בחר תור אחר.",
     "scheduleNoSlotsForMaster": "אין תורים זמינים כרגע עבור מאסטר זה.",
+    "scheduleMoreSlots": "עוד תורים...",
+    "scheduleBackToHotSlots": "חזרה לתורים חמים",
+    "scheduleSelectDate": "בחר תאריך",
+    "schedulePrevDay": "יום קודם",
+    "scheduleNextDay": "יום הבא",
+    "scheduleLoadingEmptySlots": "טוען תורים...",
+    "scheduleNoEmptySlotsForDay": "אין תורים פנויים ביום זה.",
 
     "bookingModalTitle": "קבע/י תור",
     "bookingModalDesc": "מלאו את הפרטים לאישור התור. נשלח אישור.",

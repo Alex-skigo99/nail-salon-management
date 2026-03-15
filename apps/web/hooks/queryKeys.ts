@@ -5,4 +5,5 @@ export const queryKeys = {
   appointments: "appointments",
   slots: "slots",
   appointmentSuggestions: "appointment_suggestions",
+  emptySlots: "empty_slots",
 };

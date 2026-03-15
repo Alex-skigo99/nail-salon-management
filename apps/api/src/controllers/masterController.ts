@@ -6,7 +6,7 @@ import * as masterService from "../services/masterService";
  * @openapi
  * /master:
  *   get:
- *     summary: Retrieve a list of masters
+ *     summary: Retrieve a list of masters (ADMIN only)
  *     tags:
  *       - Master
  *     responses:
@@ -21,7 +21,7 @@ import * as masterService from "../services/masterService";
  *       500:
  *         description: Internal server error
  *   post:
- *     summary: Create a new master
+ *     summary: Create a new master (ADMIN only)
  *     tags:
  *       - Master
  *     requestBody:
@@ -44,7 +44,7 @@ import * as masterService from "../services/masterService";
  *
  * /master/{id}:
  *   put:
- *     summary: Update an existing master
+ *     summary: Update an existing master (ADMIN only)
  *     tags:
  *       - Master
  *     parameters:
@@ -74,7 +74,7 @@ import * as masterService from "../services/masterService";
  *       500:
  *         description: Internal server error
  *   delete:
- *     summary: Delete a master
+ *     summary: Delete a master (ADMIN only)
  *     tags:
  *       - Master
  *     parameters:

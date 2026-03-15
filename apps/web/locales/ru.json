@@ -58,6 +58,13 @@
     "scheduleAvailableSpecialist": "Доступный специалист",
     "scheduleSlotBooked": "Это время уже забронировано. Пожалуйста, выберите другое.",
     "scheduleNoSlotsForMaster": "Сейчас нет доступных мест для этого мастера.",
+    "scheduleMoreSlots": "Ещё слоты...",
+    "scheduleBackToHotSlots": "Назад к горячим слотам",
+    "scheduleSelectDate": "Выбрать дату",
+    "schedulePrevDay": "Предыдущий день",
+    "scheduleNextDay": "Следующий день",
+    "scheduleLoadingEmptySlots": "Загрузка слотов...",
+    "scheduleNoEmptySlotsForDay": "Нет доступных слотов на этот день.",
 
     "bookingModalTitle": "Записаться на приём",
     "bookingModalDesc": "Заполните данные для подтверждения записи. Мы отправим подтверждение.",

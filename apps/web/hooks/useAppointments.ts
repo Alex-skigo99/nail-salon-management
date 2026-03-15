@@ -13,6 +13,19 @@ import type {
 
 // ─── Queries ──────────────────────────────────────────
 
+export function useMasterEmptySlots(masterId: number | null, date: string) {
+  return useQuery({
+    queryKey: [queryKeys.emptySlots, masterId, date],
+    queryFn: async () => {
+      const res = await apiClient.get<DaySlots[]>(`${apiRoutes.appointment}/master/${masterId}/empty_slots`, {
+        params: { from: date, to: date },
+      });
+      return res.data;
+    },
+    enabled: !!masterId && !!date,
+  });
+}
+
 export function useMasterSlots(masterId: number | null, from: string, to: string) {
   return useQuery({
     queryKey: [queryKeys.slots, masterId, from, to],
@@ -64,6 +77,7 @@ export function useCreateAppointment() {
       queryClient.invalidateQueries({ queryKey: [queryKeys.slots] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.appointments] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.appointmentSuggestions] });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.emptySlots] });
     },
   });
 }

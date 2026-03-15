@@ -240,7 +240,7 @@
     },
     "/appointment/master/{masterId}/slots": {
       "get": {
-        "summary": "Get slot map for a master over a date range",
+        "summary": "Get slot map for a master over a date range (ADMIN only)",
         "description": "Returns one entry per day containing the date, working hours, slot duration, slot count, and an array of slots where each slot has status: empty | book | part_book | reserved | none. Only ADMIN can access this endpoint.\n",
         "tags": [
           "Appointment"
