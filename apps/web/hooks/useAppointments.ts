@@ -63,7 +63,7 @@ export function useCreateAppointment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [queryKeys.slots] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.appointments] });
-      // queryClient.invalidateQueries({ queryKey: [queryKeys.appointmentSuggestions] });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.appointmentSuggestions] });
     },
   });
 }

@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Sparkles } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import type { Service, ServiceCategory } from "@/types/serviceTypes";
+import { CURRENCY_SYMBOL } from "@/const/currency";
 
 type Props = { t: ReturnType<typeof useTranslations>; isMobile: boolean };
 
@@ -63,7 +64,8 @@ export default function PricesSection({ t, isMobile }: Props) {
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-gray-700">{item.name}</span>
                         <span className="ms-4 font-semibold whitespace-nowrap text-pink-600">
-                          ₪{parseFloat(item.price).toFixed(0)}
+                          {CURRENCY_SYMBOL}
+                          {parseFloat(item.price).toFixed(0)}
                         </span>
                       </div>
                       {item.description && <p className="text-sm text-gray-500">{item.description}</p>}

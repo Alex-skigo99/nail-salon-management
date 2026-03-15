@@ -109,6 +109,49 @@
     }
   },
   "bookingDialog": {
+    "title": "Book an appointment",
+    "description": "Confirm the slot and submit your appointment request.",
+    "slot": {
+      "byMasterDate": "{master} - {date}"
+    },
+    "auth": {
+      "sectionTitle": "Booking from your account",
+      "sectionDescription": "This appointment will be linked to your profile.",
+      "rememberPhone": "Remember this phone for next time"
+    },
+    "guestAccess": {
+      "description": "Log in if you have an account or sign up to view appointment status, history, and manage appointments from your account page.",
+      "login": "Log in",
+      "signup": "Sign up",
+      "continueWithoutRegistration": "Make appointment without registration"
+    },
+    "fields": {
+      "clientName": "Client name",
+      "clientNamePlaceholder": "Your name",
+      "phone": "WhatsApp phone",
+      "manicureService": "Manicure service",
+      "pedicureService": "Pedicure service",
+      "otherService": "Other service",
+      "manicurePlaceholder": "Select manicure service",
+      "pedicurePlaceholder": "Select pedicure service",
+      "otherPlaceholder": "Select additional service",
+      "comments": "Comments",
+      "commentsPlaceholder": "Any notes for the master",
+      "none": "None"
+    },
+    "summary": {
+      "duration": "Calculated duration",
+      "price": "Total price"
+    },
+    "buttons": {
+      "close": "Close",
+      "confirmAppointment": "Confirm appointment",
+      "makeAppointment": "Make appointment"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "oneServiceRequired": "Select at least one service"
+    },
     "feedback": {
       "infoTitle": "Information",
       "errorTitle": "Critical Error",

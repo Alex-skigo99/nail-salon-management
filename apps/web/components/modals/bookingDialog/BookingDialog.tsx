@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -17,54 +16,38 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CalendarDays } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
-import { Textarea } from "@/components/ui/textarea";
-import SelectInput from "@/components/inputs/SelectInput";
-import { PhoneFormInput, phoneSchemaRequired } from "@/components/inputs/PhoneFormInput";
+import { phoneSchemaRequired } from "@/components/inputs/PhoneFormInput";
+import type { ServicesSelectionState } from "@/components/inputs/ServicesFormInput";
 import InfoUserDialog from "@/components/modals/InfoUserDialog";
 import { useServices } from "@/hooks/useServices";
 import { useCreateAppointment } from "@/hooks/useAppointments";
-import type { Service } from "@/types/serviceTypes";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/hooks/queryKeys";
+import type { SelectedSlot } from "@/components/modals/bookingDialog/types";
+import AuthenticatedBookingForm from "@/components/modals/bookingDialog/AuthenticatedBookingForm";
+import GuestBookingForm from "@/components/modals/bookingDialog/GuestBookingForm";
+import GuestAccessPanel from "@/components/modals/bookingDialog/GuestAccessPanel";
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedSlot: {
-    id: string;
-    master: {
-      id: number;
-      name: string;
-      description?: string | null;
-    };
-    date: string;
-    time: string;
-  } | null;
+  selectedSlot: SelectedSlot | null;
   isMobile: boolean;
 };
 
-const authFormSchema = z.object({
-  phone: phoneSchemaRequired,
-  rememberPhone: z.boolean(),
-});
+type AuthFormValues = {
+  phone: string;
+  rememberPhone: boolean;
+  services: string[];
+};
 
-const guestFormSchema = z.object({
-  userName: z.string().min(1, "Name is required"),
-  phone: phoneSchemaRequired,
-  serviceManicure: z.string().min(1, "Manicure service is required"),
-  servicePedicure: z.string().min(1, "Pedicure service is required"),
-  serviceOther: z.string().min(1, "Other service is required"),
-  comments: z.string().optional(),
-});
-
-type AuthFormValues = z.input<typeof authFormSchema>;
-type GuestFormValues = z.infer<typeof guestFormSchema>;
-
-const DEFAULT_DURATION = 30;
+type GuestFormValues = {
+  userName: string;
+  phone: string;
+  services: string[];
+  comments?: string;
+};
 
 type FeedbackDialogState = {
   open: boolean;
@@ -72,6 +55,18 @@ type FeedbackDialogState = {
   title: string;
   infoText: string;
 };
+
+const INPUT_COUNT_FOR_SERVICES = {
+  manicure: 1,
+  pedicure: 1,
+  other: 1,
+} as const;
+
+const createInitialServicesSelected = (): ServicesSelectionState => ({
+  manicure: ["none"],
+  pedicure: ["none"],
+  other: ["none"],
+});
 
 export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobile }: Props) {
   const t = useTranslations("bookingDialog");
@@ -89,26 +84,67 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
     title: "",
     infoText: "",
   });
+  const [authServicesSelected, setAuthServicesSelected] =
+    useState<ServicesSelectionState>(createInitialServicesSelected);
+  const [authServicesDuration, setAuthServicesDuration] = useState(0);
+  const [authServicesPrice, setAuthServicesPrice] = useState(0);
+  const [guestServicesSelected, setGuestServicesSelected] =
+    useState<ServicesSelectionState>(createInitialServicesSelected);
+  const [guestServicesDuration, setGuestServicesDuration] = useState(0);
+  const [guestServicesPrice, setGuestServicesPrice] = useState(0);
 
   const createAppointment = useCreateAppointment();
   const { data: services = [] } = useServices();
 
-  const servicesByCategory = useMemo(
+  const serviceOptions = useMemo(
     () => ({
-      manicure: services.filter((service) => service.category === "manicure"),
-      pedicure: services.filter((service) => service.category === "pedicure"),
-      other: services.filter((service) => service.category === "other"),
+      manicure: services
+        .filter((service) => service.category === "manicure")
+        .map((service) => ({
+          value: String(service.id),
+          label: service.name,
+          price: service.price,
+          duration_minutes: service.duration_minutes,
+        })),
+      pedicure: services
+        .filter((service) => service.category === "pedicure")
+        .map((service) => ({
+          value: String(service.id),
+          label: service.name,
+          price: service.price,
+          duration_minutes: service.duration_minutes,
+        })),
+      other: services
+        .filter((service) => service.category === "other")
+        .map((service) => ({
+          value: String(service.id),
+          label: service.name,
+          price: service.price,
+          duration_minutes: service.duration_minutes,
+        })),
     }),
     [services]
   );
 
-  const serviceOptions = useMemo(
-    () => ({
-      manicure: servicesByCategory.manicure.map((service) => ({ value: String(service.id), label: service.name })),
-      pedicure: servicesByCategory.pedicure.map((service) => ({ value: String(service.id), label: service.name })),
-      other: servicesByCategory.other.map((service) => ({ value: String(service.id), label: service.name })),
-    }),
-    [servicesByCategory]
+  const authFormSchema = useMemo(
+    () =>
+      z.object({
+        phone: phoneSchemaRequired,
+        rememberPhone: z.boolean(),
+        services: z.array(z.string()).min(1),
+      }),
+    [t]
+  );
+
+  const guestFormSchema = useMemo(
+    () =>
+      z.object({
+        userName: z.string().min(1, t("validation.nameRequired")),
+        phone: phoneSchemaRequired,
+        services: z.array(z.string()).min(1),
+        comments: z.string().optional(),
+      }),
+    [t]
   );
 
   const authForm = useForm<AuthFormValues>({
@@ -116,6 +152,7 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
     defaultValues: {
       phone: "",
       rememberPhone: true,
+      services: [],
     },
   });
 
@@ -124,45 +161,54 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
     defaultValues: {
       userName: "",
       phone: "",
-      serviceManicure: "",
-      servicePedicure: "",
-      serviceOther: "",
+      services: [],
       comments: "",
     },
   });
 
-  const watchedGuestServices = guestForm.watch(["serviceManicure", "servicePedicure", "serviceOther"]);
+  const mapSelectedServicesToString = (selected: ServicesSelectionState) => {
+    const selectedOptions = (Object.keys(selected) as Array<keyof ServicesSelectionState>).flatMap((category) =>
+      selected[category]
+        .filter((value) => value && value !== "none")
+        .map((value) => serviceOptions[category].find((option) => option.value === value))
+        .filter(Boolean)
+    );
 
-  const selectedGuestServices = useMemo(() => {
-    const [manicureId, pedicureId, otherId] = watchedGuestServices;
+    return selectedOptions
+      .map((option) => option?.label)
+      .filter(Boolean)
+      .join(", ");
+  };
 
-    const findService = (id: string | undefined, list: Service[]) => list.find((service) => String(service.id) === id);
+  const authServicesSelectedString = useMemo(
+    () => mapSelectedServicesToString(authServicesSelected),
+    [authServicesSelected, serviceOptions]
+  );
 
-    const manicure = findService(manicureId, servicesByCategory.manicure);
-    const pedicure = findService(pedicureId, servicesByCategory.pedicure);
-    const other = findService(otherId, servicesByCategory.other);
-
-    const list = [manicure, pedicure, other].filter(Boolean) as Service[];
-    const duration = list.reduce((total, service) => total + service.duration_minutes, 0);
-
-    return {
-      list,
-      duration,
-      names: list.map((service) => service.name).join(", "),
-    };
-  }, [watchedGuestServices, servicesByCategory]);
+  const guestServicesSelectedString = useMemo(
+    () => mapSelectedServicesToString(guestServicesSelected),
+    [guestServicesSelected, serviceOptions]
+  );
 
   useEffect(() => {
     if (!open) {
       setShowGuestForm(false);
       setFeedbackDialog((prev) => ({ ...prev, open: false }));
-      authForm.reset({ phone: "", rememberPhone: true });
+      setAuthServicesSelected(createInitialServicesSelected());
+      setAuthServicesDuration(0);
+      setAuthServicesPrice(0);
+      setGuestServicesSelected(createInitialServicesSelected());
+      setGuestServicesDuration(0);
+      setGuestServicesPrice(0);
+      authForm.reset({
+        phone: "",
+        rememberPhone: true,
+        services: [],
+      });
       guestForm.reset({
         userName: "",
         phone: "",
-        serviceManicure: "",
-        servicePedicure: "",
-        serviceOther: "",
+        services: [],
         comments: "",
       });
       return;
@@ -196,8 +242,8 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
         need_store_phone: needsPhone ? values.rememberPhone : false,
         date: selectedSlot.date,
         time: selectedSlot.time,
-        duration_minutes: DEFAULT_DURATION,
-        services: null,
+        duration_minutes: authServicesDuration,
+        services: authServicesSelectedString || null,
         comments: null,
         status: "new",
       });
@@ -216,11 +262,6 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
   const handleGuestSubmit = guestForm.handleSubmit(async (values) => {
     if (!selectedSlot) return;
 
-    if (selectedGuestServices.duration <= 0) {
-      openFeedbackDialog("error", t("feedback.errorTitle"), t("feedback.selectAllCategories"));
-      return;
-    }
-
     try {
       await createAppointment.mutateAsync({
         master_id: selectedSlot.master.id,
@@ -228,8 +269,8 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
         whatsapp_phone: values.phone.trim(),
         date: selectedSlot.date,
         time: selectedSlot.time,
-        duration_minutes: selectedGuestServices.duration,
-        services: selectedGuestServices.names,
+        duration_minutes: guestServicesDuration,
+        services: guestServicesSelectedString,
         comments: values.comments?.trim() || null,
         status: "new",
       });
@@ -254,8 +295,8 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={isMobile ? "max-w-[95vw]" : ""}>
         <DialogHeader>
-          <DialogTitle>Book an appointment</DialogTitle>
-          <DialogDescription>Confirm the slot and submit your appointment request.</DialogDescription>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
         {selectedSlot && (
@@ -263,7 +304,10 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
             <CalendarDays className="size-5 text-pink-500" />
             <div>
               <p className="text-sm font-medium text-gray-900">
-                {selectedSlot.master.name} - {selectedSlot.date}
+                {t("slot.byMasterDate", {
+                  master: selectedSlot.master.name,
+                  date: selectedSlot.date,
+                })}
               </p>
               <p className="text-sm text-pink-600">{selectedSlot.time}</p>
             </div>
@@ -271,155 +315,49 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
         )}
 
         {isAuthenticated && !showGuestForm && (
-          <div className="space-y-4">
-            <div className="rounded-xl border border-pink-100 bg-pink-50/60 p-4 text-sm text-gray-700">
-              <p className="font-medium text-gray-900">Booking from your account</p>
-              <p className="mt-1">This appointment will be linked to your profile.</p>
-            </div>
-
-            {needsPhone && (
-              <div className="space-y-3 rounded-xl border border-gray-200 p-4">
-                <PhoneFormInput control={authForm.control} name="phone" id="auth-phone" inputClassName="rounded-xl" />
-                <label className="flex items-center gap-2 text-sm text-gray-700">
-                  <Controller
-                    name="rememberPhone"
-                    control={authForm.control}
-                    render={({ field }) => (
-                      <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(Boolean(checked))} />
-                    )}
-                  />
-                  remember this phone for next time
-                </label>
-              </div>
-            )}
-          </div>
+          <AuthenticatedBookingForm
+            form={authForm}
+            needsPhone={needsPhone}
+            serviceOptions={serviceOptions}
+            inputCountForServices={INPUT_COUNT_FOR_SERVICES}
+            servicesSelected={authServicesSelected}
+            setServicesSelected={setAuthServicesSelected}
+            setValueBySchemaName={(nameInSchema, value) => {
+              authForm.setValue(nameInSchema as "services", value, { shouldValidate: true, shouldDirty: true });
+            }}
+            setServicesDuration={setAuthServicesDuration}
+            setServicesPrice={setAuthServicesPrice}
+            totalDuration={authServicesDuration}
+            totalPrice={authServicesPrice}
+            t={t}
+          />
         )}
 
         {!isAuthenticated && !showGuestForm && (
-          <div className="space-y-4 rounded-xl border border-gray-200 p-4">
-            <p className="text-sm text-gray-700">
-              Log in if you have an account or sign up to view an appointment status, history and manage your
-              appointments through account page
-            </p>
-
-            <div className="flex flex-wrap gap-2">
-              <Button asChild>
-                <Link href="/login">Log in</Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href="/signup">Sign up</Link>
-              </Button>
-            </div>
-
-            <div className="border-t border-gray-200 pt-3">
-              <Button
-                variant="ghost"
-                className="px-0 text-pink-600 hover:text-pink-700"
-                onClick={() => setShowGuestForm(true)}
-              >
-                Make appointment without registration
-              </Button>
-            </div>
-          </div>
+          <GuestAccessPanel onContinueAsGuest={() => setShowGuestForm(true)} t={t} />
         )}
 
         {showGuestForm && (
-          <div className="space-y-4">
-            <div className="grid gap-1.5">
-              <Label htmlFor="guest-name">Client name</Label>
-              <Input
-                id="guest-name"
-                placeholder="Your name"
-                {...guestForm.register("userName")}
-                className="rounded-xl"
-              />
-            </div>
-
-            <PhoneFormInput control={guestForm.control} name="phone" id="guest-phone" inputClassName="rounded-xl" />
-
-            <div className="space-y-3 rounded-xl border border-gray-200 p-4">
-              <div className="grid gap-1.5">
-                <Label>Manicure service</Label>
-                <Controller
-                  name="serviceManicure"
-                  control={guestForm.control}
-                  render={({ field }) => (
-                    <SelectInput
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      options={serviceOptions.manicure}
-                      placeholder="Select manicure service"
-                      triggerClassName="w-full cursor-pointer"
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="grid gap-1.5">
-                <Label>Pedicure service</Label>
-                <Controller
-                  name="servicePedicure"
-                  control={guestForm.control}
-                  render={({ field }) => (
-                    <SelectInput
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      options={serviceOptions.pedicure}
-                      placeholder="Select pedicure service"
-                      triggerClassName="w-full cursor-pointer"
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="grid gap-1.5">
-                <Label>Other service</Label>
-                <Controller
-                  name="serviceOther"
-                  control={guestForm.control}
-                  render={({ field }) => (
-                    <SelectInput
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      options={serviceOptions.other}
-                      placeholder="Select additional service"
-                      triggerClassName="w-full cursor-pointer"
-                    />
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-700">
-              Calculated duration:{" "}
-              <span className="font-semibold text-gray-900">{selectedGuestServices.duration || 0} min</span>
-            </div>
-
-            <div className="grid gap-1.5">
-              <Label htmlFor="guest-comments">Comments</Label>
-              <Textarea
-                id="guest-comments"
-                rows={3}
-                placeholder="Any notes for the master"
-                {...guestForm.register("comments")}
-              />
-            </div>
-          </div>
-        )}
-
-        {guestForm.formState.errors.userName && (
-          <p className="text-sm text-red-600">{guestForm.formState.errors.userName?.message}</p>
-        )}
-
-        {(guestForm.formState.errors.serviceManicure ||
-          guestForm.formState.errors.servicePedicure ||
-          guestForm.formState.errors.serviceOther) && (
-          <p className="text-sm text-red-600">All service categories are required.</p>
+          <GuestBookingForm
+            form={guestForm}
+            serviceOptions={serviceOptions}
+            inputCountForServices={INPUT_COUNT_FOR_SERVICES}
+            servicesSelected={guestServicesSelected}
+            setServicesSelected={setGuestServicesSelected}
+            setValueBySchemaName={(nameInSchema, value) => {
+              guestForm.setValue(nameInSchema as "services", value, { shouldValidate: true, shouldDirty: true });
+            }}
+            setServicesDuration={setGuestServicesDuration}
+            setServicesPrice={setGuestServicesPrice}
+            totalDuration={guestServicesDuration}
+            totalPrice={guestServicesPrice}
+            t={t}
+          />
         )}
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
+            {t("buttons.close")}
           </Button>
           {isAuthenticated && !showGuestForm && (
             <Button
@@ -428,7 +366,7 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
               disabled={createAppointment.isPending}
             >
               {createAppointment.isPending && <Spinner className="mr-2 size-4" />}
-              Confirm appointment
+              {t("buttons.confirmAppointment")}
             </Button>
           )}
 
@@ -439,7 +377,7 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
               disabled={createAppointment.isPending}
             >
               {createAppointment.isPending && <Spinner className="mr-2 size-4" />}
-              Make appointment
+              {t("buttons.makeAppointment")}
             </Button>
           )}
         </DialogFooter>

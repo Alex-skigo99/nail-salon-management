@@ -108,6 +108,49 @@
     }
   },
   "bookingDialog": {
+    "title": "Запись на прием",
+    "description": "Подтвердите слот и отправьте заявку на запись.",
+    "slot": {
+      "byMasterDate": "{master} - {date}"
+    },
+    "auth": {
+      "sectionTitle": "Запись из вашего аккаунта",
+      "sectionDescription": "Эта запись будет привязана к вашему профилю.",
+      "rememberPhone": "Запомнить этот телефон на следующий раз"
+    },
+    "guestAccess": {
+      "description": "Войдите, если у вас есть аккаунт, или зарегистрируйтесь, чтобы видеть статус, историю и управлять записями на странице аккаунта.",
+      "login": "Войти",
+      "signup": "Регистрация",
+      "continueWithoutRegistration": "Записаться без регистрации"
+    },
+    "fields": {
+      "clientName": "Имя клиента",
+      "clientNamePlaceholder": "Ваше имя",
+      "phone": "WhatsApp телефон",
+      "manicureService": "Услуга маникюра",
+      "pedicureService": "Услуга педикюра",
+      "otherService": "Дополнительная услуга",
+      "manicurePlaceholder": "Выберите услугу маникюра",
+      "pedicurePlaceholder": "Выберите услугу педикюра",
+      "otherPlaceholder": "Выберите дополнительную услугу",
+      "comments": "Комментарии",
+      "commentsPlaceholder": "Заметки для мастера",
+      "none": "Нет"
+    },
+    "summary": {
+      "duration": "Расчетная длительность",
+      "price": "Общая стоимость"
+    },
+    "buttons": {
+      "close": "Закрыть",
+      "confirmAppointment": "Подтвердить запись",
+      "makeAppointment": "Записаться"
+    },
+    "validation": {
+      "nameRequired": "Имя обязательно",
+      "oneServiceRequired": "Выберите хотя бы одну услугу"
+    },
     "feedback": {
       "infoTitle": "Информация",
       "errorTitle": "Критическая ошибка",

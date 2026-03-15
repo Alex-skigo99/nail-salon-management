@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import SelectInput from "@/components/inputs/SelectInput";
+import ServicesFormInput, { type ServicesSelectionState } from "@/components/inputs/ServicesFormInput";
 import {
   useCreateAppointment,
   useUpdateAppointment,
@@ -38,9 +39,7 @@ const gap = 30; // minimum time gap in minutes between appointments
 const appointmentSchema = z.object({
   userName: z.string().min(1, "Client name is required"),
   phone: phoneSchemaOptional,
-  serviceManicure: z.string().optional(),
-  servicePedicure: z.string().optional(),
-  serviceOther: z.string().optional(),
+  services: z.array(z.string()),
   comments: z.string().optional(),
   status: z.enum(APPOINTMENT_STATUSES),
   duration: z.number().min(gap).multipleOf(gap),
@@ -59,6 +58,18 @@ type AdminAppointmentDialogProps = {
   masterId: number;
 };
 
+const INPUT_COUNT_FOR_SERVICES = {
+  manicure: 1,
+  pedicure: 1,
+  other: 1,
+} as const;
+
+const createInitialServicesSelected = (): ServicesSelectionState => ({
+  manicure: ["none"],
+  pedicure: ["none"],
+  other: ["none"],
+});
+
 export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterId }: AdminAppointmentDialogProps) {
   const isExisting = !!slot?.appointment_data;
   const apt = slot?.appointment_data;
@@ -66,6 +77,8 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
   // UI state
   const [showReschedule, setShowReschedule] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [servicesSelected, setServicesSelected] = useState<ServicesSelectionState>(createInitialServicesSelected);
+  const [servicesDuration, setServicesDuration] = useState(0);
 
   const { data: services = [] } = useServices();
 
@@ -84,33 +97,28 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
       manicure: servicesByCategory.manicure.map((s) => ({
         value: String(s.id),
         label: s.name,
+        price: s.price,
+        duration_minutes: s.duration_minutes,
       })),
       pedicure: servicesByCategory.pedicure.map((s) => ({
         value: String(s.id),
         label: s.name,
+        price: s.price,
+        duration_minutes: s.duration_minutes,
       })),
       other: servicesByCategory.other.map((s) => ({
         value: String(s.id),
         label: s.name,
+        price: s.price,
+        duration_minutes: s.duration_minutes,
       })),
     }),
     [servicesByCategory]
   );
 
-  // Add empty option to each
-  const optionsWithEmpty = useMemo(
-    () => ({
-      manicure: [{ value: "none", label: "None" }, ...serviceOptions.manicure],
-      pedicure: [{ value: "none", label: "None" }, ...serviceOptions.pedicure],
-      other: [{ value: "none", label: "None" }, ...serviceOptions.other],
-    }),
-    [serviceOptions]
-  );
-
   // Form management
   const {
     control,
-    watch,
     handleSubmit,
     reset,
     setValue,
@@ -120,9 +128,7 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
     defaultValues: {
       userName: "",
       phone: "",
-      serviceManicure: "none",
-      servicePedicure: "none",
-      serviceOther: "none",
+      services: [],
       comments: "",
       status: "new",
       duration: gap,
@@ -132,49 +138,25 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
     },
   });
 
-  // Watch service selections for duration calculation
-  const serviceManicureId = watch("serviceManicure");
-  const servicePedicureId = watch("servicePedicure");
-  const serviceOtherId = watch("serviceOther");
-
-  // Build services display string
-  const servicesDisplay = useMemo(() => {
-    const selected = [];
-    if (serviceManicureId && serviceManicureId !== "none") {
-      const svc = servicesByCategory.manicure.find((s) => String(s.id) === serviceManicureId);
-      if (svc) selected.push(svc.name);
-    }
-    if (servicePedicureId && servicePedicureId !== "none") {
-      const svc = servicesByCategory.pedicure.find((s) => String(s.id) === servicePedicureId);
-      if (svc) selected.push(svc.name);
-    }
-    if (serviceOtherId && serviceOtherId !== "none") {
-      const svc = servicesByCategory.other.find((s) => String(s.id) === serviceOtherId);
-      if (svc) selected.push(svc.name);
-    }
-    return selected.join(", ");
-  }, [serviceManicureId, servicePedicureId, serviceOtherId, servicesByCategory]);
-
-  // Calculate duration from selected services
   useEffect(() => {
-    let totalDuration = 0;
+    if (servicesDuration > 0) {
+      setValue("duration", servicesDuration, { shouldDirty: true });
+    }
+  }, [servicesDuration, setValue]);
 
-    if (serviceManicureId) {
-      const svc = servicesByCategory.manicure.find((s) => String(s.id) === serviceManicureId);
-      if (svc) totalDuration += svc.duration_minutes;
-    }
-    if (servicePedicureId) {
-      const svc = servicesByCategory.pedicure.find((s) => String(s.id) === servicePedicureId);
-      if (svc) totalDuration += svc.duration_minutes;
-    }
-    if (serviceOtherId) {
-      const svc = servicesByCategory.other.find((s) => String(s.id) === serviceOtherId);
-      if (svc) totalDuration += svc.duration_minutes;
-    }
+  const servicesDisplay = useMemo(() => {
+    const selectedOptions = (Object.keys(servicesSelected) as Array<keyof ServicesSelectionState>).flatMap((category) =>
+      servicesSelected[category]
+        .filter((value) => value && value !== "none")
+        .map((value) => serviceOptions[category].find((option) => option.value === value))
+        .filter(Boolean)
+    );
 
-    const currentDuration = watch("duration");
-    setValue("duration", totalDuration || currentDuration, { shouldDirty: true });
-  }, [serviceManicureId, servicePedicureId, serviceOtherId, servicesByCategory, setValue]);
+    return selectedOptions
+      .map((option) => option?.label)
+      .filter(Boolean)
+      .join(", ");
+  }, [servicesSelected, serviceOptions]);
 
   const createMutation = useCreateAppointment();
   const updateMutation = useUpdateAppointment();
@@ -189,12 +171,15 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
     if (!open) {
       setShowReschedule(false);
       setConfirmDelete(false);
+      setServicesSelected(createInitialServicesSelected());
+      setServicesDuration(0);
       return;
     }
     if (apt) {
       reset({
         userName: apt.user_name ?? "",
         phone: apt.whatsapp_phone ?? "",
+        services: [],
         comments: apt.comments ?? "",
         status: apt.status,
         duration: apt.duration_minutes,
@@ -202,13 +187,13 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
         rescheduleTime: formatTimeToHHMM(apt.time),
         rescheduleDuration: apt.duration_minutes,
       });
+      setServicesSelected(createInitialServicesSelected());
+      setServicesDuration(apt.duration_minutes);
     } else {
       reset({
         userName: "",
         phone: "",
-        serviceManicure: "none",
-        servicePedicure: "none",
-        serviceOther: "none",
+        services: [],
         comments: "",
         status: "new",
         duration: gap,
@@ -216,6 +201,8 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
         rescheduleTime: slot ? formatTimeToHHMM(slot.start_time) : "10:00",
         rescheduleDuration: gap,
       });
+      setServicesSelected(createInitialServicesSelected());
+      setServicesDuration(0);
     }
   }, [open, apt, slot, date, reset]);
 
@@ -325,61 +312,28 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
               placeholder="+1234567890"
             />
 
-            {/* Services by Category */}
-            <div className="bg-background rounded-lg border p-4">
-              <div className="grid gap-3">
-                <div className="grid gap-1.5">
-                  <Label>Manicure Service</Label>
-                  <Controller
-                    name="serviceManicure"
-                    control={control}
-                    render={({ field }) => (
-                      <SelectInput
-                        value={field.value as string}
-                        onValueChange={field.onChange}
-                        options={optionsWithEmpty.manicure}
-                        placeholder="Select manicure..."
-                        triggerClassName="w-full cursor-pointer"
-                      />
-                    )}
-                  />
-                </div>
-
-                <div className="grid gap-1.5">
-                  <Label>Pedicure Service</Label>
-                  <Controller
-                    name="servicePedicure"
-                    control={control}
-                    render={({ field }) => (
-                      <SelectInput
-                        value={field.value as string}
-                        onValueChange={field.onChange}
-                        options={optionsWithEmpty.pedicure}
-                        placeholder="Select pedicure..."
-                        triggerClassName="w-full cursor-pointer"
-                      />
-                    )}
-                  />
-                </div>
-
-                <div className="grid gap-1.5">
-                  <Label>Other Service</Label>
-                  <Controller
-                    name="serviceOther"
-                    control={control}
-                    render={({ field }) => (
-                      <SelectInput
-                        value={field.value as string}
-                        onValueChange={field.onChange}
-                        options={optionsWithEmpty.other}
-                        placeholder="Select other service..."
-                        triggerClassName="w-full cursor-pointer"
-                      />
-                    )}
-                  />
-                </div>
-              </div>
-            </div>
+            <ServicesFormInput
+              serviceOptions={serviceOptions}
+              inputCountForServices={INPUT_COUNT_FOR_SERVICES}
+              nameInSchema="services"
+              servicesSelected={servicesSelected}
+              setServicesSelected={setServicesSelected}
+              setValueBySchemaName={(nameInSchema, value) => {
+                setValue(nameInSchema as "services", value, { shouldValidate: true, shouldDirty: true });
+              }}
+              setServicesDuration={setServicesDuration}
+              labels={{
+                manicure: "Manicure Service",
+                pedicure: "Pedicure Service",
+                other: "Other Service",
+              }}
+              placeholders={{
+                manicure: "Select manicure...",
+                pedicure: "Select pedicure...",
+                other: "Select other service...",
+              }}
+              requiredMessage="Select at least one service"
+            />
 
             <div className="grid gap-1.5">
               <Label htmlFor="comments">Comments</Label>

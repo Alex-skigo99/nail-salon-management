@@ -108,6 +108,49 @@
     }
   },
   "bookingDialog": {
+    "title": "קביעת תור",
+    "description": "אשרו את המשבצת ושלחו בקשה לתור.",
+    "slot": {
+      "byMasterDate": "{master} - {date}"
+    },
+    "auth": {
+      "sectionTitle": "קביעה מהחשבון שלך",
+      "sectionDescription": "התור הזה יקושר לפרופיל שלך.",
+      "rememberPhone": "זכור את הטלפון הזה לפעם הבאה"
+    },
+    "guestAccess": {
+      "description": "התחברו אם יש לכם חשבון או הירשמו כדי לצפות בסטטוס התורים, בהיסטוריה ולנהל תורים מדף החשבון.",
+      "login": "התחברות",
+      "signup": "הרשמה",
+      "continueWithoutRegistration": "קבע תור ללא הרשמה"
+    },
+    "fields": {
+      "clientName": "שם לקוחה",
+      "clientNamePlaceholder": "השם שלך",
+      "phone": "טלפון וואטסאפ",
+      "manicureService": "שירות מניקור",
+      "pedicureService": "שירות פדיקור",
+      "otherService": "שירות נוסף",
+      "manicurePlaceholder": "בחרי שירות מניקור",
+      "pedicurePlaceholder": "בחרי שירות פדיקור",
+      "otherPlaceholder": "בחרי שירות נוסף",
+      "comments": "הערות",
+      "commentsPlaceholder": "הערות למאסטר",
+      "none": "ללא"
+    },
+    "summary": {
+      "duration": "משך זמן מחושב",
+      "price": "מחיר כולל"
+    },
+    "buttons": {
+      "close": "סגירה",
+      "confirmAppointment": "אישור תור",
+      "makeAppointment": "קביעת תור"
+    },
+    "validation": {
+      "nameRequired": "נדרש שם",
+      "oneServiceRequired": "יש לבחור לפחות שירות אחד"
+    },
     "feedback": {
       "infoTitle": "מידע",
       "errorTitle": "שגיאה קריטית",
