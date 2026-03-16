@@ -177,8 +177,8 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
     }
     if (apt) {
       reset({
-        userName: apt.user_name ?? "",
-        phone: apt.whatsapp_phone ?? "",
+        userName: apt.guest_name ?? "",
+        phone: apt.guest_phone ?? "",
         services: [],
         comments: apt.comments ?? "",
         status: apt.status,
@@ -213,8 +213,8 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
         date,
         time: slot ? formatTimeToHHMM(slot.start_time) : "10:00",
         duration_minutes: data.duration,
-        user_name: data.userName || null,
-        whatsapp_phone: data.phone || null,
+        guest_name: data.userName || null,
+        guest_phone: data.phone || null,
         services: servicesDisplay || null,
         comments: data.comments || null,
         status: data.status,
@@ -232,8 +232,8 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
       await updateMutation.mutateAsync({
         id: apt.id,
         data: {
-          user_name: data.userName || null,
-          whatsapp_phone: data.phone || null,
+          guest_name: data.userName || null,
+          guest_phone: data.phone || null,
           services: servicesDisplay || apt.services,
           comments: data.comments || null,
           status: data.status,

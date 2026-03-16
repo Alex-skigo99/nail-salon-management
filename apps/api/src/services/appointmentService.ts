@@ -156,10 +156,8 @@ export async function createAppointment(data: CreateAppointmentInput): Promise<A
       .insert({ ...appointmentData, status: appointmentData.status ?? "new" })
       .returning("*");
 
-    if (appointmentData.user_id && appointmentData.whatsapp_phone && need_store_phone) {
-      await trx(DB_TABLES.USERS)
-        .where({ id: appointmentData.user_id })
-        .update({ phone: appointmentData.whatsapp_phone });
+    if (appointmentData.user_id && appointmentData.guest_phone && need_store_phone) {
+      await trx(DB_TABLES.USERS).where({ id: appointmentData.user_id }).update({ phone: appointmentData.guest_phone });
     }
 
     return appt;

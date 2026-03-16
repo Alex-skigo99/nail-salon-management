@@ -204,14 +204,7 @@ export default function ServicesFormInput({
     const selectedValues = selectedOptions.map((option) => option.value);
 
     setServicesDuration(totalDuration);
-
-    if (setServicesPrice) {
-      setServicesPrice(totalPrice);
-    }
-
-    if (setValueBySchemaName) {
-      setValueBySchemaName(nameInSchema, selectedValues);
-    }
+    if (setServicesPrice) setServicesPrice(totalPrice);
   }, [serviceOptions, servicesSelected, nameInSchema, setValueBySchemaName, setServicesDuration, setServicesPrice]);
 
   const selectedValues = useMemo(() => {
@@ -237,6 +230,24 @@ export default function ServicesFormInput({
     };
 
     setServicesSelected(next);
+    // Also sync the updated selection to the external form state and totals.
+    if (setValueBySchemaName || setServicesDuration || setServicesPrice) {
+      const selectedOptions = CATEGORY_ORDER.flatMap((cat) => {
+        const vals = next[cat] || [];
+        return vals
+          .filter((v) => v && v !== "none")
+          .map((v) => serviceOptions[cat].find((option) => option.value === v))
+          .filter(Boolean) as ServicesSelectOption[];
+      });
+
+      const totalDuration = selectedOptions.reduce((acc, option) => acc + toNumber(option.duration_minutes), 0);
+      const totalPrice = selectedOptions.reduce((acc, option) => acc + toNumber(option.price), 0);
+      const selectedValues = selectedOptions.map((option) => option.value);
+
+      if (setServicesDuration) setServicesDuration(totalDuration);
+      if (setServicesPrice) setServicesPrice(totalPrice);
+      if (setValueBySchemaName) setValueBySchemaName(nameInSchema, selectedValues);
+    }
   };
 
   return (

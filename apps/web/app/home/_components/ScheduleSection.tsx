@@ -5,20 +5,13 @@ import { ChevronsUpDown } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Spinner } from "@/components/ui/spinner";
 import { useAppointmentSuggestions } from "@/hooks/useAppointments";
-import type { MasterSuggestion, TimeSlot } from "@/types/appointmentTypes";
+import type { MasterSuggestion, TimeSlot, SelectedSlot } from "@/types/appointmentTypes";
 import BookingDialog from "@/components/modals/bookingDialog/BookingDialog";
 import { useTranslations } from "next-intl";
 import HotSlots from "./scheduleSection/HotSlots";
 import DayEmptySlots from "./scheduleSection/DayEmptySlots";
 
 type Props = { isMobile: boolean; t: ReturnType<typeof useTranslations> };
-
-type SelectedSlot = {
-  id: string;
-  master: MasterSuggestion["master"];
-  date: string;
-  time: string;
-};
 
 export default function ScheduleSection({ isMobile, t }: Props) {
   const [bookingOpen, setBookingOpen] = useState(false);

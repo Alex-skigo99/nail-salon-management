@@ -6,8 +6,8 @@ export type Appointment = {
   id: number;
   master_id: number;
   user_id: number | null;
-  user_name: string | null;
-  whatsapp_phone: string | null;
+  guest_name: string | null;
+  guest_phone: string | null;
   date: string;
   time: string;
   duration_minutes: number;
@@ -21,8 +21,8 @@ export type Appointment = {
 export type AppointmentCreate = {
   master_id: number;
   user_id?: number | null;
-  user_name?: string | null;
-  whatsapp_phone?: string | null;
+  guest_name?: string | null;
+  guest_phone?: string | null;
   need_store_phone?: boolean;
   date: string;
   time: string;
@@ -47,8 +47,8 @@ export type MasterSuggestion = {
 };
 
 export type AppointmentUpdate = {
-  user_name?: string | null;
-  whatsapp_phone?: string | null;
+  guest_name?: string | null;
+  guest_phone?: string | null;
   services?: string | null;
   comments?: string | null;
   status?: AppointmentStatus;
@@ -74,6 +74,13 @@ export type DaySlots = {
   slot_duration: number;
   slots_count: number;
   slots: Slot[];
+};
+
+export type SelectedSlot = {
+  id: string;
+  master: MasterSuggestion["master"];
+  date: string;
+  time: string;
 };
 
 export type ViewMode = "week" | "month";

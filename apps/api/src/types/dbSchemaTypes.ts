@@ -44,8 +44,8 @@ export type Appointment = {
   id: number;
   master_id: number;
   user_id: number | null;
-  user_name: string | null;
-  whatsapp_phone: string | null;
+  guest_name: string | null;
+  guest_phone: string | null;
   date: string; // YYYY-MM-DD
   time: string; // HH:MM:SS
   duration_minutes: number;
@@ -70,10 +70,10 @@ export type Appointment = {
  *         user_id:
  *           type: integer
  *           nullable: true
- *         user_name:
+ *         guest_name:
  *           type: string
  *           nullable: true
- *         whatsapp_phone:
+ *         guest_phone:
  *           type: string
  *           nullable: true
  *         date:

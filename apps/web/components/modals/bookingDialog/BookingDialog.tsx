@@ -24,7 +24,7 @@ import { useServices } from "@/hooks/useServices";
 import { useCreateAppointment } from "@/hooks/useAppointments";
 import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/hooks/queryKeys";
-import type { SelectedSlot } from "@/components/modals/bookingDialog/types";
+import type { SelectedSlot } from "@/types/appointmentTypes";
 import AuthenticatedBookingForm from "@/components/modals/bookingDialog/AuthenticatedBookingForm";
 import GuestBookingForm from "@/components/modals/bookingDialog/GuestBookingForm";
 import GuestAccessPanel from "@/components/modals/bookingDialog/GuestAccessPanel";
@@ -192,7 +192,7 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
 
   useEffect(() => {
     if (!open) {
-      setShowGuestForm(false);
+      // setShowGuestForm(false);
       setFeedbackDialog((prev) => ({ ...prev, open: false }));
       setAuthServicesSelected(createInitialServicesSelected());
       setAuthServicesDuration(0);
@@ -237,8 +237,8 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
       await createAppointment.mutateAsync({
         master_id: selectedSlot.master.id,
         user_id: userId,
-        user_name: session?.user?.name ?? null,
-        whatsapp_phone: normalizedPhone || userPhone || null,
+        guest_name: session?.user?.name ?? null,
+        guest_phone: normalizedPhone || userPhone || null,
         need_store_phone: needsPhone ? values.rememberPhone : false,
         date: selectedSlot.date,
         time: selectedSlot.time,
@@ -265,8 +265,8 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
     try {
       await createAppointment.mutateAsync({
         master_id: selectedSlot.master.id,
-        user_name: values.userName.trim(),
-        whatsapp_phone: values.phone.trim(),
+        guest_name: values.userName.trim(),
+        guest_phone: values.phone.trim(),
         date: selectedSlot.date,
         time: selectedSlot.time,
         duration_minutes: guestServicesDuration,

@@ -129,7 +129,7 @@
       "description": "התחברו אם יש לכם חשבון או הירשמו כדי לצפות בסטטוס התורים, בהיסטוריה ולנהל תורים מדף החשבון.",
       "login": "התחברות",
       "signup": "הרשמה",
-      "continueWithoutRegistration": "קבע תור ללא הרשמה"
+      "continueWithoutRegistration": "קבע תור ללא הרשמה (אורח)"
     },
     "fields": {
       "clientName": "שם לקוחה",

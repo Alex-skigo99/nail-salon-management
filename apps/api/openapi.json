@@ -743,7 +743,7 @@
     },
     "/master": {
       "get": {
-        "summary": "Retrieve a list of masters",
+        "summary": "Retrieve a list of masters (ADMIN only)",
         "tags": [
           "Master"
         ],
@@ -767,7 +767,7 @@
         }
       },
       "post": {
-        "summary": "Create a new master",
+        "summary": "Create a new master (ADMIN only)",
         "tags": [
           "Master"
         ],
@@ -803,7 +803,7 @@
     },
     "/master/{id}": {
       "put": {
-        "summary": "Update an existing master",
+        "summary": "Update an existing master (ADMIN only)",
         "tags": [
           "Master"
         ],
@@ -851,7 +851,7 @@
         }
       },
       "delete": {
-        "summary": "Delete a master",
+        "summary": "Delete a master (ADMIN only)",
         "tags": [
           "Master"
         ],
@@ -905,7 +905,7 @@
         }
       },
       "post": {
-        "summary": "Create a new service",
+        "summary": "Create a new service (ADMIN only)",
         "tags": [
           "Services"
         ],
@@ -935,7 +935,7 @@
     },
     "/services/{id}": {
       "put": {
-        "summary": "Update a service",
+        "summary": "Update a service (ADMIN only)",
         "tags": [
           "Services"
         ],
@@ -979,7 +979,7 @@
         }
       },
       "delete": {
-        "summary": "Delete a service",
+        "summary": "Delete a service (ADMIN only)",
         "tags": [
           "Services"
         ],
@@ -1002,7 +1002,7 @@
     },
     "/working-hours": {
       "get": {
-        "summary": "Get working hours for a master",
+        "summary": "Get working hours for a master (ADMIN only)",
         "tags": [
           "WorkingHours"
         ],
@@ -1033,7 +1033,7 @@
         }
       },
       "post": {
-        "summary": "Replace working hours for a master",
+        "summary": "Replace working hours for a master (ADMIN only)",
         "tags": [
           "WorkingHours"
         ],
@@ -1064,7 +1064,7 @@
         }
       },
       "delete": {
-        "summary": "Delete working hours for a master",
+        "summary": "Delete working hours for a master (ADMIN only)",
         "tags": [
           "WorkingHours"
         ],
@@ -1106,19 +1106,19 @@
             "nullable": true,
             "example": null
           },
-          "user_name": {
+          "guest_name": {
             "type": "string",
             "nullable": true,
             "example": "John Doe"
           },
-          "whatsapp_phone": {
+          "guest_phone": {
             "type": "string",
             "nullable": true,
             "example": "+1234567890"
           },
           "need_store_phone": {
             "type": "boolean",
-            "description": "Save provided whatsapp_phone to the user profile when user_id is present",
+            "description": "Save provided guest_phone to the user profile when user_id is present",
             "example": true
           },
           "date": {
@@ -1161,12 +1161,12 @@
       "AppointmentUpdate": {
         "type": "object",
         "properties": {
-          "user_name": {
+          "guest_name": {
             "type": "string",
             "nullable": true,
             "example": "John Doe"
           },
-          "whatsapp_phone": {
+          "guest_phone": {
             "type": "string",
             "nullable": true,
             "example": "+1234567890"
@@ -1495,11 +1495,11 @@
             "type": "integer",
             "nullable": true
           },
-          "user_name": {
+          "guest_name": {
             "type": "string",
             "nullable": true
           },
-          "whatsapp_phone": {
+          "guest_phone": {
             "type": "string",
             "nullable": true
           },

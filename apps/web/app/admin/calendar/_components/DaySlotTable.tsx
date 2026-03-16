@@ -119,10 +119,10 @@ export function DaySlotTable({ daySlots, onSlotClick, defaultOpen = true }: DayS
                             <TruncatedText text={appointmentData?.services} />
                           </td>
                           <td className={cn("px-3 py-1.5", isMobile && "text-xs")}>
-                            <TruncatedText text={appointmentData?.user_name} />
+                            <TruncatedText text={appointmentData?.guest_name} />
                           </td>
                           <td className={cn("px-3 py-1.5 text-xs", !isMobile && "hidden text-sm md:table-cell")}>
-                            <TruncatedText text={appointmentData?.whatsapp_phone} />
+                            <TruncatedText text={appointmentData?.guest_phone} />
                           </td>
                           <td className={cn("hidden px-3 py-1.5 lg:table-cell", isMobile && "text-xs")}>
                             <TruncatedText text={appointmentData?.comments} />

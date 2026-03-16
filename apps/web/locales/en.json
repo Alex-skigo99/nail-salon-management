@@ -130,7 +130,7 @@
       "description": "Log in if you have an account or sign up to view appointment status, history, and manage appointments from your account page.",
       "login": "Log in",
       "signup": "Sign up",
-      "continueWithoutRegistration": "Make appointment without registration"
+      "continueWithoutRegistration": "Make an appointment without registration (guest)"
     },
     "fields": {
       "clientName": "Client name",

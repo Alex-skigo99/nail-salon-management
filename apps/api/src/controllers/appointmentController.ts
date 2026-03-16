@@ -12,8 +12,8 @@ const AppointmentStatusEnum = z.enum(["new", "confirmed", "reserved", "pending",
 const CreateAppointmentSchema = z.object({
   master_id: z.number().int().positive(),
   user_id: z.number().int().positive().optional().nullable(),
-  user_name: z.string().optional().nullable(),
-  whatsapp_phone: z.string().optional().nullable(),
+  guest_name: z.string().optional().nullable(),
+  guest_phone: z.string().optional().nullable(),
   need_store_phone: z.boolean().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
   time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "time must be HH:MM or HH:MM:SS"),
@@ -24,8 +24,8 @@ const CreateAppointmentSchema = z.object({
 });
 
 const UpdateAppointmentSchema = z.object({
-  user_name: z.string().optional().nullable(),
-  whatsapp_phone: z.string().optional().nullable(),
+  guest_name: z.string().optional().nullable(),
+  guest_phone: z.string().optional().nullable(),
   services: z.string().optional().nullable(),
   comments: z.string().optional().nullable(),
   status: AppointmentStatusEnum.optional(),
@@ -60,17 +60,17 @@ const RescheduleSchema = z.object({
  *           type: integer
  *           nullable: true
  *           example: null
- *         user_name:
+ *         guest_name:
  *           type: string
  *           nullable: true
  *           example: "John Doe"
- *         whatsapp_phone:
+ *         guest_phone:
  *           type: string
  *           nullable: true
  *           example: "+1234567890"
  *         need_store_phone:
  *           type: boolean
- *           description: Save provided whatsapp_phone to the user profile when user_id is present
+ *           description: Save provided guest_phone to the user profile when user_id is present
  *           example: true
  *         date:
  *           type: string
@@ -98,11 +98,11 @@ const RescheduleSchema = z.object({
  *     AppointmentUpdate:
  *       type: object
  *       properties:
- *         user_name:
+ *         guest_name:
  *           type: string
  *           nullable: true
  *           example: "John Doe"
- *         whatsapp_phone:
+ *         guest_phone:
  *           type: string
  *           nullable: true
  *           example: "+1234567890"

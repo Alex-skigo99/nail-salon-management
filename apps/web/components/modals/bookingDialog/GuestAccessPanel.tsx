@@ -21,7 +21,11 @@ export default function GuestAccessPanel({ onContinueAsGuest, t }: GuestAccessPa
       </div>
 
       <div className="border-t border-gray-200 pt-3">
-        <Button variant="ghost" className="px-0 text-pink-600 hover:text-pink-700" onClick={onContinueAsGuest}>
+        <Button
+          variant="link"
+          className="border-0 px-2 text-pink-600 hover:cursor-pointer hover:text-pink-700"
+          onClick={onContinueAsGuest}
+        >
           {t("guestAccess.continueWithoutRegistration")}
         </Button>
       </div>
