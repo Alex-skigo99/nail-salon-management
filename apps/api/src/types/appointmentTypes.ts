@@ -30,6 +30,7 @@ export type RescheduleInput = {
   date: string;
   time: string;
   duration_minutes?: number;
+  services?: string | null;
 };
 
 // ─────────────────────────────────────────────

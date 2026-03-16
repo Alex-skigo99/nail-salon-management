@@ -35,6 +35,7 @@ const RescheduleSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
   time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "time must be HH:MM or HH:MM:SS"),
   duration_minutes: z.number().int().positive().optional(),
+  services: z.string().optional().nullable(),
 });
 
 // ─────────────────────────────────────────────
@@ -135,6 +136,10 @@ const RescheduleSchema = z.object({
  *           type: integer
  *           nullable: true
  *           example: 60
+ *         services:
+ *           type: string
+ *           nullable: true
+ *           example: "Manicure, Pedicure"
  *     TimeSlot:
  *       type: object
  *       required:

@@ -186,10 +186,18 @@ export async function rescheduleAppointment(id: number, data: RescheduleInput): 
   const available = await isSlotAvailable(existing.master_id, data.date, data.time, duration, id);
   if (!available) throw new Error("SLOT_UNAVAILABLE");
 
-  const [appt] = await knex(DB_TABLES.APPOINTMENTS)
-    .where({ id })
-    .update({ date: data.date, time: data.time, duration_minutes: duration, updated_at: knex.fn.now() })
-    .returning("*");
+  const updateData: Record<string, any> = {
+    date: data.date,
+    time: data.time,
+    duration_minutes: duration,
+    updated_at: knex.fn.now(),
+  };
+
+  if (data.services !== undefined) {
+    updateData.services = data.services;
+  }
+
+  const [appt] = await knex(DB_TABLES.APPOINTMENTS).where({ id }).update(updateData).returning("*");
   return appt;
 }
 
