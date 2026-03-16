@@ -296,7 +296,7 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
         {!showReschedule && !confirmDelete && (
           <div className="grid gap-3 py-2">
             <div className="grid gap-1.5">
-              <Label htmlFor="userName">Client Name</Label>
+              <Label htmlFor="userName">Guest Client Name</Label>
               <Controller
                 name="userName"
                 control={control}
@@ -308,7 +308,7 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
               control={control}
               name="phone"
               id="phone"
-              label="WhatsApp Phone"
+              label="Guest Client Phone"
               placeholder="+1234567890"
             />
 
