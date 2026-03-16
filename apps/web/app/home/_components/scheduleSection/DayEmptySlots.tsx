@@ -8,7 +8,8 @@ import type { useTranslations } from "next-intl";
 import type { MasterSuggestion, TimeSlot } from "@/types/appointmentTypes";
 import { useMasterEmptySlots } from "@/hooks/useAppointments";
 import DaySlotsCard from "./DaySlotsCard";
-import { formatDateLabel, shiftDate, todayStr } from "./utils";
+import { formatDateLabel } from "./formatDateLabel";
+import { shiftDate, todayStr } from "@/utils/dateUtils";
 
 type Props = {
   master: MasterSuggestion["master"];

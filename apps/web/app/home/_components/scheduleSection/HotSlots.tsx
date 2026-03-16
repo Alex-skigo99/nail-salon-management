@@ -3,7 +3,7 @@
 import type { useTranslations } from "next-intl";
 import type { MasterSuggestion, TimeSlot } from "@/types/appointmentTypes";
 import HotSlotsCard from "./HotSlotsCard";
-import { formatDateLabel } from "./utils";
+import { formatDateLabel } from "./formatDateLabel";
 
 type Props = {
   slots: (TimeSlot & { id: string })[];
