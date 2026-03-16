@@ -25,11 +25,24 @@ export default function DayEmptySlots({ master, isMobile, t, onBook }: Props) {
 
   const slots = daySlots[0]?.slots ?? [];
 
-  const handlePrevDay = () => setSelectedDate((d) => shiftDate(d, -1));
+  const handlePrevDay = () => {
+    const newDate = shiftDate(selectedDate, -1);
+    if (newDate < todayStr()) return;
+    setSelectedDate(newDate);
+  };
   const handleNextDay = () => setSelectedDate((d) => shiftDate(d, 1));
 
+  const prevDisabled = selectedDate <= todayStr();
+
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value) setSelectedDate(e.target.value);
+    if (!e.target.value) return;
+    // Prevent selecting dates in the past
+    if (e.target.value < todayStr()) {
+      setSelectedDate(todayStr());
+      return;
+    }
+
+    setSelectedDate(e.target.value);
   };
 
   const handleBookSlot = (slot: { start_time: string }) => {
@@ -47,6 +60,7 @@ export default function DayEmptySlots({ master, isMobile, t, onBook }: Props) {
             size="icon"
             className="size-8 border-pink-100 hover:border-pink-300 hover:bg-pink-50"
             onClick={handlePrevDay}
+            disabled={prevDisabled}
             aria-label={t("schedulePrevDay")}
           >
             <ChevronLeft className="size-4 text-pink-500" />
@@ -56,6 +70,7 @@ export default function DayEmptySlots({ master, isMobile, t, onBook }: Props) {
             type="date"
             value={selectedDate}
             onChange={handleDateChange}
+            min={todayStr()}
             className="rounded-lg border border-pink-100 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm ring-pink-300 transition-all outline-none focus:border-pink-300 focus:ring-1"
             aria-label={t("scheduleSelectDate")}
           />
