@@ -83,7 +83,8 @@ export function MonthView({ days, isLoading, currentDate, onWeekClick }: MonthVi
                   {!isOff && dayData && (
                     <div className="flex flex-col">
                       {dayData.slots.map((slot: Slot, i: number) => {
-                        const clientName = slot.appointment_data?.guest_name || "No client";
+                        const clientName =
+                          slot.appointment_data?.user_data?.name ?? slot.appointment_data?.guest_name ?? "No client";
                         const slotStatus = slot.appointment_data?.status;
                         const isPartBook = slot.status === "part_book";
                         const tooltipText = `${formatTimeToHHMM(slot.start_time)} – ${slotStatus} (${clientName})`;

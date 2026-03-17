@@ -1,6 +1,6 @@
 import { knex } from "../lib/db";
 import { DB_TABLES } from "../constants/dbTables";
-import { Appointment, WorkingHours, Slot, SlotStatus, Master } from "../types/dbSchemaTypes";
+import { Appointment, AppointmentRetrieve, WorkingHours, Slot, SlotStatus, Master } from "../types/dbSchemaTypes";
 import { SETTINGS_KEYS } from "../constants/settings";
 import type {
   CreateAppointmentInput,
@@ -11,6 +11,19 @@ import type {
   MasterSuggestions,
   DaySlots,
 } from "../types/appointmentTypes";
+
+// ─────────────────────────────────────────────
+// Constants and types
+// ─────────────────────────────────────────────
+const userDataSelect = `CASE WHEN u.id IS NULL THEN NULL
+              ELSE json_build_object(
+                'id', u.id,
+                'name', u.name,
+                'email', u.email,
+                'phone', u.phone,
+                'image', u.image
+              )
+         END AS user_data`;
 
 // ─────────────────────────────────────────────
 // Utility helpers
@@ -210,12 +223,18 @@ export async function deleteAppointment(id: number): Promise<boolean> {
 // Query: appointments for a master in a period
 // ─────────────────────────────────────────────
 
-export async function getAppointmentsForMaster(masterId: number, from: string, to: string): Promise<Appointment[]> {
-  return knex(DB_TABLES.APPOINTMENTS)
-    .where({ master_id: masterId })
-    .whereBetween("date", [from, to])
-    .orderBy("date", "asc")
-    .orderBy("time", "asc");
+export async function getAppointmentsForMaster(
+  masterId: number,
+  from: string,
+  to: string
+): Promise<AppointmentRetrieve[]> {
+  return knex({ a: DB_TABLES.APPOINTMENTS })
+    .where({ "a.master_id": masterId })
+    .whereBetween("a.date", [from, to])
+    .leftJoin(`${DB_TABLES.USERS} as u`, `a.user_id`, "u.id")
+    .select("a.*", knex.raw(userDataSelect))
+    .orderBy("a.date", "asc")
+    .orderBy("a.time", "asc");
 }
 
 // ─────────────────────────────────────────────
@@ -237,13 +256,15 @@ export async function getSlotsMap(
   // Build map: day_of_week -> working hours row
   const whByDay = new Map(workingHours.map((wh) => [wh.day_of_week, wh]));
 
-  const appointments: Appointment[] = await knex(DB_TABLES.APPOINTMENTS)
-    .where({ master_id: masterId })
-    .whereBetween("date", [from, to])
-    .whereNot({ status: "rejected" });
+  const appointments: AppointmentRetrieve[] = await knex({ a: DB_TABLES.APPOINTMENTS })
+    .where({ "a.master_id": masterId })
+    .whereBetween("a.date", [from, to])
+    .whereNot({ "a.status": "rejected" })
+    .leftJoin(`${DB_TABLES.USERS} as u`, "a.user_id", "u.id")
+    .select("a.*", knex.raw(userDataSelect));
 
   // Group appointments by date string
-  const apptByDate = new Map<string, Appointment[]>();
+  const apptByDate = new Map<string, AppointmentRetrieve[]>();
   for (const appt of appointments) {
     const utcDate = new Date(appt.date);
     const d = utcDate.toLocaleDateString("en-CA"); // normalize from DB date type

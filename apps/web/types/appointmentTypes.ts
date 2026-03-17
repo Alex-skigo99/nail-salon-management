@@ -2,6 +2,14 @@ export type AppointmentStatus = "new" | "confirmed" | "reserved" | "pending" | "
 
 export type SlotStatus = "empty" | "reserved" | "none" | "part_book" | "book";
 
+export type UserData = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  image: string | null;
+};
+
 export type Appointment = {
   id: number;
   master_id: number;
@@ -16,6 +24,10 @@ export type Appointment = {
   comments: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type AppointmentRetrieve = Appointment & {
+  user_data: UserData | null;
 };
 
 export type AppointmentCreate = {
@@ -66,7 +78,7 @@ export type Slot = {
   start_time: string;
   end_time: string;
   status: SlotStatus;
-  appointment_data: Appointment | null;
+  appointment_data: AppointmentRetrieve | null;
 };
 
 export type DaySlots = {

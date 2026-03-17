@@ -19,7 +19,7 @@ import { CalendarDays } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { phoneSchemaRequired } from "@/components/inputs/PhoneFormInput";
 import type { ServicesSelectionState } from "@/components/inputs/ServicesFormInput";
-import InfoUserDialog from "@/components/modals/InfoUserDialog";
+import InfoUserDialog, { InfoUserDialogType } from "@/components/modals/InfoUserDialog";
 import { useServices } from "@/hooks/useServices";
 import { useCreateAppointment } from "@/hooks/useAppointments";
 import { useQueryClient } from "@tanstack/react-query";
@@ -51,7 +51,7 @@ type GuestFormValues = {
 
 type FeedbackDialogState = {
   open: boolean;
-  type: "error" | "info";
+  type: InfoUserDialogType;
   title: string;
   infoText: string;
 };
@@ -219,7 +219,7 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
     }
   }, [open, userPhone, authForm, guestForm]);
 
-  const openFeedbackDialog = (type: "error" | "info", title: string, infoText: string) => {
+  const openFeedbackDialog = (type: InfoUserDialogType, title: string, infoText: string) => {
     setFeedbackDialog({
       open: true,
       type,
@@ -248,7 +248,7 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
         status: "new",
       });
 
-      openFeedbackDialog("info", t("feedback.infoTitle"), t("feedback.authSuccess"));
+      openFeedbackDialog("success", t("feedback.infoTitle"), t("feedback.authSuccess"));
     } catch (error: any) {
       if (error?.response?.status === 409) {
         queryClient.invalidateQueries({ queryKey: [queryKeys.appointmentSuggestions] });
@@ -275,7 +275,7 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
         status: "new",
       });
 
-      openFeedbackDialog("info", t("feedback.infoTitle"), t("feedback.guestSuccess"));
+      openFeedbackDialog("success", t("feedback.infoTitle"), t("feedback.guestSuccess"));
     } catch (error: any) {
       if (error?.response?.status === 409) {
         queryClient.invalidateQueries({ queryKey: [queryKeys.appointmentSuggestions] });

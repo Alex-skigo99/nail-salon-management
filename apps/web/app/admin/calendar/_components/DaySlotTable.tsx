@@ -8,8 +8,9 @@ import { DAY_NAMES } from "@/const/days";
 import { formatTimeToHHMM } from "@/utils/formatTime";
 import { StatusBadge } from "./StatusBadge";
 import { TruncatedText } from "./TruncatedText";
+import { AvatarPopup } from "./AvatarPopup";
 import type { DaySlots, Slot, SlotStatus } from "@/types/appointmentTypes";
-import { isPastDate, parseLocalDate, formatShortDate, isSameDay } from "@/utils/dateUtils";
+import { isPastDate, parseLocalDate, formatShortDate, isSameDay, getCreatedAtString } from "@/utils/dateUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type DaySlotTableProps = {
@@ -85,6 +86,8 @@ export function DaySlotTable({ daySlots, onSlotClick, defaultOpen = true }: DayS
                   <th className="w-15 px-3 py-2 text-left font-medium">Dur.</th>
                   <th className={cn("px-3 py-2 text-left font-medium", isMobile && "hidden")}>Services</th>
                   <th className="px-3 py-2 text-left font-medium">Client</th>
+                  <th className="px-3 py-2 text-left font-medium">Avatar</th>
+                  <th className="px-3 py-2 text-left font-medium">Name</th>
                   <th className={cn("px-3 py-2 text-left font-medium", !isMobile && "hidden md:table-cell")}>Phone</th>
                   <th className="hidden px-3 py-2 text-left font-medium lg:table-cell">Comments</th>
                   <th className="hidden px-3 py-2 text-left font-medium sm:table-cell">Created</th>
@@ -94,6 +97,7 @@ export function DaySlotTable({ daySlots, onSlotClick, defaultOpen = true }: DayS
                 {daySlots.slots.map((slot, idx) => {
                   const appointmentData = slot.appointment_data;
                   const isPartBook = slot.status === "part_book";
+                  const isEmpty = slot.status === "empty";
 
                   return (
                     <tr
@@ -118,32 +122,31 @@ export function DaySlotTable({ daySlots, onSlotClick, defaultOpen = true }: DayS
                           <td className={cn("px-3 py-1.5", isMobile && "hidden")}>
                             <TruncatedText text={appointmentData?.services} />
                           </td>
+                          <td className="px-3 py-1.5 text-xs font-medium">
+                            {!isEmpty ? (
+                              appointmentData?.user_id ? (
+                                <span className="rounded bg-blue-100 px-1.5 py-0.5 text-blue-700">User</span>
+                              ) : (
+                                <span className="rounded bg-gray-100 px-1.5 py-0.5 text-gray-600">Guest</span>
+                              )
+                            ) : null}
+                          </td>
+                          <td className="px-3 py-1.5">
+                            {appointmentData?.user_data?.image ? (
+                              <AvatarPopup src={appointmentData.user_data.image} alt={appointmentData.user_data.name} />
+                            ) : null}
+                          </td>
                           <td className={cn("px-3 py-1.5", isMobile && "text-xs")}>
-                            <TruncatedText text={appointmentData?.guest_name} />
+                            <TruncatedText text={appointmentData?.user_data?.name ?? appointmentData?.guest_name} />
                           </td>
                           <td className={cn("px-3 py-1.5 text-xs", !isMobile && "hidden text-sm md:table-cell")}>
-                            <TruncatedText text={appointmentData?.guest_phone} />
+                            <TruncatedText text={appointmentData?.user_data?.phone ?? appointmentData?.guest_phone} />
                           </td>
                           <td className={cn("hidden px-3 py-1.5 lg:table-cell", isMobile && "text-xs")}>
                             <TruncatedText text={appointmentData?.comments} />
                           </td>
                           <td className={cn("hidden px-3 py-1.5 sm:table-cell", isMobile && "text-xs")}>
-                            <TruncatedText
-                              text={
-                                appointmentData?.created_at
-                                  ? new Date(appointmentData.created_at)
-                                      .toLocaleDateString("en-CA", {
-                                        year: "numeric",
-                                        month: "2-digit",
-                                        day: "2-digit",
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                        hour12: false,
-                                      })
-                                      .replace(",", "")
-                                  : null
-                              }
-                            />
+                            <TruncatedText text={getCreatedAtString(appointmentData?.created_at)} />
                           </td>
                         </>
                       )}

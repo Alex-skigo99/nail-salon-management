@@ -128,3 +128,19 @@ export function shiftDate(dateStr: string, days: number): string {
 export function todayStr(): string {
   return shiftDate(new Date().toISOString().slice(0, 10), 0);
 }
+
+/** Get created at string in YYYY-MM-DD hh:mm format */
+export function getCreatedAtString(date: string | null | undefined): string | null {
+  return date
+    ? new Date(date)
+        .toLocaleDateString("en-CA", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        })
+        .replace(",", "")
+    : null;
+}

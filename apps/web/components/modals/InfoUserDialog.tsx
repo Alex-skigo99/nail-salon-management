@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { AlertTriangle, CircleHelp, Info } from "lucide-react";
+import { AlertTriangle, CircleHelp, Info, CheckCircle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-type InfoUserDialogType = "error" | "info" | "confirm";
+export type InfoUserDialogType = "error" | "info" | "confirm" | "success";
 
 type InfoUserDialogProps = {
   open: boolean;
@@ -40,6 +40,10 @@ const typeStyles: Record<InfoUserDialogType, { container: string; icon: string }
     container: "border-sky-200 bg-sky-50/70",
     icon: "text-sky-600",
   },
+  success: {
+    container: "border-emerald-200 bg-emerald-50/70",
+    icon: "text-emerald-600",
+  },
   confirm: {
     container: "border-amber-200 bg-amber-50/70",
     icon: "text-amber-600",
@@ -49,6 +53,7 @@ const typeStyles: Record<InfoUserDialogType, { container: string; icon: string }
 const typeIcon: Record<InfoUserDialogType, ReactNode> = {
   error: <AlertTriangle className="size-5" aria-hidden="true" />,
   info: <Info className="size-5" aria-hidden="true" />,
+  success: <CheckCircle className="size-5" aria-hidden="true" />,
   confirm: <CircleHelp className="size-5" aria-hidden="true" />,
 };
 
@@ -123,7 +128,13 @@ export default function InfoUserDialog({
           <Button
             variant={type === "error" ? "destructive" : "default"}
             onClick={handleConfirm}
-            className={type === "info" ? "bg-sky-600 text-white hover:bg-sky-700" : undefined}
+            className={
+              type === "info"
+                ? "bg-sky-600 text-white hover:bg-sky-700"
+                : type === "success"
+                  ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                  : undefined
+            }
           >
             {type === "confirm" ? (confirmLabel ?? t("confirm")) : (okLabel ?? t("ok"))}
           </Button>

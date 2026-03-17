@@ -1395,6 +1395,11 @@
       "AppointmentUpdate": {
         "type": "object",
         "properties": {
+          "user_id": {
+            "type": "integer",
+            "nullable": true,
+            "example": null
+          },
           "guest_name": {
             "type": "string",
             "nullable": true,
@@ -1826,6 +1831,28 @@
           }
         }
       },
+      "UserData": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "image": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "Appointment": {
         "type": "object",
         "properties": {
@@ -1881,10 +1908,32 @@
             "format": "date-time"
           },
           "updated_at": {
-            "type": "string",
-            "format": "date-time"
+            "type": "string"
           }
         }
+      },
+      "AppointmentRetrieve": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Appointment"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "user_data": {
+                "nullable": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/UserData"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        ]
       },
       "Slot": {
         "type": "object",
@@ -1910,7 +1959,7 @@
           "appointment_data": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/Appointment"
+                "$ref": "#/components/schemas/AppointmentRetrieve"
               },
               {
                 "type": "null"
