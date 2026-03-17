@@ -1,9 +1,18 @@
 import { z } from "zod";
 
+export type UserData = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  image: string | null;
+};
+
 export type User = {
   id: number;
   name: string;
   email: string;
+  phone: string | null;
   role: "ADMIN" | "USER";
   last_login: string;
   password: string | null;
@@ -43,8 +52,8 @@ export type Appointment = {
   id: number;
   master_id: number;
   user_id: number | null;
-  user_name: string | null;
-  whatsapp_phone: string | null;
+  guest_name: string | null;
+  guest_phone: string | null;
   date: string; // YYYY-MM-DD
   time: string; // HH:MM:SS
   duration_minutes: number;
@@ -54,6 +63,31 @@ export type Appointment = {
   created_at: string;
   updated_at: string;
 };
+
+export type AppointmentRetrieve = Appointment & {
+  user_data: UserData | null;
+};
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     UserData:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *         phone:
+ *           type: string
+ *           nullable: true
+ *         image:
+ *           type: string
+ *           nullable: true
+ */
 
 /**
  * @openapi
@@ -69,10 +103,10 @@ export type Appointment = {
  *         user_id:
  *           type: integer
  *           nullable: true
- *         user_name:
+ *         guest_name:
  *           type: string
  *           nullable: true
- *         whatsapp_phone:
+ *         guest_phone:
  *           type: string
  *           nullable: true
  *         date:
@@ -97,7 +131,22 @@ export type Appointment = {
  *           format: date-time
  *         updated_at:
  *           type: string
- *           format: date-time
+ */
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     AppointmentRetrieve:
+ *       allOf:
+ *         - $ref: '#/components/schemas/Appointment'
+ *         - type: object
+ *           properties:
+ *             user_data:
+ *               nullable: true
+ *               oneOf:
+ *                 - $ref: '#/components/schemas/UserData'
+ *                 - type: 'null'
  */
 
 export type Setting = {
@@ -115,7 +164,7 @@ export type Slot = {
   start_time: string;
   end_time: string;
   status: SlotStatus;
-  appointment_data: Appointment | null;
+  appointment_data: AppointmentRetrieve | null;
 };
 
 /**
@@ -136,7 +185,7 @@ export type Slot = {
  *           enum: ["empty", "reserved", "none", "part_book", "book"]
  *         appointment_data:
  *           oneOf:
- *             - $ref: '#/components/schemas/Appointment'
+ *             - $ref: '#/components/schemas/AppointmentRetrieve'
  *             - type: 'null'
  */
 

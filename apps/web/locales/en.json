@@ -49,10 +49,23 @@
     "pricesTitle": "Our Services & Prices",
     "pricesSubtitle": "Explore our range of treatments tailored just for you.",
 
-    "scheduleTitle": "Available Appointments",
+    "scheduleTitle": "Hot Slots Available",
     "scheduleSubtitle": "Grab one of the nearest open slots — limited availability!",
+    "loadingSlots": "Loading available slots...",
+    "loadingError": "Failed to load available slots. Please try again in a moment.",
     "scheduleBook": "Book This Slot",
     "scheduleNoSlots": "No available slots right now. Please check back later!",
+    "scheduleAvailableSpecialist": "Available specialist",
+    "scheduleSlotBooked": "This slot has already been booked. Please choose another one.",
+    "scheduleNoSlotsForMaster": "No current slots for this master.",
+    "scheduleMoreSlots": "More slots...",
+    "scheduleBackToHotSlots": "Back to hot slots",
+    "scheduleSelectDate": "Select date",
+    "schedulePrevDay": "Previous day",
+    "scheduleNextDay": "Next day",
+    "scheduleLoadingEmptySlots": "Loading slots...",
+    "scheduleNoEmptySlotsForDay": "No available slots for this day.",
+
     "bookingModalTitle": "Book Your Appointment",
     "bookingModalDesc": "Fill in your details to confirm the booking. We'll send you a confirmation.",
     "bookingName": "Full Name",
@@ -91,5 +104,71 @@
     "calendar": "Calendar",
     "masters": "Masters",
     "services": "Services"
+  },
+  "dialogs": {
+    "infoUserDialog": {
+      "ok": "OK",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "defaultErrorTitle": "Critical Error",
+      "defaultInfoTitle": "Information",
+      "defaultConfirmTitle": "Please Confirm"
+    }
+  },
+  "bookingDialog": {
+    "title": "Book an appointment",
+    "description": "Confirm the slot and submit your appointment request.",
+    "slot": {
+      "byMasterDate": "{master} - {date}"
+    },
+    "auth": {
+      "sectionTitle": "Booking from your account",
+      "sectionDescription": "This appointment will be linked to your profile.",
+      "rememberPhone": "Remember this phone for next time"
+    },
+    "guestAccess": {
+      "description": "Log in if you have an account or sign up to view appointment status, history, and manage appointments from your account page.",
+      "login": "Log in",
+      "signup": "Sign up",
+      "continueWithoutRegistration": "Make an appointment without registration (guest)"
+    },
+    "fields": {
+      "clientName": "Client name",
+      "clientNamePlaceholder": "Your name",
+      "phone": "WhatsApp phone",
+      "manicureService": "Manicure service",
+      "pedicureService": "Pedicure service",
+      "otherService": "Other service",
+      "manicurePlaceholder": "Select manicure service",
+      "pedicurePlaceholder": "Select pedicure service",
+      "otherPlaceholder": "Select additional service",
+      "comments": "Comments",
+      "commentsPlaceholder": "Any notes for the master",
+      "none": "None"
+    },
+    "summary": {
+      "duration": "Calculated duration",
+      "price": "Total price"
+    },
+    "buttons": {
+      "close": "Close",
+      "confirmAppointment": "Confirm appointment",
+      "makeAppointment": "Make appointment"
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "oneServiceRequired": "Select at least one service"
+    },
+    "feedback": {
+      "infoTitle": "Information",
+      "errorTitle": "Critical Error",
+      "conflictTitle": "Selected time is unavailable",
+      "authSuccess": "Your appointment has been created. You can track the status of your appointment on your account page.",
+      "guestSuccess": "Your registration request has been registered. You need to receive confirmation. Tip: Create an account to track your registrations.",
+      "conflictError": "Unfortunately, booking for the services (duration) you selected is unavailable. Please try a different appointment time.",
+      "genericError": "Failed to create appointment. Please try again.",
+      "phoneRequired": "Phone is required",
+      "selectAllCategories": "Please choose one service in each category."
+    }
   }
 }

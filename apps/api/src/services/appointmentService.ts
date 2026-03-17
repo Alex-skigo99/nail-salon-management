@@ -1,6 +1,6 @@
 import { knex } from "../lib/db";
 import { DB_TABLES } from "../constants/dbTables";
-import { Appointment, WorkingHours, Slot, SlotStatus } from "../types/dbSchemaTypes";
+import { Appointment, AppointmentRetrieve, WorkingHours, Slot, SlotStatus, Master } from "../types/dbSchemaTypes";
 import { SETTINGS_KEYS } from "../constants/settings";
 import type {
   CreateAppointmentInput,
@@ -8,8 +8,22 @@ import type {
   RescheduleInput,
   AvailabilityResult,
   SlotSuggestion,
+  MasterSuggestions,
   DaySlots,
 } from "../types/appointmentTypes";
+
+// ─────────────────────────────────────────────
+// Constants and types
+// ─────────────────────────────────────────────
+const userDataSelect = `CASE WHEN u.id IS NULL THEN NULL
+              ELSE json_build_object(
+                'id', u.id,
+                'name', u.name,
+                'email', u.email,
+                'phone', u.phone,
+                'image', u.image
+              )
+         END AS user_data`;
 
 // ─────────────────────────────────────────────
 // Utility helpers
@@ -148,10 +162,21 @@ export async function createAppointment(data: CreateAppointmentInput): Promise<A
     throw new Error("SLOT_UNAVAILABLE");
   }
 
-  const [appt] = await knex(DB_TABLES.APPOINTMENTS)
-    .insert({ ...data, status: data.status ?? "new" })
-    .returning("*");
-  return appt;
+  const result = await knex.transaction(async (trx) => {
+    const { need_store_phone, ...appointmentData } = data;
+
+    const [appt] = await trx(DB_TABLES.APPOINTMENTS)
+      .insert({ ...appointmentData, status: appointmentData.status ?? "new" })
+      .returning("*");
+
+    if (appointmentData.user_id && appointmentData.guest_phone && need_store_phone) {
+      await trx(DB_TABLES.USERS).where({ id: appointmentData.user_id }).update({ phone: appointmentData.guest_phone });
+    }
+
+    return appt;
+  });
+
+  return result;
 }
 
 export async function updateAppointment(id: number, data: UpdateAppointmentInput): Promise<Appointment | null> {
@@ -174,10 +199,18 @@ export async function rescheduleAppointment(id: number, data: RescheduleInput): 
   const available = await isSlotAvailable(existing.master_id, data.date, data.time, duration, id);
   if (!available) throw new Error("SLOT_UNAVAILABLE");
 
-  const [appt] = await knex(DB_TABLES.APPOINTMENTS)
-    .where({ id })
-    .update({ date: data.date, time: data.time, duration_minutes: duration, updated_at: knex.fn.now() })
-    .returning("*");
+  const updateData: Record<string, any> = {
+    date: data.date,
+    time: data.time,
+    duration_minutes: duration,
+    updated_at: knex.fn.now(),
+  };
+
+  if (data.services !== undefined) {
+    updateData.services = data.services;
+  }
+
+  const [appt] = await knex(DB_TABLES.APPOINTMENTS).where({ id }).update(updateData).returning("*");
   return appt;
 }
 
@@ -190,19 +223,30 @@ export async function deleteAppointment(id: number): Promise<boolean> {
 // Query: appointments for a master in a period
 // ─────────────────────────────────────────────
 
-export async function getAppointmentsForMaster(masterId: number, from: string, to: string): Promise<Appointment[]> {
-  return knex(DB_TABLES.APPOINTMENTS)
-    .where({ master_id: masterId })
-    .whereBetween("date", [from, to])
-    .orderBy("date", "asc")
-    .orderBy("time", "asc");
+export async function getAppointmentsForMaster(
+  masterId: number,
+  from: string,
+  to: string
+): Promise<AppointmentRetrieve[]> {
+  return knex({ a: DB_TABLES.APPOINTMENTS })
+    .where({ "a.master_id": masterId })
+    .whereBetween("a.date", [from, to])
+    .leftJoin(`${DB_TABLES.USERS} as u`, `a.user_id`, "u.id")
+    .select("a.*", knex.raw(userDataSelect))
+    .orderBy("a.date", "asc")
+    .orderBy("a.time", "asc");
 }
 
 // ─────────────────────────────────────────────
 // Query: slots map for a master in a period
 // ─────────────────────────────────────────────
 
-export async function getSlotsMap(masterId: number, from: string, to: string): Promise<DaySlots[]> {
+export async function getSlotsMap(
+  masterId: number,
+  from: string,
+  to: string,
+  slotStatusFilter?: SlotStatus
+): Promise<DaySlots[]> {
   const slotDuration = await getSettingValue(SETTINGS_KEYS.SLOT_DURATION, 30);
 
   const workingHours: WorkingHours[] = await knex(DB_TABLES.WORKING_HOURS).where({
@@ -212,18 +256,18 @@ export async function getSlotsMap(masterId: number, from: string, to: string): P
   // Build map: day_of_week -> working hours row
   const whByDay = new Map(workingHours.map((wh) => [wh.day_of_week, wh]));
 
-  const appointments: Appointment[] = await knex(DB_TABLES.APPOINTMENTS)
-    .where({ master_id: masterId })
-    .whereBetween("date", [from, to])
-    .whereNot({ status: "rejected" });
+  const appointments: AppointmentRetrieve[] = await knex({ a: DB_TABLES.APPOINTMENTS })
+    .where({ "a.master_id": masterId })
+    .whereBetween("a.date", [from, to])
+    .whereNot({ "a.status": "rejected" })
+    .leftJoin(`${DB_TABLES.USERS} as u`, "a.user_id", "u.id")
+    .select("a.*", knex.raw(userDataSelect));
 
-  console.log("Appointments fetched for slots map:", appointments); // Debug log to check fetched appointments
   // Group appointments by date string
-  const apptByDate = new Map<string, Appointment[]>();
+  const apptByDate = new Map<string, AppointmentRetrieve[]>();
   for (const appt of appointments) {
     const utcDate = new Date(appt.date);
     const d = utcDate.toLocaleDateString("en-CA"); // normalize from DB date type
-    console.log("Processing appointment for date:", d); // Debug log to check appointment processing
     if (!apptByDate.has(d)) apptByDate.set(d, []);
     apptByDate.get(d)!.push(appt);
   }
@@ -252,8 +296,6 @@ export async function getSlotsMap(masterId: number, from: string, to: string): P
       const dayAppts = apptByDate.get(dateStr) ?? [];
       const slots: Slot[] = [];
 
-      console.log("dayAppts for", dateStr, dayAppts); // Debug log to check appointments for the day
-
       for (let t = startMin; t + slotDuration <= endMin; t += slotDuration) {
         const slotStartStr = minutesToTime(t);
         const slotEndStr = minutesToTime(t + slotDuration);
@@ -275,12 +317,14 @@ export async function getSlotsMap(masterId: number, from: string, to: string): P
           }
         }
 
-        slots.push({
-          start_time: slotStartStr,
-          end_time: slotEndStr,
-          status,
-          appointment_data: overlapping ?? null,
-        });
+        if (!slotStatusFilter || status === slotStatusFilter) {
+          slots.push({
+            start_time: slotStartStr,
+            end_time: slotEndStr,
+            status,
+            appointment_data: overlapping ?? null,
+          });
+        }
       }
 
       result.push({
@@ -402,4 +446,30 @@ export async function getHomeSuggestions(masterId: number): Promise<SlotSuggesti
   }
 
   return suggestions.slice(0, 6);
+}
+
+export async function getSuggestionsByMaster(masterId?: number): Promise<MasterSuggestions[]> {
+  const mastersQuery = knex(DB_TABLES.MASTERS).select<Master[]>("id", "name", "description").orderBy("id", "asc");
+
+  if (masterId) {
+    mastersQuery.where({ id: masterId });
+  }
+
+  const masters = await mastersQuery;
+
+  if (masters.length === 0) {
+    return [];
+  }
+
+  const result = await Promise.all(
+    masters.map(async (master) => {
+      const slots = await getHomeSuggestions(master.id);
+      return {
+        master,
+        slots,
+      };
+    })
+  );
+
+  return result;
 }

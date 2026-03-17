@@ -9,6 +9,7 @@ import serviceRouter from "./routes/service";
 import welcomeRouter from "./routes/welcome";
 import appointmentRouter from "./routes/appointment";
 import authRouter from "./routes/auth";
+import userRouter from "./routes/user";
 
 if (process.env.NODE_ENV !== "production") {
   dotenv.config();
@@ -35,6 +36,7 @@ app.use("/master", masterRouter);
 app.use("/working_hours", workingHoursRouter);
 app.use("/service", serviceRouter);
 app.use("/appointment", appointmentRouter);
+app.use("/user", userRouter);
 
 // DEV ONLY: serve swagger UI if openapi.json exists and swagger-ui-express is installed
 if (process.env.NODE_ENV !== "production") {

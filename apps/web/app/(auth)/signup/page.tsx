@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Mail, Lock, User, UserPlus, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, UserPlus, ArrowLeft, Phone } from "lucide-react";
+import * as z from "zod";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -14,13 +16,22 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Spinner } from "@/components/ui/spinner";
 import { useRegister, useGoogleSignIn } from "@/hooks/useAuth";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
+import { PhoneFormInput, phoneSchemaRequired } from "@/components/inputs/PhoneFormInput";
 
-interface SignUpFormValues {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-}
+const signUpSchema = z
+  .object({
+    name: z.string().min(1, "Name is required").max(100, "Name is too long"),
+    email: z.email("Invalid email address"),
+    phone: phoneSchemaRequired,
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
+
+type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -30,20 +41,28 @@ export default function SignUpPage() {
   const {
     register: formRegister,
     handleSubmit,
-    watch,
+    control,
     formState: { errors },
-  } = useForm<SignUpFormValues>();
+  } = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
   const registerMutation = useRegister();
   const googleSignIn = useGoogleSignIn();
-
-  const password = watch("password");
 
   const onSubmit = async (data: SignUpFormValues) => {
     try {
       await registerMutation.mutateAsync({
         name: data.name,
         email: data.email,
+        phone: data.phone,
         password: data.password,
       });
       toast.success("Account created successfully!");
@@ -101,16 +120,25 @@ export default function SignUpPage() {
                   type="email"
                   placeholder="you@example.com"
                   className="pl-10"
-                  {...formRegister("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Invalid email address",
-                    },
-                  })}
+                  {...formRegister("email")}
                 />
               </div>
               {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
+            </div>
+
+            {/* Phone */}
+            <div className="space-y-2">
+              <div className="relative">
+                <Phone className="text-muted-foreground absolute top-10 left-3 size-4 -translate-y-1/2" />
+                <PhoneFormInput
+                  control={control}
+                  name="phone"
+                  id="phone"
+                  label="Phone"
+                  placeholder="+972-..."
+                  inputClassName="pl-10"
+                />
+              </div>
             </div>
 
             {/* Password */}
@@ -123,13 +151,7 @@ export default function SignUpPage() {
                   type={showPassword ? "text" : "password"}
                   placeholder="At least 8 characters"
                   className="pr-10 pl-10"
-                  {...formRegister("password", {
-                    required: "Password is required",
-                    minLength: {
-                      value: 8,
-                      message: "Password must be at least 8 characters",
-                    },
-                  })}
+                  {...formRegister("password")}
                 />
                 <button
                   type="button"
@@ -157,10 +179,7 @@ export default function SignUpPage() {
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Re-enter your password"
                   className="pr-10 pl-10"
-                  {...formRegister("confirmPassword", {
-                    required: "Please confirm your password",
-                    validate: (value) => value === password || "Passwords do not match",
-                  })}
+                  {...formRegister("confirmPassword")}
                 />
                 <button
                   type="button"

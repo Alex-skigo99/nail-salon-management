@@ -8,7 +8,6 @@ import { ServiceForm } from "./ServiceForm";
 import { DeleteServiceDialog } from "./DeleteServiceDialog";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { is } from "date-fns/locale";
 
 type Props = {
   service: Service;

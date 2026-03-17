@@ -2,12 +2,20 @@ export type AppointmentStatus = "new" | "confirmed" | "reserved" | "pending" | "
 
 export type SlotStatus = "empty" | "reserved" | "none" | "part_book" | "book";
 
+export type UserData = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  image: string | null;
+};
+
 export type Appointment = {
   id: number;
   master_id: number;
   user_id: number | null;
-  user_name: string | null;
-  whatsapp_phone: string | null;
+  guest_name: string | null;
+  guest_phone: string | null;
   date: string;
   time: string;
   duration_minutes: number;
@@ -18,11 +26,16 @@ export type Appointment = {
   updated_at: string;
 };
 
+export type AppointmentRetrieve = Appointment & {
+  user_data: UserData | null;
+};
+
 export type AppointmentCreate = {
   master_id: number;
   user_id?: number | null;
-  user_name?: string | null;
-  whatsapp_phone?: string | null;
+  guest_name?: string | null;
+  guest_phone?: string | null;
+  need_store_phone?: boolean;
   date: string;
   time: string;
   duration_minutes: number;
@@ -31,9 +44,24 @@ export type AppointmentCreate = {
   status?: AppointmentStatus;
 };
 
+export type TimeSlot = {
+  date: string;
+  time: string;
+};
+
+export type MasterSuggestion = {
+  master: {
+    id: number;
+    name: string;
+    description?: string | null;
+  };
+  slots: TimeSlot[];
+};
+
 export type AppointmentUpdate = {
-  user_name?: string | null;
-  whatsapp_phone?: string | null;
+  user_id?: number | null;
+  guest_name?: string | null;
+  guest_phone?: string | null;
   services?: string | null;
   comments?: string | null;
   status?: AppointmentStatus;
@@ -43,13 +71,14 @@ export type AppointmentReschedule = {
   date: string;
   time: string;
   duration_minutes?: number | null;
+  services?: string | null;
 };
 
 export type Slot = {
   start_time: string;
   end_time: string;
   status: SlotStatus;
-  appointment_data: Appointment | null;
+  appointment_data: AppointmentRetrieve | null;
 };
 
 export type DaySlots = {
@@ -59,6 +88,13 @@ export type DaySlots = {
   slot_duration: number;
   slots_count: number;
   slots: Slot[];
+};
+
+export type SelectedSlot = {
+  id: string;
+  master: MasterSuggestion["master"];
+  date: string;
+  time: string;
 };
 
 export type ViewMode = "week" | "month";

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import * as appointmentService from "../services/appointmentService";
-import type { AvailabilityResult } from "../types/appointmentTypes";
+import type { SlotStatus } from "../types/appointmentTypes";
 
 // ─────────────────────────────────────────────
 // Validation schemas
@@ -12,8 +12,9 @@ const AppointmentStatusEnum = z.enum(["new", "confirmed", "reserved", "pending",
 const CreateAppointmentSchema = z.object({
   master_id: z.number().int().positive(),
   user_id: z.number().int().positive().optional().nullable(),
-  user_name: z.string().optional().nullable(),
-  whatsapp_phone: z.string().optional().nullable(),
+  guest_name: z.string().optional().nullable(),
+  guest_phone: z.string().optional().nullable(),
+  need_store_phone: z.boolean().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
   time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "time must be HH:MM or HH:MM:SS"),
   duration_minutes: z.number().int().positive(),
@@ -23,8 +24,9 @@ const CreateAppointmentSchema = z.object({
 });
 
 const UpdateAppointmentSchema = z.object({
-  user_name: z.string().optional().nullable(),
-  whatsapp_phone: z.string().optional().nullable(),
+  user_id: z.number().int().positive().optional().nullable(),
+  guest_name: z.string().optional().nullable(),
+  guest_phone: z.string().optional().nullable(),
   services: z.string().optional().nullable(),
   comments: z.string().optional().nullable(),
   status: AppointmentStatusEnum.optional(),
@@ -34,6 +36,7 @@ const RescheduleSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
   time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "time must be HH:MM or HH:MM:SS"),
   duration_minutes: z.number().int().positive().optional(),
+  services: z.string().optional().nullable(),
 });
 
 // ─────────────────────────────────────────────
@@ -59,14 +62,18 @@ const RescheduleSchema = z.object({
  *           type: integer
  *           nullable: true
  *           example: null
- *         user_name:
+ *         guest_name:
  *           type: string
  *           nullable: true
  *           example: "John Doe"
- *         whatsapp_phone:
+ *         guest_phone:
  *           type: string
  *           nullable: true
  *           example: "+1234567890"
+ *         need_store_phone:
+ *           type: boolean
+ *           description: Save provided guest_phone to the user profile when user_id is present
+ *           example: true
  *         date:
  *           type: string
  *           format: date
@@ -93,11 +100,15 @@ const RescheduleSchema = z.object({
  *     AppointmentUpdate:
  *       type: object
  *       properties:
- *         user_name:
+ *         user_id:
+ *           type: integer
+ *           nullable: true
+ *           example: null
+ *         guest_name:
  *           type: string
  *           nullable: true
  *           example: "John Doe"
- *         whatsapp_phone:
+ *         guest_phone:
  *           type: string
  *           nullable: true
  *           example: "+1234567890"
@@ -130,6 +141,10 @@ const RescheduleSchema = z.object({
  *           type: integer
  *           nullable: true
  *           example: 60
+ *         services:
+ *           type: string
+ *           nullable: true
+ *           example: "Manicure, Pedicure"
  *     TimeSlot:
  *       type: object
  *       required:
@@ -405,11 +420,11 @@ export const getMasterAppointments = async (req: Request, res: Response): Promis
  * @openapi
  * /appointment/master/{masterId}/slots:
  *   get:
- *     summary: Get slot map for a master over a date range
+ *     summary: Get slot map for a master over a date range (ADMIN only)
  *     description: >
  *       Returns one entry per day containing the date, working hours, slot duration,
  *       slot count, and an array of slots where each slot has status:
- *       empty | book | part_book | reserved | none.
+ *       empty | book | part_book | reserved | none. Only ADMIN can access this endpoint.
  *     tags: [Appointment]
  *     parameters:
  *       - in: path
@@ -452,6 +467,64 @@ export const getSlotsMap = async (req: Request, res: Response): Promise<void> =>
     }
     const slotsMap = await appointmentService.getSlotsMap(masterId, from, to);
     res.json(slotsMap);
+  } catch (err) {
+    console.error("Error fetching slots map:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * @openapi
+ * /appointment/master/{masterId}/empty_slots:
+ *   get:
+ *     summary: Get empty slots for a master over a date range
+ *     description: >
+ *       Returns one entry per day containing the date, working hours, slot duration,
+ *       slot count, and an array of slots where each slot has status:
+ *       empty | book | part_book | reserved | none.
+ *     tags: [Appointment]
+ *     parameters:
+ *       - in: path
+ *         name: masterId
+ *         schema: { type: integer }
+ *         required: true
+ *       - in: query
+ *         name: from
+ *         schema: { type: string, example: "2026-03-01" }
+ *         required: true
+ *       - in: query
+ *         name: to
+ *         schema: { type: string, example: "2026-03-07" }
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Array of DaySlots objects
+ *         content:
+ *          application/json:
+ *            schema:
+ *             type: array
+ *             items:
+ *               $ref: '#/components/schemas/DaySlots'
+ *       400:
+ *         description: Missing or invalid parameters
+ *       500:
+ *         description: Internal server error
+ */
+export const getEmptySlots = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const masterId = Number(req.params.masterId);
+    if (isNaN(masterId)) {
+      res.status(400).json({ error: "Invalid masterId" });
+      return;
+    }
+    const { from, to } = req.query;
+    if (!from || !to || typeof from !== "string" || typeof to !== "string") {
+      res.status(400).json({ error: "Query params 'from' and 'to' (YYYY-MM-DD) are required" });
+      return;
+    }
+    const slotStatusFilter: SlotStatus = "empty";
+    const emptySlots = await appointmentService.getSlotsMap(masterId, from, to, slotStatusFilter);
+    res.json(emptySlots);
   } catch (err) {
     console.error("Error fetching slots map:", err);
     res.status(500).json({ error: "Internal server error" });
@@ -571,39 +644,52 @@ export const checkAvailability = async (req: Request, res: Response): Promise<vo
  * @openapi
  * /appointment/suggestions:
  *   get:
- *     summary: Get up to 6 appointment slot suggestions for the home page
+ *     summary: Get up to 6 appointment slot suggestions grouped by master
  *     description: >
- *       Returns up to 6 upcoming empty time slots starting from today.
- *       Strategy per day: 2 nearest (earliest) empty slots + 1 near end of day.
- *       Continues to the next day if fewer than 3 are available today.
+ *       Returns upcoming empty time slots grouped by master.
+ *       If masterId is provided, returns only that master.
  *     tags: [Appointment]
  *     parameters:
  *       - in: query
  *         name: masterId
  *         schema: { type: integer }
- *         required: true
+ *         required: false
  *     responses:
  *       200:
- *         description: Array of time slot suggestions (max 6)
+ *         description: Array of grouped suggestions by master
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/TimeSlot'
+ *                 type: object
+ *                 required: [master, slots]
+ *                 properties:
+ *                   master:
+ *                     $ref: '#/components/schemas/Master'
+ *                   slots:
+ *                     type: array
+ *                     items:
+ *                       $ref: '#/components/schemas/TimeSlot'
  *       400:
- *         description: Missing or invalid masterId
+ *         description: Invalid masterId
  *       500:
  *         description: Internal server error
  */
 export const getSuggestions = async (req: Request, res: Response): Promise<void> => {
   try {
-    const masterId = Number(req.query.masterId);
-    if (isNaN(masterId)) {
-      res.status(400).json({ error: "Query param 'masterId' is required and must be a number" });
-      return;
+    const queryMasterId = req.query.masterId;
+    let masterId: number | undefined;
+
+    if (queryMasterId !== undefined) {
+      masterId = Number(queryMasterId);
+      if (isNaN(masterId)) {
+        res.status(400).json({ error: "Query param 'masterId' must be a number" });
+        return;
+      }
     }
-    const suggestions = await appointmentService.getHomeSuggestions(masterId);
+
+    const suggestions = await appointmentService.getSuggestionsByMaster(masterId);
     res.json(suggestions);
   } catch (err) {
     console.error("Error fetching suggestions:", err);

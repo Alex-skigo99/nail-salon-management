@@ -49,10 +49,23 @@
     "pricesTitle": "השירותים והמחירים שלנו",
     "pricesSubtitle": "גלו את מגוון הטיפולים המותאמים במיוחד עבורכם.",
 
-    "scheduleTitle": "תורים פנויים",
+    "scheduleTitle": "תורים חמים זמינים",
     "scheduleSubtitle": "תפסו אחד מהתורים הקרובים — זמינות מוגבלת!",
+    "loadingSlots": "טוען תורים פנויים...",
+    "loadingError": "טעינת התורים הפנויים נכשלה. אנא נסו שוב בעוד רגע.",
     "scheduleBook": "קבע תור",
     "scheduleNoSlots": "אין תורים פנויים כרגע. אנא בדקו שוב מאוחר יותר!",
+    "scheduleAvailableSpecialist": "מומחה זמין",
+    "scheduleSlotBooked": "תור זה כבר הוזמן. אנא בחר תור אחר.",
+    "scheduleNoSlotsForMaster": "אין תורים זמינים כרגע עבור מאסטר זה.",
+    "scheduleMoreSlots": "עוד תורים...",
+    "scheduleBackToHotSlots": "חזרה לתורים חמים",
+    "scheduleSelectDate": "בחר תאריך",
+    "schedulePrevDay": "יום קודם",
+    "scheduleNextDay": "יום הבא",
+    "scheduleLoadingEmptySlots": "טוען תורים...",
+    "scheduleNoEmptySlotsForDay": "אין תורים פנויים ביום זה.",
+
     "bookingModalTitle": "קבע/י תור",
     "bookingModalDesc": "מלאו את הפרטים לאישור התור. נשלח אישור.",
     "bookingName": "שם מלא",
@@ -90,5 +103,71 @@
     "calendar": "לוח שנה",
     "masters": "מאסטרים",
     "services": "שירותים"
+  },
+  "dialogs": {
+    "infoUserDialog": {
+      "ok": "אישור",
+      "cancel": "ביטול",
+      "confirm": "אישור",
+      "defaultErrorTitle": "שגיאה קריטית",
+      "defaultInfoTitle": "מידע",
+      "defaultConfirmTitle": "נא לאשר"
+    }
+  },
+  "bookingDialog": {
+    "title": "קביעת תור",
+    "description": "אשרו את המשבצת ושלחו בקשה לתור.",
+    "slot": {
+      "byMasterDate": "{master} - {date}"
+    },
+    "auth": {
+      "sectionTitle": "קביעה מהחשבון שלך",
+      "sectionDescription": "התור הזה יקושר לפרופיל שלך.",
+      "rememberPhone": "זכור את הטלפון הזה לפעם הבאה"
+    },
+    "guestAccess": {
+      "description": "התחברו אם יש לכם חשבון או הירשמו כדי לצפות בסטטוס התורים, בהיסטוריה ולנהל תורים מדף החשבון.",
+      "login": "התחברות",
+      "signup": "הרשמה",
+      "continueWithoutRegistration": "קבע תור ללא הרשמה (אורח)"
+    },
+    "fields": {
+      "clientName": "שם לקוחה",
+      "clientNamePlaceholder": "השם שלך",
+      "phone": "טלפון וואטסאפ",
+      "manicureService": "שירות מניקור",
+      "pedicureService": "שירות פדיקור",
+      "otherService": "שירות נוסף",
+      "manicurePlaceholder": "בחרי שירות מניקור",
+      "pedicurePlaceholder": "בחרי שירות פדיקור",
+      "otherPlaceholder": "בחרי שירות נוסף",
+      "comments": "הערות",
+      "commentsPlaceholder": "הערות למאסטר",
+      "none": "ללא"
+    },
+    "summary": {
+      "duration": "משך זמן מחושב",
+      "price": "מחיר כולל"
+    },
+    "buttons": {
+      "close": "סגירה",
+      "confirmAppointment": "אישור תור",
+      "makeAppointment": "קביעת תור"
+    },
+    "validation": {
+      "nameRequired": "נדרש שם",
+      "oneServiceRequired": "יש לבחור לפחות שירות אחד"
+    },
+    "feedback": {
+      "infoTitle": "מידע",
+      "errorTitle": "שגיאה קריטית",
+      "conflictTitle": "השעה שנבחרה אינה זמינה",
+      "authSuccess": "התור שלך נקבע בהצלחה! נשלח אישור למייל שלך.",
+      "guestSuccess": "בקשת הרישום שלך נקלטה. יש להמתין לאישור. טיפ: צרו חשבון כדי לעקוב אחרי הרישומים שלכם.",
+      "conflictError": "לצערנו, הזמנה עבור השירותים (משך הזמן) שבחרת אינה זמינה. נא לנסות שעה אחרת.",
+      "genericError": "יצירת התור נכשלה. נא לנסות שוב.",
+      "phoneRequired": "נדרש מספר טלפון",
+      "selectAllCategories": "נא לבחור שירות אחד בכל קטגוריה."
+    }
   }
 }

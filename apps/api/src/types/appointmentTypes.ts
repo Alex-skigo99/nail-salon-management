@@ -7,8 +7,9 @@ import { Appointment, AppointmentStatus, Slot, SlotStatus, DaySlots } from "./db
 export type CreateAppointmentInput = {
   master_id: number;
   user_id?: number | null;
-  user_name?: string | null;
-  whatsapp_phone?: string | null;
+  guest_name?: string | null;
+  guest_phone?: string | null;
+  need_store_phone?: boolean;
   date: string;
   time: string;
   duration_minutes: number;
@@ -18,8 +19,8 @@ export type CreateAppointmentInput = {
 };
 
 export type UpdateAppointmentInput = {
-  user_name?: string | null;
-  whatsapp_phone?: string | null;
+  guest_name?: string | null;
+  guest_phone?: string | null;
   services?: string | null;
   comments?: string | null;
   status?: AppointmentStatus;
@@ -29,6 +30,7 @@ export type RescheduleInput = {
   date: string;
   time: string;
   duration_minutes?: number;
+  services?: string | null;
 };
 
 // ─────────────────────────────────────────────
@@ -65,4 +67,13 @@ export type AvailabilityResult =
 export type SlotSuggestion = {
   date: string;
   time: string;
+};
+
+export type MasterSuggestions = {
+  master: {
+    id: number;
+    name: string;
+    description?: string | null;
+  };
+  slots: SlotSuggestion[];
 };

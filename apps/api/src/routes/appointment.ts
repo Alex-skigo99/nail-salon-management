@@ -1,5 +1,6 @@
 import express from "express";
 import * as appointmentController from "../controllers/appointmentController";
+import { authenticate, requireRole } from "../middleware/auth";
 
 const router = express.Router();
 
@@ -16,8 +17,11 @@ router.get("/suggestions", appointmentController.getSuggestions);
 // GET /appointment/master/:masterId?from=&to=
 router.get("/master/:masterId", appointmentController.getMasterAppointments);
 
-// GET /appointment/master/:masterId/slots?from=&to=
-router.get("/master/:masterId/slots", appointmentController.getSlotsMap);
+// GET /appointment/master/:masterId/slots?from=&to= (ADMIN only)
+router.get("/master/:masterId/slots", authenticate, requireRole("ADMIN"), appointmentController.getSlotsMap);
+
+// GET /appointment/master/:masterId/empty_slots?from=&to=
+router.get("/master/:masterId/empty_slots", appointmentController.getEmptySlots);
 
 // ── CRUD ──
 
@@ -25,10 +29,10 @@ router.get("/master/:masterId/slots", appointmentController.getSlotsMap);
 router.post("/", appointmentController.create);
 
 // PUT /appointment/:id/reschedule  (move date/time with availability check)
-router.put("/:id/reschedule", appointmentController.reschedule);
+router.put("/:id/reschedule", authenticate, requireRole("ADMIN"), appointmentController.reschedule);
 
 // PUT /appointment/:id  (edit non-scheduling fields)
-router.put("/:id", appointmentController.update);
+router.put("/:id", authenticate, requireRole("ADMIN"), appointmentController.update);
 
 // DELETE /appointment/:id
 router.delete("/:id", appointmentController.remove);
