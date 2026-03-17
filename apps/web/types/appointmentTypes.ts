@@ -47,6 +47,7 @@ export type MasterSuggestion = {
 };
 
 export type AppointmentUpdate = {
+  user_id?: number | null;
   guest_name?: string | null;
   guest_phone?: string | null;
   services?: string | null;
@@ -58,6 +59,7 @@ export type AppointmentReschedule = {
   date: string;
   time: string;
   duration_minutes?: number | null;
+  services?: string | null;
 };
 
 export type Slot = {

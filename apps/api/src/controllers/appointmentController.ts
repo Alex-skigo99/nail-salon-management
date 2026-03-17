@@ -24,6 +24,7 @@ const CreateAppointmentSchema = z.object({
 });
 
 const UpdateAppointmentSchema = z.object({
+  user_id: z.number().int().positive().optional().nullable(),
   guest_name: z.string().optional().nullable(),
   guest_phone: z.string().optional().nullable(),
   services: z.string().optional().nullable(),
@@ -99,6 +100,10 @@ const RescheduleSchema = z.object({
  *     AppointmentUpdate:
  *       type: object
  *       properties:
+ *         user_id:
+ *           type: integer
+ *           nullable: true
+ *           example: null
  *         guest_name:
  *           type: string
  *           nullable: true

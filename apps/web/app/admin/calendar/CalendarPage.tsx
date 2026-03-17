@@ -8,11 +8,17 @@ import { CalendarNavigation } from "./_components/CalendarNavigation";
 import { WeekView } from "./_components/WeekView";
 import { MonthView } from "./_components/MonthView";
 import type { ViewMode, DisplayMode } from "@/types/appointmentTypes";
-import { getWeekStart, getWeekEnd, getMonthStart, getMonthEnd, formatDate } from "../../../utils/dateUtils";
+import { getWeekStart, getWeekEnd, getMonthStart, getMonthEnd, formatDate } from "@/utils/dateUtils";
+import { useSession } from "next-auth/react";
+import { is } from "date-fns/locale";
 
 export default function CalendarPage() {
+  const { data: session } = useSession();
+  const userRole = session?.user?.role;
+  const isAdmin = userRole === "ADMIN";
   // ── Master selection ─────────────────────────────────
-  const { data: masters, isLoading: isLoadingMasters } = useMasters();
+  // TODO Only fetch masters if admin, otherwise we assume the user is a master and will get their own slots
+  const { data: masters, isLoading: isLoadingMasters } = useMasters(isAdmin);
   const [selectedMasterId, setSelectedMasterId] = useState<number | null>(null);
 
   // Auto-select first master when loaded

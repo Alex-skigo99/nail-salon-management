@@ -7,7 +7,7 @@ import { apiRoutes } from "@/const/apiRouts";
 
 const MASTERS_QUERY_KEY = [queryKeys.masters];
 
-export function useMasters() {
+export function useMasters(enabled = true) {
   return useQuery({
     queryKey: MASTERS_QUERY_KEY,
     queryFn: async () => {
@@ -15,6 +15,7 @@ export function useMasters() {
       return res.data;
     },
     staleTime: CACHE_TIME,
+    enabled,
   });
 }
 

@@ -4,6 +4,7 @@ export const apiRoutes = {
   welcome: "/welcome",
   service: "/service",
   appointment: "/appointment",
+  user: "/user",
   auth: {
     register: "/auth/register",
     login: "/auth/login",
