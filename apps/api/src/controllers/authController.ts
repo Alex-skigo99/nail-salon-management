@@ -157,9 +157,9 @@ export async function register(req: Request, res: Response): Promise<void> {
     const result = await authService.register(parsed.data);
     setTokenCookie(res, result.token);
     res.status(201).json(result);
-  } catch (err: any) {
-    if (err.statusCode === 409) {
-      res.status(409).json({ error: err.message });
+  } catch (err: unknown) {
+    if ((err as { statusCode?: number; message?: string })?.statusCode === 409) {
+      res.status(409).json({ error: (err as { message?: string })?.message });
       return;
     }
     console.error("Register error:", err);
@@ -201,9 +201,9 @@ export async function login(req: Request, res: Response): Promise<void> {
     const result = await authService.login(parsed.data.email, parsed.data.password);
     setTokenCookie(res, result.token);
     res.json(result);
-  } catch (err: any) {
-    if (err.statusCode === 401) {
-      res.status(401).json({ error: err.message });
+  } catch (err: unknown) {
+    if ((err as { statusCode?: number; message?: string })?.statusCode === 401) {
+      res.status(401).json({ error: (err as { message?: string })?.message });
       return;
     }
     console.error("Login error:", err);
@@ -253,7 +253,7 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
     const result = await authService.findOrCreateGoogleUser(parsed.data);
     setTokenCookie(res, result.token);
     res.json(result);
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("Google auth error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
@@ -280,6 +280,7 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
 export async function me(req: Request, res: Response): Promise<void> {
   try {
     // req.user is set by the authenticate middleware
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userId = (req as any).user?.userId;
     if (!userId) {
       res.status(401).json({ error: "Not authenticated" });

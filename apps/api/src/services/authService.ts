@@ -116,6 +116,7 @@ export async function login(email: string, password: string): Promise<{ user: Sa
   await knex(DB_TABLES.USERS).where({ id: user.id }).update({ last_login: knex.fn.now() });
 
   const token = generateToken(user);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password: _pw, ...safeUser } = user;
   return { user: safeUser, token };
 }
@@ -172,6 +173,7 @@ export async function findOrCreateGoogleUser(profile: GoogleProfile): Promise<{ 
   }
 
   const token = generateToken(user!);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password: _pw, ...safeUser } = user!;
   return { user: safeUser, token };
 }

@@ -201,7 +201,7 @@ export async function rescheduleAppointment(id: number, data: RescheduleInput): 
   const available = await isSlotAvailable(masterId, data.date, data.time, duration, excludeId);
   if (!available) throw new Error("SLOT_UNAVAILABLE");
 
-  const updateData: Record<string, any> = {
+  const updateData: Record<string, unknown> = {
     master_id: masterId,
     date: data.date,
     time: data.time,

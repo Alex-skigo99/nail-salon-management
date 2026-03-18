@@ -40,23 +40,28 @@ app.use("/user", userRouter);
 
 // DEV ONLY: serve swagger UI if openapi.json exists and swagger-ui-express is installed
 if (process.env.NODE_ENV !== "production") {
-  try {
-    // require here so production lambda doesn't include the dev-only dependency unless installed
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const swaggerUi = require("swagger-ui-express");
-    // Trying to load generated openapi.json in package root
-    // Note: Ensure you run `npm run gen:openapi` before starting dev server
-    // or the require will fail; this is fine — it simply skips docs until the spec is generated.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const openapi = require("../openapi.json");
-    app.use("/docs", swaggerUi.serve, swaggerUi.setup(openapi));
-    console.log("Swagger UI available at /docs (dev only)");
-  } catch (err: any) {
-    console.warn(
-      "Swagger UI not available (dev-only). Install swagger-ui-express and generate openapi.json to enable it.",
-      err?.message
-    );
-  }
+  (async () => {
+    try {
+      const swaggerModule = await import("swagger-ui-express");
+      const swaggerUi = (swaggerModule as { default?: unknown }).default ?? swaggerModule;
+      const openapiModule = await import("../openapi.json");
+      const openapi = (openapiModule as { default?: unknown }).default ?? openapiModule;
+      const serve = (swaggerUi as unknown as { serve: express.RequestHandler }).serve;
+      const setup = (
+        swaggerUi as unknown as {
+          setup: (doc: unknown) => express.RequestHandler;
+        }
+      ).setup;
+      app.use("/docs", serve, setup(openapi));
+      console.log("Swagger UI available at /docs (dev only)");
+    } catch (err: unknown) {
+      const errMessage = err instanceof Error ? err.message : String(err);
+      console.warn(
+        "Swagger UI not available (dev-only). Install swagger-ui-express and generate openapi.json to enable it.",
+        errMessage
+      );
+    }
+  })();
 }
 
 // Start server only in development (not in Lambda)

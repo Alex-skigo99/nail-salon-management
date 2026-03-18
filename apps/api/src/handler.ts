@@ -4,6 +4,7 @@ import serverless from "serverless-http";
 
 const handlerProxy = serverless(app);
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const handler = async (event: any, context: any) => {
   try {
     console.log("Lambda handler invoked with event:", JSON.stringify(event));
