@@ -10,8 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 import ServicesFormInput, { type ServicesSelectionState } from "@/components/inputs/ServicesFormInput";
+import SelectInput from "@/components/inputs/SelectInput";
 import { useRescheduleAppointment } from "@/hooks/useAppointments";
 import { useServices } from "@/hooks/useServices";
+import { useMasters } from "@/hooks/useMasters";
 import type { Appointment, Slot } from "@/types/appointmentTypes";
 import { formatTimeToHHMM } from "@/utils/formatTime";
 import { formatDateForInput } from "@/utils/dateUtils";
@@ -19,6 +21,7 @@ import { formatDateForInput } from "@/utils/dateUtils";
 const gap = 30;
 
 const rescheduleSchema = z.object({
+  masterId: z.number().int().positive(),
   rescheduleDate: z.string().min(1, "Date is required"),
   rescheduleTime: z.string().min(1, "Time is required"),
   rescheduleDuration: z.number().min(gap).multipleOf(gap),
@@ -45,6 +48,7 @@ type RescheduleFormProps = {
 
 export function RescheduleForm({ apt, slot, date, onSuccess, onBack }: RescheduleFormProps) {
   const { data: services = [] } = useServices();
+  const { data: masters = [] } = useMasters();
   const rescheduleMutation = useRescheduleAppointment();
 
   const [servicesSelected, setServicesSelected] = useState<ServicesSelectionState>(createInitialServicesSelected);
@@ -83,6 +87,8 @@ export function RescheduleForm({ apt, slot, date, onSuccess, onBack }: Reschedul
     [servicesByCategory]
   );
 
+  const masterOptions = useMemo(() => masters.map((m) => ({ value: String(m.id), label: m.name })), [masters]);
+
   const {
     control,
     handleSubmit,
@@ -91,6 +97,7 @@ export function RescheduleForm({ apt, slot, date, onSuccess, onBack }: Reschedul
   } = useForm<RescheduleFormData>({
     resolver: zodResolver(rescheduleSchema),
     defaultValues: {
+      masterId: apt.master_id,
       rescheduleDate: formatDateForInput(apt.date),
       rescheduleTime: formatTimeToHHMM(apt.time),
       rescheduleDuration: apt.duration_minutes,
@@ -122,6 +129,7 @@ export function RescheduleForm({ apt, slot, date, onSuccess, onBack }: Reschedul
       await rescheduleMutation.mutateAsync({
         id: apt.id,
         data: {
+          master_id: data.masterId,
           date: data.rescheduleDate,
           time: data.rescheduleTime,
           duration_minutes: data.rescheduleDuration,
@@ -137,9 +145,22 @@ export function RescheduleForm({ apt, slot, date, onSuccess, onBack }: Reschedul
 
   return (
     <form onSubmit={onSubmit} className="grid gap-3 py-2">
-      <p className="text-muted-foreground text-sm">
-        Move this appointment to a new date/time. Availability will be checked.
-      </p>
+      <div className="grid gap-1.5">
+        <Label htmlFor="r-master">Master</Label>
+        <Controller
+          name="masterId"
+          control={control}
+          render={({ field }) => (
+            <SelectInput
+              value={String(field.value)}
+              onValueChange={(v) => field.onChange(Number(v))}
+              options={masterOptions}
+              placeholder="Select master..."
+              triggerClassName="w-full cursor-pointer"
+            />
+          )}
+        />
+      </div>
 
       <div className="grid gap-1.5">
         <Label htmlFor="r-date">New Date</Label>

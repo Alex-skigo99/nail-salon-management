@@ -1442,6 +1442,12 @@
           "time"
         ],
         "properties": {
+          "master_id": {
+            "type": "integer",
+            "nullable": true,
+            "example": 1,
+            "description": "New master for the appointment (optional, defaults to current master)"
+          },
           "date": {
             "type": "string",
             "format": "date",

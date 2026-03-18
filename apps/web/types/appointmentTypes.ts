@@ -68,6 +68,7 @@ export type AppointmentUpdate = {
 };
 
 export type AppointmentReschedule = {
+  master_id?: number;
   date: string;
   time: string;
   duration_minutes?: number | null;

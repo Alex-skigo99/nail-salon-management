@@ -33,6 +33,7 @@ const UpdateAppointmentSchema = z.object({
 });
 
 const RescheduleSchema = z.object({
+  master_id: z.number().int().positive().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
   time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "time must be HH:MM or HH:MM:SS"),
   duration_minutes: z.number().int().positive().optional(),
@@ -129,6 +130,11 @@ const RescheduleSchema = z.object({
  *         - date
  *         - time
  *       properties:
+ *         master_id:
+ *           type: integer
+ *           nullable: true
+ *           example: 1
+ *           description: "New master for the appointment (optional, defaults to current master)"
  *         date:
  *           type: string
  *           format: date

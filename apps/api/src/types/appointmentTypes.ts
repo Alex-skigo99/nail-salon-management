@@ -27,6 +27,7 @@ export type UpdateAppointmentInput = {
 };
 
 export type RescheduleInput = {
+  master_id?: number;
   date: string;
   time: string;
   duration_minutes?: number;

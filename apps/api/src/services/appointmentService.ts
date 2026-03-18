@@ -194,12 +194,15 @@ export async function rescheduleAppointment(id: number, data: RescheduleInput): 
   const existing: Appointment | undefined = await knex(DB_TABLES.APPOINTMENTS).where({ id }).first();
   if (!existing) throw new Error("APPOINTMENT_NOT_FOUND");
 
+  const masterId = data.master_id ?? existing.master_id;
   const duration = data.duration_minutes ?? existing.duration_minutes;
+  const excludeId = masterId === existing.master_id ? id : undefined;
 
-  const available = await isSlotAvailable(existing.master_id, data.date, data.time, duration, id);
+  const available = await isSlotAvailable(masterId, data.date, data.time, duration, excludeId);
   if (!available) throw new Error("SLOT_UNAVAILABLE");
 
   const updateData: Record<string, any> = {
+    master_id: masterId,
     date: data.date,
     time: data.time,
     duration_minutes: duration,
