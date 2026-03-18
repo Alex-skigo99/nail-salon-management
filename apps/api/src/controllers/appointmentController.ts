@@ -11,7 +11,7 @@ const AppointmentStatusEnum = z.enum(["new", "confirmed", "reserved", "pending",
 
 const CreateAppointmentSchema = z.object({
   master_id: z.number().int().positive(),
-  user_id: z.number().int().positive().optional().nullable(),
+  user_id: z.uuid().optional().nullable(),
   guest_name: z.string().optional().nullable(),
   guest_phone: z.string().optional().nullable(),
   need_store_phone: z.boolean().optional(),
@@ -24,7 +24,7 @@ const CreateAppointmentSchema = z.object({
 });
 
 const UpdateAppointmentSchema = z.object({
-  user_id: z.number().int().positive().optional().nullable(),
+  user_id: z.uuid().optional().nullable(),
   guest_name: z.string().optional().nullable(),
   guest_phone: z.string().optional().nullable(),
   services: z.string().optional().nullable(),
@@ -33,6 +33,7 @@ const UpdateAppointmentSchema = z.object({
 });
 
 const RescheduleSchema = z.object({
+  master_id: z.number().int().positive().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD"),
   time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "time must be HH:MM or HH:MM:SS"),
   duration_minutes: z.number().int().positive().optional(),
@@ -129,6 +130,11 @@ const RescheduleSchema = z.object({
  *         - date
  *         - time
  *       properties:
+ *         master_id:
+ *           type: integer
+ *           nullable: true
+ *           example: 1
+ *           description: "New master for the appointment (optional, defaults to current master)"
  *         date:
  *           type: string
  *           format: date
@@ -211,7 +217,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
  * @openapi
  * /appointment/{id}:
  *   put:
- *     summary: Update non-scheduling fields of an appointment
+ *     summary: Update non-scheduling fields of an appointment (ADMIN only)
  *     tags: [Appointment]
  *     parameters:
  *       - in: path
@@ -266,7 +272,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
  * @openapi
  * /appointment/{id}/reschedule:
  *   put:
- *     summary: Move appointment to a new date/time (checks availability)
+ *     summary: Move appointment to a new date/time (checks availability) (ADMIN only)
  *     tags: [Appointment]
  *     parameters:
  *       - in: path
@@ -390,7 +396,7 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
  *            schema:
  *             type: array
  *             items:
- *               $ref: '#/components/schemas/Appointment'
+ *               $ref: '#/components/schemas/AppointmentRetrieve'
  *       400:
  *         description: Missing or invalid parameters
  *       500:

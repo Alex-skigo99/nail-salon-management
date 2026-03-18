@@ -65,9 +65,10 @@ import * as userService from "../services/userService";
  *       - in: path
  *         name: id
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         required: true
- *         description: Numeric ID of the user
+ *         description: UUID ID of the user
  *     responses:
  *       200:
  *         description: A single user
@@ -95,9 +96,10 @@ import * as userService from "../services/userService";
  *       - in: path
  *         name: id
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         required: true
- *         description: Numeric ID of the user to update
+ *         description: UUID ID of the user to update
  *     requestBody:
  *       required: true
  *       content:
@@ -131,9 +133,10 @@ import * as userService from "../services/userService";
  *       - in: path
  *         name: id
  *         schema:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         required: true
- *         description: Numeric ID of the user to delete
+ *         description: UUID ID of the user to delete
  *     responses:
  *       204:
  *         description: No content (deleted)
@@ -154,8 +157,9 @@ import * as userService from "../services/userService";
  *       type: object
  *       properties:
  *         id:
- *           type: integer
- *           example: 1
+ *           type: string
+ *           format: uuid
+ *           example: "550e8400-e29b-41d4-a716-446655440000"
  *         name:
  *           type: string
  *           example: "Jane Doe"
@@ -239,6 +243,10 @@ const UpdateUserSchema = z.object({
   image: z.string().nullable().optional(),
 });
 
+const UserIdParamSchema = z.object({
+  id: z.uuid(),
+});
+
 export const getAll = async (_req: Request, res: Response): Promise<void> => {
   try {
     const users = await userService.getAllUsers();
@@ -251,8 +259,9 @@ export const getAll = async (_req: Request, res: Response): Promise<void> => {
 
 export const getById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = Number(req.params.id);
-    if (isNaN(id)) {
+    const id = req.params.id as string;
+    const parsed = UserIdParamSchema.safeParse({ id });
+    if (!parsed.success) {
       res.status(400).json({ error: "Invalid id" });
       return;
     }
@@ -285,8 +294,9 @@ export const create = async (req: Request, res: Response): Promise<void> => {
 
 export const update = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = Number(req.params.id);
-    if (isNaN(id)) {
+    const id = req.params.id as string;
+    const parsedId = UserIdParamSchema.safeParse({ id });
+    if (!parsedId.success) {
       res.status(400).json({ error: "Invalid id" });
       return;
     }
@@ -309,8 +319,9 @@ export const update = async (req: Request, res: Response): Promise<void> => {
 
 export const remove = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id = Number(req.params.id);
-    if (isNaN(id)) {
+    const id = req.params.id as string;
+    const parsedId = UserIdParamSchema.safeParse({ id });
+    if (!parsedId.success) {
       res.status(400).json({ error: "Invalid id" });
       return;
     }

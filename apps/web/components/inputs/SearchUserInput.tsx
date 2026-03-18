@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 import { UserIcon, XIcon } from "lucide-react";
 
 type SearchUserInputProps = {
-  value: number | null;
-  onChange: (userId: number | null) => void;
+  value: string | null;
+  onChange: (userId: string | null) => void;
   label?: string;
   placeholder?: string;
   id?: string;

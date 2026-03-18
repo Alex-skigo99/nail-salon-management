@@ -10,7 +10,7 @@ export const getAllUsers = async (): Promise<SafeUser[]> => {
   return knex(DB_TABLES.USERS).select(SAFE_COLUMNS);
 };
 
-export const getUserById = async (id: number): Promise<SafeUser | null> => {
+export const getUserById = async (id: string): Promise<SafeUser | null> => {
   const user = await knex(DB_TABLES.USERS).select(SAFE_COLUMNS).where({ id }).first();
   return user ?? null;
 };
@@ -23,14 +23,14 @@ export const createUser = async (
 };
 
 export const updateUser = async (
-  id: number,
+  id: string,
   data: Partial<Pick<User, "name" | "email" | "phone" | "role" | "image">>
 ): Promise<SafeUser | null> => {
   const [user] = await knex(DB_TABLES.USERS).where({ id }).update(data).returning(SAFE_COLUMNS);
   return user ?? null;
 };
 
-export const deleteUser = async (id: number): Promise<boolean> => {
+export const deleteUser = async (id: string): Promise<boolean> => {
   const deleted = await knex(DB_TABLES.USERS).where({ id }).delete();
   return deleted > 0;
 };

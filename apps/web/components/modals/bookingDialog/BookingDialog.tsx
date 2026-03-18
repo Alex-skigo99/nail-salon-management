@@ -73,7 +73,7 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
   const { data: session, status } = useSession();
   const queryClient = useQueryClient();
   const isAuthenticated = status === "authenticated";
-  const userId = session?.user?.id ? Number(session.user.id) : null;
+  const userId = session?.user?.id ?? null;
   const userPhone = session?.user?.phone ?? null;
   const needsPhone = isAuthenticated && !userPhone;
 

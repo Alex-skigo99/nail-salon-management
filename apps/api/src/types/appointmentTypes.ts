@@ -6,7 +6,7 @@ import { Appointment, AppointmentStatus, Slot, SlotStatus, DaySlots } from "./db
 
 export type CreateAppointmentInput = {
   master_id: number;
-  user_id?: number | null;
+  user_id?: string | null;
   guest_name?: string | null;
   guest_phone?: string | null;
   need_store_phone?: boolean;
@@ -27,6 +27,7 @@ export type UpdateAppointmentInput = {
 };
 
 export type RescheduleInput = {
+  master_id?: number;
   date: string;
   time: string;
   duration_minutes?: number;

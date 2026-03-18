@@ -16,7 +16,7 @@ export function useUsers() {
   });
 }
 
-export function useUser(id: number | null) {
+export function useUser(id: string | null) {
   return useQuery({
     queryKey: [queryKeys.users, id],
     queryFn: async () => {
@@ -43,7 +43,7 @@ export function useCreateUser() {
 export function useUpdateUser() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: UpdateUserInput }) => {
+    mutationFn: async ({ id, data }: { id: string; data: UpdateUserInput }) => {
       const res = await apiClient.put<User>(`${apiRoutes.user}/${id}`, data);
       return res.data;
     },
@@ -57,7 +57,7 @@ export function useUpdateUser() {
 export function useDeleteUser() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       await apiClient.delete(`${apiRoutes.user}/${id}`);
     },
     onSuccess: () => {

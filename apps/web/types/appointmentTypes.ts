@@ -3,7 +3,7 @@ export type AppointmentStatus = "new" | "confirmed" | "reserved" | "pending" | "
 export type SlotStatus = "empty" | "reserved" | "none" | "part_book" | "book";
 
 export type UserData = {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phone: string | null;
@@ -13,7 +13,7 @@ export type UserData = {
 export type Appointment = {
   id: number;
   master_id: number;
-  user_id: number | null;
+  user_id: string | null;
   guest_name: string | null;
   guest_phone: string | null;
   date: string;
@@ -32,7 +32,7 @@ export type AppointmentRetrieve = Appointment & {
 
 export type AppointmentCreate = {
   master_id: number;
-  user_id?: number | null;
+  user_id?: string | null;
   guest_name?: string | null;
   guest_phone?: string | null;
   need_store_phone?: boolean;
@@ -59,7 +59,7 @@ export type MasterSuggestion = {
 };
 
 export type AppointmentUpdate = {
-  user_id?: number | null;
+  user_id?: string | null;
   guest_name?: string | null;
   guest_phone?: string | null;
   services?: string | null;
@@ -68,6 +68,7 @@ export type AppointmentUpdate = {
 };
 
 export type AppointmentReschedule = {
+  master_id?: number;
   date: string;
   time: string;
   duration_minutes?: number | null;

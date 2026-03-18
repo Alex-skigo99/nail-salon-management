@@ -23,7 +23,7 @@ const gap = 30;
 
 const createSchema = z
   .object({
-    userId: z.number().nullable().optional(),
+    userId: z.uuid().nullable().optional(),
     userName: z.string().optional(),
     phone: phoneSchemaOptional,
     services: z.array(z.string()),
@@ -59,7 +59,7 @@ export function CreateForm({ slot, date, masterId, onSuccess }: CreateFormProps)
 
   const [servicesSelected, setServicesSelected] = useState<ServicesSelectionState>(createInitialServicesSelected);
   const [servicesDuration, setServicesDuration] = useState(0);
-  const [userId, setUserId] = useState<number | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const servicesByCategory = useMemo(
     () => ({
