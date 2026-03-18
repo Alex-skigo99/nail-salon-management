@@ -38,6 +38,16 @@ const createSchema = z
 
 type CreateFormData = z.input<typeof createSchema>;
 
+const initSchemaValues: CreateFormData = {
+  userId: null,
+  userName: "",
+  phone: "",
+  services: [],
+  comments: "",
+  status: "new",
+  duration: gap,
+};
+
 const INPUT_COUNT_FOR_SERVICES = { manicure: 1, pedicure: 1, other: 1 } as const;
 
 const createInitialServicesSelected = (): ServicesSelectionState => ({
@@ -98,18 +108,11 @@ export function CreateForm({ slot, date, masterId, onSuccess }: CreateFormProps)
     control,
     handleSubmit,
     setValue,
+    reset,
     formState: { isSubmitting, errors },
   } = useForm<CreateFormData>({
     resolver: zodResolver(createSchema),
-    defaultValues: {
-      userId: null,
-      userName: "",
-      phone: "",
-      services: [],
-      comments: "",
-      status: "new",
-      duration: gap,
-    },
+    defaultValues: initSchemaValues,
   });
 
   useEffect(() => {
@@ -152,8 +155,13 @@ export function CreateForm({ slot, date, masterId, onSuccess }: CreateFormProps)
       });
       toast.success("Appointment created");
       onSuccess();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.error ?? "Failed to create appointment");
+    } catch {
+      toast.error("Failed to create appointment. Please try again.");
+    } finally {
+      setServicesSelected(createInitialServicesSelected());
+      setServicesDuration(0);
+      setUserId(null);
+      reset(initSchemaValues);
     }
   });
 

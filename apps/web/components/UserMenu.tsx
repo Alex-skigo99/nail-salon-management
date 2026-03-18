@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLogout } from "@/hooks/useAuth";
+import Image from "next/image";
 
 export function UserMenu() {
   const { data: session, status } = useSession();
@@ -35,7 +36,7 @@ export function UserMenu() {
   const callbackUrl = typeof window !== "undefined" ? window.location.pathname : "/login";
 
   const user = session.user;
-  const isAdmin = (user as any).role === "ADMIN";
+  const isAdmin = user.role === "ADMIN";
   const accountPath = isAdmin ? "/admin" : "/client";
   const initials =
     user.name
@@ -50,11 +51,12 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild className="cursor-pointer">
         <Button variant="ghost" className="w-full justify-start gap-2 px-2">
           {user.image && !imgError ? (
-            <img
+            <Image
               src={user.image}
               alt={user.name ?? ""}
-              className="size-7 rounded-full"
-              loading="lazy"
+              className="rounded-full"
+              width={28}
+              height={28}
               onError={() => setImgError(true)}
             />
           ) : (

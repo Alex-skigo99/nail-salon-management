@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 type ShopSectionProps = {
   t: ReturnType<typeof useTranslations>;
@@ -15,7 +16,7 @@ export default function ShopSection({ t, isMobile }: ShopSectionProps) {
   return (
     <section id="shop" className="bg-blue-50 py-20 sm:py-28">
       <div className="container mx-auto px-4 text-center">
-        <h2 className="mb-4 text-3xl font-bold">{t("shopSection.title")}</h2>
+        <h2 className={cn("mb-4 font-bold", isMobile ? "text-2xl" : "text-3xl")}>{t("shopSection.title")}</h2>
         <p className="mb-6 text-lg">{t("shopSection.description")}</p>
         <Button disabled onClick={() => router.push("/shop")}>
           {t("shopSection.buttonText")}

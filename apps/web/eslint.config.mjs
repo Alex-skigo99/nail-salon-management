@@ -12,6 +12,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "components/ui/**", // Ignore UI components as they are a third-party library
   ]),
 ]);
 

@@ -29,6 +29,39 @@ type MenuItem = {
   icon: LucideIcon;
 };
 
+function MenuContent({
+  menuItems,
+  pathname,
+  onItemClick,
+}: {
+  menuItems: MenuItem[];
+  pathname: string | null;
+  onItemClick?: () => void;
+}) {
+  return (
+    <SidebarMenu>
+      {menuItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = pathname === item.href;
+        return (
+          <SidebarMenuItem key={item.href}>
+            <SidebarMenuButton asChild isActive={isActive}>
+              <Link
+                href={item.href}
+                className={cn("flex items-center gap-2", isActive && "bg-accent")}
+                onClick={() => onItemClick?.()}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{item.label}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        );
+      })}
+    </SidebarMenu>
+  );
+}
+
 export function AppSidebar() {
   const pathname = usePathname();
   const locale = useLocale();
@@ -60,29 +93,6 @@ export function AppSidebar() {
     },
   ];
 
-  const MenuContent = () => (
-    <SidebarMenu>
-      {menuItems.map((item) => {
-        const Icon = item.icon;
-        const isActive = pathname === item.href;
-        return (
-          <SidebarMenuItem key={item.href}>
-            <SidebarMenuButton asChild isActive={isActive}>
-              <Link
-                href={item.href}
-                className={cn("flex items-center gap-2", isActive && "bg-accent")}
-                onClick={() => setIsOpen(false)}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{item.label}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        );
-      })}
-    </SidebarMenu>
-  );
-
   if (isMobile) {
     return (
       <div className="flex items-center gap-2 border-b p-4">
@@ -101,7 +111,7 @@ export function AppSidebar() {
                 </div>
               </SheetTitle>
             </SheetHeader>
-            <MenuContent />
+            <MenuContent menuItems={menuItems} pathname={pathname} onItemClick={() => setIsOpen(false)} />
             <div className="mt-auto border-t pt-4">
               <UserMenu />
             </div>
@@ -120,7 +130,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <MenuContent />
+        <MenuContent menuItems={menuItems} pathname={pathname} />
       </SidebarContent>
       <SidebarFooter className="border-t">
         <UserMenu />

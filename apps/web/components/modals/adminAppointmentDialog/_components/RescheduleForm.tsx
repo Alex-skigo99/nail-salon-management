@@ -14,7 +14,7 @@ import SelectInput from "@/components/inputs/SelectInput";
 import { useRescheduleAppointment } from "@/hooks/useAppointments";
 import { useServices } from "@/hooks/useServices";
 import { useMasters } from "@/hooks/useMasters";
-import type { Appointment, Slot } from "@/types/appointmentTypes";
+import type { Appointment } from "@/types/appointmentTypes";
 import { formatTimeToHHMM } from "@/utils/formatTime";
 import { formatDateForInput } from "@/utils/dateUtils";
 
@@ -40,13 +40,11 @@ const createInitialServicesSelected = (): ServicesSelectionState => ({
 
 type RescheduleFormProps = {
   apt: Appointment;
-  slot: Slot | null;
-  date: string;
   onSuccess: () => void;
   onBack: () => void;
 };
 
-export function RescheduleForm({ apt, slot, date, onSuccess, onBack }: RescheduleFormProps) {
+export function RescheduleForm({ apt, onSuccess, onBack }: RescheduleFormProps) {
   const { data: services = [] } = useServices();
   const { data: masters = [] } = useMasters();
   const rescheduleMutation = useRescheduleAppointment();
@@ -138,8 +136,8 @@ export function RescheduleForm({ apt, slot, date, onSuccess, onBack }: Reschedul
       });
       toast.success("Appointment rescheduled");
       onSuccess();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.error ?? "Slot unavailable");
+    } catch {
+      toast.error("Slot unavailable! Please choose another time or master.");
     }
   });
 

@@ -52,8 +52,8 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
       await deleteMutation.mutateAsync(apt.id);
       toast.success("Appointment deleted");
       handleClose();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.error ?? "Failed to delete");
+    } catch {
+      toast.error("Failed to delete. Please try again.");
     } finally {
       setView("main");
     }
@@ -102,7 +102,7 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
 
         {/* Reschedule */}
         {isExisting && apt && view === "reschedule" && (
-          <RescheduleForm apt={apt} slot={slot} date={date} onSuccess={handleClose} onBack={() => setView("main")} />
+          <RescheduleForm apt={apt} onSuccess={handleClose} onBack={() => setView("main")} />
         )}
 
         {/* Delete confirmation */}

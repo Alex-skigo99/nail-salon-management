@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
+import type { User } from "./types/userTypes";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -80,9 +81,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const data = await res.json();
           // Attach DB user data to the user object for the jwt callback
           user.id = String(data.user.id);
-          (user as any).role = data.user.role;
-          (user as any).phone = data.user.phone;
-          (user as any).accessToken = data.token;
+          user.role = data.user.role;
+          user.phone = data.user.phone;
+          user.accessToken = data.token;
 
           return true;
         } catch {
@@ -96,9 +97,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = (user as any).role;
-        token.phone = (user as any).phone;
-        token.accessToken = (user as any).accessToken;
+        token.role = user.role;
+        token.phone = user.phone;
+        token.accessToken = user.accessToken;
       }
       return token;
     },
@@ -106,10 +107,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     // ─── Expose custom fields in the session ───────
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
-        (session.user as any).role = token.role;
-        (session.user as any).phone = token.phone;
-        (session as any).accessToken = token.accessToken;
+        session.user.id = token.id as User["id"];
+        session.user.role = token.role as User["role"];
+        session.user.phone = token.phone as User["phone"];
+        session.accessToken = token.accessToken as string;
       }
       return session;
     },
