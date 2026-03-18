@@ -211,7 +211,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
  * @openapi
  * /appointment/{id}:
  *   put:
- *     summary: Update non-scheduling fields of an appointment
+ *     summary: Update non-scheduling fields of an appointment (ADMIN only)
  *     tags: [Appointment]
  *     parameters:
  *       - in: path
@@ -266,7 +266,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
  * @openapi
  * /appointment/{id}/reschedule:
  *   put:
- *     summary: Move appointment to a new date/time (checks availability)
+ *     summary: Move appointment to a new date/time (checks availability) (ADMIN only)
  *     tags: [Appointment]
  *     parameters:
  *       - in: path
@@ -390,7 +390,7 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
  *            schema:
  *             type: array
  *             items:
- *               $ref: '#/components/schemas/Appointment'
+ *               $ref: '#/components/schemas/AppointmentRetrieve'
  *       400:
  *         description: Missing or invalid parameters
  *       500:
