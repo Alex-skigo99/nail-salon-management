@@ -4,7 +4,7 @@ const path = require("path");
 
 const configPath = path.resolve(__dirname, "..", "swagger.config.cjs");
 if (!fs.existsSync(configPath)) {
-  console.error("swagger.config.js not found at", configPath);
+  console.error("swagger.config.cjs not found at", configPath);
   process.exit(1);
 }
 const config = require(configPath);
