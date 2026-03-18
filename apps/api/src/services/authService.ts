@@ -13,7 +13,7 @@ const SALT_ROUNDS = 12;
 // ─────────────────────────────────────────────
 
 export interface JwtPayload {
-  userId: number;
+  userId: string;
   email: string;
   role: "ADMIN" | "USER";
 }
@@ -56,7 +56,7 @@ export async function findUserByEmail(email: string): Promise<User | undefined> 
   return knex(DB_TABLES.USERS).where({ email }).first();
 }
 
-export async function findUserById(id: number): Promise<SafeUser | undefined> {
+export async function findUserById(id: string): Promise<SafeUser | undefined> {
   return knex(DB_TABLES.USERS).select(SAFE_COLUMNS).where({ id }).first();
 }
 

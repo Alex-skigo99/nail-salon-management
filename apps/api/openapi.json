@@ -1098,10 +1098,11 @@
             "in": "path",
             "name": "id",
             "schema": {
-              "type": "integer"
+              "type": "string",
+              "format": "uuid"
             },
             "required": true,
-            "description": "Numeric ID of the user"
+            "description": "UUID ID of the user"
           }
         ],
         "responses": {
@@ -1147,10 +1148,11 @@
             "in": "path",
             "name": "id",
             "schema": {
-              "type": "integer"
+              "type": "string",
+              "format": "uuid"
             },
             "required": true,
-            "description": "Numeric ID of the user to update"
+            "description": "UUID ID of the user to update"
           }
         ],
         "requestBody": {
@@ -1206,10 +1208,11 @@
             "in": "path",
             "name": "id",
             "schema": {
-              "type": "integer"
+              "type": "string",
+              "format": "uuid"
             },
             "required": true,
-            "description": "Numeric ID of the user to delete"
+            "description": "UUID ID of the user to delete"
           }
         ],
         "responses": {
@@ -1694,8 +1697,9 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "example": 1
+            "type": "string",
+            "format": "uuid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "name": {
             "type": "string",
@@ -1835,7 +1839,8 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer"
+            "type": "string",
+            "format": "uuid"
           },
           "name": {
             "type": "string"
@@ -1863,7 +1868,8 @@
             "type": "integer"
           },
           "user_id": {
-            "type": "integer",
+            "type": "string",
+            "format": "uuid",
             "nullable": true
           },
           "guest_name": {

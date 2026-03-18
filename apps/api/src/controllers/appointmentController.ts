@@ -11,7 +11,7 @@ const AppointmentStatusEnum = z.enum(["new", "confirmed", "reserved", "pending",
 
 const CreateAppointmentSchema = z.object({
   master_id: z.number().int().positive(),
-  user_id: z.number().int().positive().optional().nullable(),
+  user_id: z.uuid().optional().nullable(),
   guest_name: z.string().optional().nullable(),
   guest_phone: z.string().optional().nullable(),
   need_store_phone: z.boolean().optional(),
@@ -24,7 +24,7 @@ const CreateAppointmentSchema = z.object({
 });
 
 const UpdateAppointmentSchema = z.object({
-  user_id: z.number().int().positive().optional().nullable(),
+  user_id: z.uuid().optional().nullable(),
   guest_name: z.string().optional().nullable(),
   guest_phone: z.string().optional().nullable(),
   services: z.string().optional().nullable(),

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export type UserData = {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phone: string | null;
@@ -9,7 +9,7 @@ export type UserData = {
 };
 
 export type User = {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phone: string | null;
@@ -51,7 +51,7 @@ export type AppointmentStatus = "new" | "confirmed" | "reserved" | "pending" | "
 export type Appointment = {
   id: number;
   master_id: number;
-  user_id: number | null;
+  user_id: string | null;
   guest_name: string | null;
   guest_phone: string | null;
   date: string; // YYYY-MM-DD
@@ -76,7 +76,8 @@ export type AppointmentRetrieve = Appointment & {
  *       type: object
  *       properties:
  *         id:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *         name:
  *           type: string
  *         email:
@@ -101,7 +102,8 @@ export type AppointmentRetrieve = Appointment & {
  *         master_id:
  *           type: integer
  *         user_id:
- *           type: integer
+ *           type: string
+ *           format: uuid
  *           nullable: true
  *         guest_name:
  *           type: string

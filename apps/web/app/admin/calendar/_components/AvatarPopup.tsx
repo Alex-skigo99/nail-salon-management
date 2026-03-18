@@ -32,7 +32,7 @@ export function AvatarPopup({ src, alt, className }: AvatarPopupProps) {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTitle className="sr-only">{alt}</DialogTitle>
-        <DialogContent className="flex items-center justify-center p-4" style={{ maxWidth: 480 }}>
+        <DialogContent className="flex items-center justify-center p-0" style={{ maxWidth: 384 }}>
           <div className="relative h-96 w-96 overflow-hidden rounded-lg">
             <Image src={src} alt={alt} fill sizes="384px" className="object-contain" />
           </div>

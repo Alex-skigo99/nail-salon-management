@@ -18,7 +18,7 @@ import type { Appointment } from "@/types/appointmentTypes";
 import { CalendarClock, Trash2 } from "lucide-react";
 
 const updateSchema = z.object({
-  userId: z.number().nullable().optional(),
+  userId: z.uuid().nullable().optional(),
   userName: z.string().optional(),
   phone: phoneSchemaOptional,
   comments: z.string().optional(),
@@ -36,7 +36,7 @@ type UpdateFormProps = {
 
 export function UpdateForm({ apt, onSuccess, onReschedule, onDelete }: UpdateFormProps) {
   const updateMutation = useUpdateAppointment();
-  const [userId, setUserId] = useState<number | null>(apt.user_id ?? null);
+  const [userId, setUserId] = useState<string | null>(apt.user_id ?? null);
 
   const {
     control,

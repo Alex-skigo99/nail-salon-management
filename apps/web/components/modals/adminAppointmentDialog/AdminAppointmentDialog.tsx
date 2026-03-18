@@ -36,7 +36,10 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
   const [view, setView] = useState<View>("main");
   const deleteMutation = useDeleteAppointment();
 
-  const handleClose = () => onOpenChange(false);
+  const handleClose = () => {
+    setView("main");
+    onOpenChange(false);
+  };
 
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) setView("main");
