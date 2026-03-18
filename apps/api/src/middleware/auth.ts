@@ -19,6 +19,7 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
 
   try {
     const payload = verifyToken(token);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (req as any).user = payload;
     next();
   } catch {
@@ -32,6 +33,7 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
  */
 export function requireRole(...roles: Array<"ADMIN" | "USER">) {
   return (req: Request, res: Response, next: NextFunction): void => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const user: JwtPayload | undefined = (req as any).user;
     if (!user) {
       res.status(401).json({ error: "Authentication required" });
@@ -53,6 +55,7 @@ export function optionalAuth(req: Request, _res: Response, next: NextFunction): 
   const token = extractToken(req);
   if (token) {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (req as any).user = verifyToken(token);
     } catch {
       // Token is invalid — treat as unauthenticated
@@ -71,6 +74,7 @@ function extractToken(req: Request): string | null {
   }
 
   // 2. Cookie
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cookieToken = (req as any).cookies?.auth_token;
   if (cookieToken) {
     return cookieToken;

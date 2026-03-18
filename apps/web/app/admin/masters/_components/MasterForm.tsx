@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ export function MasterForm({ open, onOpenChange, master }: Props) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (open) {
       setName(master?.name ?? "");
@@ -33,7 +34,7 @@ export function MasterForm({ open, onOpenChange, master }: Props) {
 
   const isPending = createMaster.isPending || updateMaster.isPending;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!name.trim()) return;
 
@@ -53,7 +54,7 @@ export function MasterForm({ open, onOpenChange, master }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent key={`${open ? "open" : "closed"}-${master?.id ?? "new"}`} className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Master" : "Add Master"}</DialogTitle>
         </DialogHeader>

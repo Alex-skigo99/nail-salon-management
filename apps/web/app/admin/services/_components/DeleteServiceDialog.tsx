@@ -34,8 +34,8 @@ export function DeleteServiceDialog({ open, onOpenChange, serviceId, serviceName
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Service</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete <span className="font-semibold">"{serviceName}"</span>? This action cannot
-            be undone.
+            Are you sure you want to delete <span className="font-semibold">&quot;{serviceName}&quot;</span>? This
+            action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

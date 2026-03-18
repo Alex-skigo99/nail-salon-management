@@ -8,14 +8,14 @@ interface TablePaginationProps<TData> {
   table: Table<TData>;
   isPaginationNeeded?: boolean;
   totalItems: number;
-  nextPageToken?: string | null;
+  // nextPageToken?: string | null;
 }
 
 export function TablePagination<TData>({
   table,
   isPaginationNeeded = false,
   totalItems,
-  nextPageToken,
+  // nextPageToken,
 }: TablePaginationProps<TData>) {
   const { pageIndex, pageSize } = table.getState().pagination;
   const startItem = pageIndex * pageSize + 1;

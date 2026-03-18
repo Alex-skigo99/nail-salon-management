@@ -201,7 +201,6 @@ export default function ServicesFormInput({
 
     const totalDuration = selectedOptions.reduce((acc, option) => acc + toNumber(option.duration_minutes), 0);
     const totalPrice = selectedOptions.reduce((acc, option) => acc + toNumber(option.price), 0);
-    const selectedValues = selectedOptions.map((option) => option.value);
 
     setServicesDuration(totalDuration);
     if (setServicesPrice) setServicesPrice(totalPrice);

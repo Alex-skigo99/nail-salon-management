@@ -203,8 +203,8 @@ export const create = async (req: Request, res: Response): Promise<void> => {
     }
     const appt = await appointmentService.createAppointment(parsed.data);
     res.status(201).json(appt);
-  } catch (err: any) {
-    if (err?.message === "SLOT_UNAVAILABLE") {
+  } catch (err: unknown) {
+    if ((err as { message?: string })?.message === "SLOT_UNAVAILABLE") {
       res.status(409).json({ error: "The requested time slot is not available" });
       return;
     }
@@ -315,12 +315,12 @@ export const reschedule = async (req: Request, res: Response): Promise<void> => 
     }
     const appt = await appointmentService.rescheduleAppointment(id, parsed.data);
     res.json(appt);
-  } catch (err: any) {
-    if (err?.message === "APPOINTMENT_NOT_FOUND") {
+  } catch (err: unknown) {
+    if ((err as { message?: string })?.message === "APPOINTMENT_NOT_FOUND") {
       res.status(404).json({ error: "Appointment not found" });
       return;
     }
-    if (err?.message === "SLOT_UNAVAILABLE") {
+    if ((err as { message?: string })?.message === "SLOT_UNAVAILABLE") {
       res.status(409).json({ error: "The requested time slot is not available" });
       return;
     }

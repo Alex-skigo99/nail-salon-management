@@ -28,6 +28,7 @@ import type { SelectedSlot } from "@/types/appointmentTypes";
 import AuthenticatedBookingForm from "@/components/modals/bookingDialog/AuthenticatedBookingForm";
 import GuestBookingForm from "@/components/modals/bookingDialog/GuestBookingForm";
 import GuestAccessPanel from "@/components/modals/bookingDialog/GuestAccessPanel";
+import { AxiosError } from "axios";
 
 type Props = {
   open: boolean;
@@ -133,7 +134,7 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
         rememberPhone: z.boolean(),
         services: z.array(z.string()).min(1),
       }),
-    [t]
+    []
   );
 
   const guestFormSchema = useMemo(
@@ -190,9 +191,9 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
     [guestServicesSelected, serviceOptions]
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!open) {
-      // setShowGuestForm(false);
       setFeedbackDialog((prev) => ({ ...prev, open: false }));
       setAuthServicesSelected(createInitialServicesSelected());
       setAuthServicesDuration(0);
@@ -249,8 +250,8 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
       });
 
       openFeedbackDialog("success", t("feedback.infoTitle"), t("feedback.authSuccess"));
-    } catch (error: any) {
-      if (error?.response?.status === 409) {
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response?.status === 409) {
         queryClient.invalidateQueries({ queryKey: [queryKeys.appointmentSuggestions] });
         openFeedbackDialog("error", t("feedback.conflictTitle"), t("feedback.conflictError"));
         return;
@@ -276,8 +277,8 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
       });
 
       openFeedbackDialog("success", t("feedback.infoTitle"), t("feedback.guestSuccess"));
-    } catch (error: any) {
-      if (error?.response?.status === 409) {
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response?.status === 409) {
         queryClient.invalidateQueries({ queryKey: [queryKeys.appointmentSuggestions] });
         openFeedbackDialog("error", t("feedback.conflictTitle"), t("feedback.conflictError"));
         return;

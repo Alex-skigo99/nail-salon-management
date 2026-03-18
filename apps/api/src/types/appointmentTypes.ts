@@ -1,4 +1,4 @@
-import { Appointment, AppointmentStatus, Slot, SlotStatus, DaySlots } from "./dbSchemaTypes";
+import { AppointmentStatus, Slot, SlotStatus, DaySlots } from "./dbSchemaTypes";
 
 // ─────────────────────────────────────────────
 // CRUD Input Types

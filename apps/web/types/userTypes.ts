@@ -1,11 +1,15 @@
 import { z } from "zod";
 
+export const UserRoleSchema = z.enum(["ADMIN", "USER"]);
+
+export type UserRole = z.infer<typeof UserRoleSchema>;
+
 export const UserSchema = z.object({
   id: z.uuid(),
   name: z.string(),
   email: z.email(),
   phone: z.string().nullable().optional(),
-  role: z.enum(["ADMIN", "USER"]),
+  role: UserRoleSchema,
   last_login: z.string().nullable(),
   image: z.string().nullable().optional(),
   google_id: z.string().nullable().optional(),
@@ -17,7 +21,7 @@ export type User = z.infer<typeof UserSchema>;
 export type CreateUserInput = {
   name: string;
   email: string;
-  role: "ADMIN" | "USER";
+  role: UserRole;
   phone?: string | null;
   image?: string | null;
 };
@@ -26,6 +30,6 @@ export type UpdateUserInput = {
   name?: string;
   email?: string;
   phone?: string | null;
-  role?: "ADMIN" | "USER";
+  role?: UserRole;
   image?: string | null;
 };

@@ -58,7 +58,6 @@ export function UpdateForm({ apt, onSuccess, onReschedule, onDelete }: UpdateFor
   // Sync if apt changes
   useEffect(() => {
     const newUserId = apt.user_id ?? null;
-    setUserId(newUserId);
     reset({
       userId: newUserId,
       userName: apt.guest_name ?? "",
@@ -87,8 +86,8 @@ export function UpdateForm({ apt, onSuccess, onReschedule, onDelete }: UpdateFor
       });
       toast.success("Appointment updated");
       onSuccess();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.error ?? "Failed to update appointment");
+    } catch {
+      toast.error("Failed to update appointment. Please try again.");
     }
   });
 

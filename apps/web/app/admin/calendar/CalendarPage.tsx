@@ -10,7 +10,6 @@ import { MonthView } from "./_components/MonthView";
 import type { ViewMode, DisplayMode } from "@/types/appointmentTypes";
 import { getWeekStart, getWeekEnd, getMonthStart, getMonthEnd, formatDate } from "@/utils/dateUtils";
 import { useSession } from "next-auth/react";
-import { is } from "date-fns/locale";
 
 export default function CalendarPage() {
   const { data: session } = useSession();

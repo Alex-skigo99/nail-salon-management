@@ -33,6 +33,7 @@ export function WorkingHoursForm({ open, onOpenChange, masterId, masterName, exi
   const replaceWorkingHours = useReplaceWorkingHours();
   const [rows, setRows] = useState<DayRow[]>(DAYS.map(() => ({ ...DEFAULT_ROW })));
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (open) {
       const next = DAYS.map((day) => {

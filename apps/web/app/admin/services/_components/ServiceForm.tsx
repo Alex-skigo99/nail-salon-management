@@ -32,6 +32,7 @@ export function ServiceForm({ open, onOpenChange, service, defaultCategory }: Pr
   const [price, setPrice] = useState("");
   const [duration, setDuration] = useState("");
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (open) {
       setName(service?.name ?? "");

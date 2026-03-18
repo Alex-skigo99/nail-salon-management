@@ -12,6 +12,7 @@ type tGeneralTable<TState, TData extends TState, TValue> = {
   data: TData[];
   isPending: boolean;
   customNoResultsMessage?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleRowClick?: (row: Row<any>) => void;
   headerClass?: string;
   cellClass?: string;
@@ -24,7 +25,7 @@ type tGeneralTable<TState, TData extends TState, TValue> = {
   totalRows?: number;
   getRowClassName?: (row: TData) => string;
   isRowDisabled?: (row: TData) => boolean | undefined;
-  nextPageToken?: string | null;
+  // nextPageToken?: string | null;
 };
 
 export default function GeneralTable<TState, TData extends TState, TValue>({
@@ -44,7 +45,7 @@ export default function GeneralTable<TState, TData extends TState, TValue>({
   totalRows,
   getRowClassName,
   isRowDisabled,
-  nextPageToken,
+  // nextPageToken,
 }: tGeneralTable<TState, TData, TValue>) {
   const tableOptions = React.useMemo(
     () =>
@@ -77,7 +78,9 @@ export default function GeneralTable<TState, TData extends TState, TValue>({
                     className={cn(
                       "px-2",
                       headerClass,
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       (header.column.columnDef.meta as any)?.columnClass ?? "",
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       (header.column.columnDef.meta as any)?.headerClass ?? ""
                     )}
                     style={{ width: header.getSize() }}
@@ -123,7 +126,9 @@ export default function GeneralTable<TState, TData extends TState, TValue>({
                             className={cn(
                               "border-r px-2 py-2 whitespace-normal last:border-r-0",
                               cellClass,
+                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
                               (cell.column.columnDef.meta as any)?.columnClass ?? "",
+                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
                               (cell.column.columnDef.meta as any)?.cellClass ?? ""
                             )}
                           >
@@ -145,12 +150,7 @@ export default function GeneralTable<TState, TData extends TState, TValue>({
           </TableBody>
         </Table>
       </div>
-      <TablePagination
-        table={table}
-        isPaginationNeeded={isPaginationNeeded}
-        totalItems={totalRows ?? 0}
-        nextPageToken={nextPageToken}
-      />
+      <TablePagination table={table} isPaginationNeeded={isPaginationNeeded} totalItems={totalRows ?? 0} />
     </div>
   );
 }

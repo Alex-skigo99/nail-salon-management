@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
@@ -8,6 +8,7 @@ import { useUsers } from "@/hooks/useUsers";
 import type { User } from "@/types/userTypes";
 import { cn } from "@/lib/utils";
 import { UserIcon, XIcon } from "lucide-react";
+import Image from "next/image";
 
 type SearchUserInputProps = {
   value: string | null;
@@ -22,10 +23,12 @@ type SearchUserInputProps = {
 function UserAvatar({ user }: { user: User }) {
   if (user.image) {
     return (
-      <img
+      <Image
         src={user.image}
         alt={user.name}
-        className="size-5 shrink-0 rounded-full object-cover"
+        className="shrink-0 rounded-full object-cover"
+        width={20}
+        height={20}
         onError={(e) => {
           (e.currentTarget as HTMLImageElement).style.display = "none";
         }}
@@ -55,20 +58,11 @@ export default function SearchUserInput({
 }: SearchUserInputProps) {
   const { data: users = [] } = useUsers();
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const wasJustSelected = useRef(false);
 
   const selectedUser = value ? (users.find((u) => u.id === value) ?? null) : null;
-
-  // Sync search display when value changes externally
-  useEffect(() => {
-    if (selectedUser) {
-      setSearch(formatUserLabel(selectedUser));
-    } else if (!open) {
-      setSearch("");
-    }
-  }, [selectedUser, open]);
+  const [search, setSearch] = useState(() => (selectedUser ? formatUserLabel(selectedUser) : ""));
 
   const filteredUsers =
     search.trim() === "" || (selectedUser && search === formatUserLabel(selectedUser))
