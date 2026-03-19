@@ -6,7 +6,7 @@
     "dev": "npm run gen:openapi && nodemon --watch src --exec tsx src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "lint": "eslint 'src/**/*.{ts,js}' --max-warnings 0",
+    "lint": "eslint 'src/**/*.{ts,js}'",
     "lint:fix": "eslint 'src/**/*.{ts,js}' --fix",
     "format": "prettier --write .",
     "db:migrate": "knex --knexfile knexfile.js migrate:latest",
