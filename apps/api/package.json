@@ -16,6 +16,7 @@
     "gen:openapi": "node scripts/generate-openapi.cjs",
     "create:admin": "tsx scripts/create-admin.ts",
     "test": "vitest run",
+    "test:list": "tsx scripts/list-and-run-tests.ts",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
