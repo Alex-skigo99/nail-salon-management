@@ -18,6 +18,7 @@
     "test:web": "npm run test -w apps/web",
     "gen:openapi": "node apps/api/scripts/generate-openapi.js",
     "publish-docs:copy": "node scripts/copy-openapi-to-docs.js",
-    "build:docs": "npm run gen:openapi && npm run publish-docs:copy"
+    "build:docs": "npm run gen:openapi && npm run publish-docs:copy",
+    "api:coverage-server": "npx http-server apps/api/coverage/lcov-report -p 4001"
   }
 }

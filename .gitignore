@@ -27,3 +27,6 @@ dist/
 tmp/
 temp/
 _temp/
+
+# test coverage
+coverage/
