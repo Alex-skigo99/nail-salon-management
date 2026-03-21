@@ -30,3 +30,5 @@ _temp/
 
 # test coverage
 coverage/
+test-results/
+playwright-report/
