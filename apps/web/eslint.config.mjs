@@ -13,6 +13,9 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "components/ui/**", // Ignore UI components as they are a third-party library
+    "__tests__/**", // Ignore tests for app components
+    "__e2e__/**", // Ignore end-to-end tests
+    "__mocks__/**", // Ignore test mocks
   ]),
 ]);
 

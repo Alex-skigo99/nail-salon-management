@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import "@testing-library/jest-dom";
 
 // jsdom doesn't implement Pointer Events pointer capture methods used by Radix UI.
