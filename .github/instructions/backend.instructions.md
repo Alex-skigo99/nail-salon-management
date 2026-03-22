@@ -80,5 +80,6 @@ Add request validation (Zod) and sanitize inputs.
 Protect sensitive routes with auth + role-based authorization.
 Use async/await and consistent error handling; avoid swallowing errors.
 Make openAPI/Swagger documentation for your endpoints to improve maintainability and client integration.
+For database interactions use knex.js as a query builder, and consider using a repository pattern to abstract DB access from services. For pagination, you can use the knex-paginate plugin to simplify paginated queries.
 
 db tables name locate in src/types/dbSchemaTypes.ts

@@ -1,6 +1,7 @@
 import path from "path";
 import dotenv from "dotenv";
 import { knex, type Knex } from "knex";
+import { attachPaginate } from "knex-paginate";
 
 if (process.env.NODE_ENV !== "production") {
   dotenv.config();
@@ -47,5 +48,7 @@ if (isProduction) {
 } else {
   instance = createInstance();
 }
+
+attachPaginate();
 
 export { instance as knex };
