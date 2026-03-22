@@ -12,5 +12,7 @@ router.post("/logout", authController.logout);
 
 // Protected routes
 router.get("/me", authenticate, authController.me);
+router.patch("/me", authenticate, authController.updateMe);
+router.delete("/me", authenticate, authController.deleteMe);
 
 export default router;

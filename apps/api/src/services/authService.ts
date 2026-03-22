@@ -179,8 +179,81 @@ export async function findOrCreateGoogleUser(profile: GoogleProfile): Promise<{ 
 }
 
 // ─────────────────────────────────────────────
+// Update current user (me)
+// ─────────────────────────────────────────────
+
+export interface UpdateMeInput {
+  name?: string;
+  email?: string;
+  phone?: string;
+  oldPassword?: string;
+  newPassword?: string;
+}
+
+export async function updateMe(userId: string, input: UpdateMeInput): Promise<SafeUser> {
+  const user = await knex(DB_TABLES.USERS).where({ id: userId }).first();
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+
+  const updates: Record<string, unknown> = {};
+
+  if (input.name !== undefined) updates.name = input.name.trim();
+  if (input.phone !== undefined) updates.phone = input.phone.trim();
+
+  if (input.email !== undefined) {
+    const normalizedEmail = input.email.toLowerCase().trim();
+    if (normalizedEmail !== user.email) {
+      const existing = await findUserByEmail(normalizedEmail);
+      if (existing) throw new ConflictError("A user with this email already exists");
+      updates.email = normalizedEmail;
+    }
+  }
+
+  if (input.newPassword !== undefined) {
+    if (user.password) {
+      if (!input.oldPassword) {
+        throw new UnauthorizedError("Old password is required to set a new password");
+      }
+      const valid = await comparePassword(input.oldPassword, user.password);
+      if (!valid) {
+        throw new UnauthorizedError("Old password is incorrect");
+      }
+    }
+    updates.password = await hashPassword(input.newPassword);
+  }
+
+  if (Object.keys(updates).length === 0) {
+    return findUserById(userId) as Promise<SafeUser>;
+  }
+
+  const [updated] = await knex(DB_TABLES.USERS).where({ id: userId }).update(updates).returning(SAFE_COLUMNS);
+
+  return updated as SafeUser;
+}
+
+// ─────────────────────────────────────────────
+// Delete current user (me)
+// ─────────────────────────────────────────────
+
+export async function deleteUser(userId: string): Promise<void> {
+  const deleted = await knex(DB_TABLES.USERS).where({ id: userId }).delete();
+  if (!deleted) {
+    throw new NotFoundError("User not found");
+  }
+}
+
+// ─────────────────────────────────────────────
 // Custom error classes
 // ─────────────────────────────────────────────
+
+export class NotFoundError extends Error {
+  public statusCode = 404;
+  constructor(message: string) {
+    super(message);
+    this.name = "NotFoundError";
+  }
+}
 
 export class ConflictError extends Error {
   public statusCode = 409;

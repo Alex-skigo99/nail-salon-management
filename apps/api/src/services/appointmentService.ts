@@ -2,6 +2,7 @@ import { knex } from "../lib/db";
 import { DB_TABLES } from "../constants/dbTables";
 import { Appointment, AppointmentRetrieve, WorkingHours, Slot, SlotStatus, Master } from "../types/dbSchemaTypes";
 import { SETTINGS_KEYS } from "../constants/settings";
+import type { IWithPagination } from "knex-paginate";
 import type {
   CreateAppointmentInput,
   UpdateAppointmentInput,
@@ -238,6 +239,47 @@ export async function getAppointmentsForMaster(
     .select("a.*", knex.raw(userDataSelect))
     .orderBy("a.date", "asc")
     .orderBy("a.time", "asc");
+}
+
+// ─────────────────────────────────────────────
+// Query: appointments for a user with pagination
+// ─────────────────────────────────────────────
+
+export interface GetUserAppointmentsParams {
+  userId: string;
+  from?: string;
+  to?: string;
+  page: number;
+  perPage: number;
+}
+
+export async function getAppointmentsByUserId(
+  params: GetUserAppointmentsParams
+): Promise<IWithPagination<AppointmentRetrieve>> {
+  const { userId, from, to, page, perPage } = params;
+  let query = knex({ a: DB_TABLES.APPOINTMENTS })
+    .where({ "a.user_id": userId })
+    .leftJoin(`${DB_TABLES.USERS} as u`, "a.user_id", "u.id")
+    .select("a.*", knex.raw(userDataSelect))
+    .orderBy("a.date", "desc")
+    .orderBy("a.time", "desc");
+
+  if (from) query = query.where("a.date", ">=", from);
+  if (to) query = query.where("a.date", "<=", to);
+
+  return query.paginate({ currentPage: page, perPage, isLengthAware: true });
+}
+
+// ─────────────────────────────────────────────
+// Update appointment comment
+// ─────────────────────────────────────────────
+
+export async function updateAppointmentComment(id: number, comments: string | null): Promise<Appointment | null> {
+  const [appt] = await knex(DB_TABLES.APPOINTMENTS)
+    .where({ id })
+    .update({ comments, updated_at: knex.fn.now() })
+    .returning("*");
+  return appt ?? null;
 }
 
 // ─────────────────────────────────────────────
