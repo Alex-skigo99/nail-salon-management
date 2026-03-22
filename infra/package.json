@@ -7,7 +7,9 @@
     "synth": "cdk synth",
     "deploy": "cdk deploy",
     "diff": "cdk diff",
-    "watch": "tsc -p tsconfig.json -w"
+    "watch": "tsc -p tsconfig.json -w",
+    "test": "echo \"Warning: no test specified\"",
+    "lint": "echo \"Warning: no lint specified\""
   },
   "devDependencies": {
     "aws-cdk": "^2.99.0",

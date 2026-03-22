@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Gem, Sparkles, Armchair, ShieldCheck } from "lucide-react";
 
-type Props = { t: ReturnType<typeof useTranslations>; isMobile: boolean };
+type SimpleT = (key: string) => string;
+type Props = { t: ReturnType<typeof useTranslations> | SimpleT; isMobile: boolean };
 
 export default function AboutSection({ t, isMobile }: Props) {
   const cards = [
