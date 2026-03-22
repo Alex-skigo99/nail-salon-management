@@ -9,6 +9,12 @@ const createJestConfig = nextJest({
 const config = {
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   testEnvironment: "jest-environment-jsdom",
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/$1",
+    "^next-intl$": "<rootDir>/__mocks__/next-intl.js",
+    "^next-auth/react$": "<rootDir>/__mocks__/next-auth-react.js",
+  },
+  transformIgnorePatterns: ["node_modules/(?!(next-intl|next-auth|lucide-react)/)"],
   testMatch: ["**/__tests__/**/*.{test,spec}.{ts,tsx,js,jsx}"],
   collectCoverageFrom: [
     "./app/**/*.{ts,tsx}",

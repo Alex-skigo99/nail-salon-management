@@ -12,7 +12,7 @@
     "dev": "npm run dev --workspaces",
     "dev:web": "npm run dev -w apps/web",
     "dev:api": "npm run dev -w apps/api",
-    "build": "npm run build --workspaces",
+    "build": "npm run test --workspaces && npm run build --workspaces && echo \"Success: build completed\"",
     "test": "npm run test --workspaces",
     "test:api": "npm run test -w apps/api",
     "test:web": "npm run test -w apps/web",

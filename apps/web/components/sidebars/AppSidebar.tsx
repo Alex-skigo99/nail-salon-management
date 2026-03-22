@@ -99,7 +99,9 @@ export function AppSidebar() {
         <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)} aria-label="Open menu">
           <Menu className="h-6 w-6" />
         </Button>
-        <h1 className="text-lg font-bold">💅 {t("title")}</h1>
+        <h1 data-testid="sidebar-mobile-title" className="text-lg font-bold">
+          💅 {t("title")}
+        </h1>
 
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetContent side={sidebarSide === "right" ? "right" : "left"}>
@@ -125,7 +127,9 @@ export function AppSidebar() {
     <Sidebar side={sidebarSide}>
       <SidebarHeader className="border-b">
         <div className="px-2 py-3">
-          <h1 className="text-lg font-bold">💅 {t("title")}</h1>
+          <h1 data-testid="sidebar-title" className="text-lg font-bold">
+            💅 {t("title")}
+          </h1>
           <p className="text-muted-foreground text-xs">{t("subtitle")}</p>
         </div>
       </SidebarHeader>

@@ -8,7 +8,8 @@ import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { changeLocaleAction } from "@/utils/changeLocaleAction";
 import { UserMenu } from "@/components/UserMenu";
 
-type Props = { t: ReturnType<typeof useTranslations>; isMobile: boolean };
+type SimpleT = (key: string) => string;
+type Props = { t: ReturnType<typeof useTranslations> | SimpleT; isMobile: boolean };
 
 export default function Header({ t, isMobile }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -94,7 +95,12 @@ export default function Header({ t, isMobile }: Props) {
               triggerClassName="w-full text-sm"
             />
           </div>
-          <Button asChild size="sm" className="w-full border-0 bg-linear-to-r from-pink-500 to-rose-500 text-white">
+          <Button
+            asChild
+            size="sm"
+            data-testid="book-btn"
+            className="w-full border-0 bg-linear-to-r from-pink-500 to-rose-500 text-white"
+          >
             <a href="#schedule" onClick={() => setMenuOpen(false)}>
               {t("heroBookBtn")}
             </a>

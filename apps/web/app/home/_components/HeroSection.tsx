@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 
-type Props = { t: ReturnType<typeof useTranslations>; isMobile: boolean };
+type SimpleT = (key: string) => string;
+type Props = { t: ReturnType<typeof useTranslations> | SimpleT; isMobile: boolean };
 
 export default function HeroSection({ t, isMobile }: Props) {
   return (
