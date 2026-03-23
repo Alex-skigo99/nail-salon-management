@@ -380,7 +380,12 @@ describe("GET /appointment/user/:userId", () => {
   beforeEach(() => vi.clearAllMocks());
 
   const mockPaginatedResult = {
-    data: [mockAppointment],
+    data: [
+      {
+        ...mockAppointment,
+        master_data: { id: 1, name: "Jane Smith", description: null },
+      },
+    ],
     pagination: {
       currentPage: 1,
       perPage: 10,
@@ -407,6 +412,7 @@ describe("GET /appointment/user/:userId", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0].master_data).toEqual({ id: 1, name: "Jane Smith", description: null });
     expect(res.body.pagination.total).toBe(1);
   });
 

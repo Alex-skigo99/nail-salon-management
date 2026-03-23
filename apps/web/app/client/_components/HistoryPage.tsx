@@ -5,7 +5,6 @@ import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { PaginationState, ColumnDef } from "@tanstack/react-table";
 import { useUserAppointments } from "@/hooks/useAppointments";
-import { useMasters } from "@/hooks/useMasters";
 import GeneralTable from "@/components/tables/GeneralTable";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -30,9 +29,6 @@ export default function HistoryPage({ isMobile }: HistoryPageProps) {
     page: pagination.pageIndex + 1,
     perPage: pagination.pageSize,
   });
-  const { data: masters } = useMasters();
-
-  const masterMap = new Map(masters?.map((m) => [m.id, m.name]) ?? []);
 
   const columns: ColumnDef<AppointmentRetrieveOfUser>[] = [
     {
@@ -47,10 +43,10 @@ export default function HistoryPage({ isMobile }: HistoryPageProps) {
       cell: ({ getValue }) => (getValue() as string)?.slice(0, 5),
     },
     {
-      accessorKey: "master_id",
+      id: "master",
       header: t("master"),
       size: isMobile ? 80 : 120,
-      cell: ({ getValue }) => masterMap.get(getValue() as number) ?? "—",
+      accessorFn: (row) => row.master_data?.name ?? "—",
     },
     {
       accessorKey: "duration_minutes",

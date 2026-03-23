@@ -13,7 +13,6 @@ import { STATUS_COLORS } from "@/types/appointmentTypes";
 
 type AppointmentCardProps = {
   appointment: AppointmentRetrieveOfUser;
-  masterName: string;
   onDelete: () => void;
   onCommentUpdate: (id: number, comments: string) => void;
   isMobile: boolean;
@@ -30,13 +29,7 @@ function getDaysToGo(dateStr: string, t: ReturnType<typeof useTranslations>) {
   return t("daysToGo", { days: diff });
 }
 
-export default function AppointmentCard({
-  appointment,
-  masterName,
-  onDelete,
-  onCommentUpdate,
-  isMobile,
-}: AppointmentCardProps) {
+export default function AppointmentCard({ appointment, onDelete, onCommentUpdate, isMobile }: AppointmentCardProps) {
   const t = useTranslations("clientPage.activeAppointments");
   const [editingComment, setEditingComment] = useState(false);
   const [commentText, setCommentText] = useState(appointment.comments ?? "");
@@ -74,7 +67,7 @@ export default function AppointmentCard({
         <div className="flex items-center gap-2 text-gray-700">
           <User className="h-4 w-4 shrink-0" />
           <span>
-            {t("master")}: <strong>{masterName}</strong>
+            {t("master")}: <strong>{appointment.master_data.name}</strong>
           </span>
         </div>
         <div className="flex items-center gap-2 text-gray-700">

@@ -5,7 +5,6 @@ import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useUserAppointments, useDeleteAppointment, useUpdateAppointmentComment } from "@/hooks/useAppointments";
-import { useMasters } from "@/hooks/useMasters";
 import { Spinner } from "@/components/ui/spinner";
 import InfoUserDialog from "@/components/modals/InfoUserDialog";
 import AppointmentCard from "./AppointmentCard";
@@ -26,13 +25,10 @@ export default function ActiveAppointments({ isMobile }: ActiveAppointmentsProps
     page: 1,
     perPage: 50,
   });
-  const { data: masters } = useMasters();
   const deleteAppointment = useDeleteAppointment();
   const updateComment = useUpdateAppointmentComment();
 
   const [deleteId, setDeleteId] = useState<number | null>(null);
-
-  const masterMap = new Map(masters?.map((m) => [m.id, m.name]) ?? []);
 
   const appointments = data?.data ?? [];
 
@@ -80,7 +76,6 @@ export default function ActiveAppointments({ isMobile }: ActiveAppointmentsProps
             <AppointmentCard
               key={appointment.id}
               appointment={appointment}
-              masterName={masterMap.get(appointment.master_id) ?? "—"}
               onDelete={() => setDeleteId(appointment.id)}
               onCommentUpdate={handleCommentUpdate}
               isMobile={isMobile}

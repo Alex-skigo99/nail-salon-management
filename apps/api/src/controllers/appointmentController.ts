@@ -806,7 +806,7 @@ export const updateComment = async (req: Request, res: Response): Promise<void> 
  *                 data:
  *                   type: array
  *                   items:
- *                     $ref: '#/components/schemas/AppointmentRetrieve'
+ *                     $ref: '#/components/schemas/AppointmentRetrieveOfUser'
  *                 pagination:
  *                   type: object
  *                   properties:

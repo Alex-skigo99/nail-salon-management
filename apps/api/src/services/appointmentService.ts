@@ -1,6 +1,14 @@
 import { knex } from "../lib/db";
 import { DB_TABLES } from "../constants/dbTables";
-import { Appointment, AppointmentRetrieve, WorkingHours, Slot, SlotStatus, Master } from "../types/dbSchemaTypes";
+import {
+  Appointment,
+  AppointmentRetrieve,
+  AppointmentRetrieveOfUser,
+  WorkingHours,
+  Slot,
+  SlotStatus,
+  Master,
+} from "../types/dbSchemaTypes";
 import { SETTINGS_KEYS } from "../constants/settings";
 import type { IWithPagination } from "knex-paginate";
 import type {
@@ -25,6 +33,12 @@ const userDataSelect = `CASE WHEN u.id IS NULL THEN NULL
                 'image', u.image
               )
          END AS user_data`;
+
+const masterDataSelect = `json_build_object(
+                'id', m.id,
+                'name', m.name,
+                'description', m.description
+              ) AS master_data`;
 
 // ─────────────────────────────────────────────
 // Utility helpers
@@ -255,12 +269,12 @@ export interface GetUserAppointmentsParams {
 
 export async function getAppointmentsByUserId(
   params: GetUserAppointmentsParams
-): Promise<IWithPagination<AppointmentRetrieve>> {
+): Promise<IWithPagination<AppointmentRetrieveOfUser>> {
   const { userId, from, to, page, perPage } = params;
   let query = knex({ a: DB_TABLES.APPOINTMENTS })
     .where({ "a.user_id": userId })
-    .leftJoin(`${DB_TABLES.USERS} as u`, "a.user_id", "u.id")
-    .select("a.*", knex.raw(userDataSelect))
+    .join(`${DB_TABLES.MASTERS} as m`, "a.master_id", "m.id")
+    .select("a.*", knex.raw(masterDataSelect))
     .orderBy("a.date", "desc")
     .orderBy("a.time", "desc");
 
