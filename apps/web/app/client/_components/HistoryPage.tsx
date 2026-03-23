@@ -86,7 +86,7 @@ export default function HistoryPage({ isMobile }: HistoryPageProps) {
   ];
 
   return (
-    <div>
+    <div className={cn(isMobile ? "" : "rounded-4xl border-2 border-blue-100 bg-blue-50 p-6")}>
       <h2 className="mb-4 text-xl font-semibold">{t("title")}</h2>
       <GeneralTable<AppointmentRetrieveOfUser, AppointmentRetrieveOfUser, unknown>
         columns={columns}
@@ -97,6 +97,7 @@ export default function HistoryPage({ isMobile }: HistoryPageProps) {
         pagination={pagination}
         setPagination={setPagination}
         totalRows={data?.pagination?.total ?? 0}
+        headerClass="bg-blue-50"
       />
     </div>
   );

@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { Locale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { changeLocaleAction } from "@/utils/changeLocaleAction";
 import { UserMenu } from "@/components/UserMenu";
+import SalonTitle from "@/components/elements/SalonTitle";
 
 type SimpleT = (key: string) => string;
 type Props = { t: ReturnType<typeof useTranslations> | SimpleT; isMobile: boolean };
@@ -30,10 +31,7 @@ export default function Header({ t, isMobile }: Props) {
     <header className="fixed top-0 right-0 left-0 z-50 border-b border-pink-100 bg-white/80 shadow-sm backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-350 items-center justify-between px-4 sm:px-6">
         <a href="#hero" className="flex items-center gap-2">
-          <Sparkles className="size-6 text-pink-500" />
-          <span className="bg-linear-to-r from-pink-600 to-rose-400 bg-clip-text text-lg font-bold text-transparent">
-            {t("salonName")}
-          </span>
+          <SalonTitle salonName={t("salonName")} />
         </a>
 
         {!isMobile && (
