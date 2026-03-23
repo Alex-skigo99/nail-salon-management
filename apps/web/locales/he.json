@@ -169,5 +169,84 @@
       "phoneRequired": "נדרש מספר טלפון",
       "selectAllCategories": "נא לבחור שירות אחד בכל קטגוריה."
     }
+  },
+  "clientPage": {
+    "nav": {
+      "backToMain": "חזרה לדף הראשי",
+      "activeAppointments": "תורים פעילים",
+      "history": "היסטוריה",
+      "profile": "פרופיל",
+      "feedback": "משוב"
+    },
+    "activeAppointments": {
+      "title": "התורים הקרובים שלך",
+      "noAppointments": "אין לך תורים קרובים.",
+      "daysToGo": "{days} ימים נשארו",
+      "dayToGo": "נשאר יום אחד",
+      "today": "היום",
+      "tomorrow": "מחר",
+      "master": "מאסטר",
+      "date": "תאריך",
+      "time": "שעה",
+      "duration": "משך",
+      "minutes": "דק׳",
+      "services": "שירותים",
+      "status": "סטטוס",
+      "comments": "הערות",
+      "editComment": "ערוך הערה",
+      "deleteAppointment": "ביטול תור",
+      "deleteConfirmTitle": "ביטול תור",
+      "deleteConfirmText": "האם אתה בטוח שברצונך לבטל את התור הזה?",
+      "deleteSuccess": "התור בוטל בהצלחה.",
+      "deleteError": "ביטול התור נכשל.",
+      "commentUpdated": "ההערה עודכנה בהצלחה.",
+      "commentUpdateError": "עדכון ההערה נכשל.",
+      "commentPlaceholder": "הוסף הערה...",
+      "save": "שמור",
+      "cancel": "ביטול"
+    },
+    "history": {
+      "title": "היסטוריית תורים",
+      "noHistory": "לא נמצאה היסטוריית תורים.",
+      "master": "מאסטר",
+      "date": "תאריך",
+      "time": "שעה",
+      "duration": "משך",
+      "minutes": "דק׳",
+      "services": "שירותים",
+      "status": "סטטוס",
+      "comments": "הערות"
+    },
+    "profile": {
+      "title": "הפרופיל שלי",
+      "name": "שם",
+      "email": "אימייל",
+      "phone": "טלפון",
+      "googleAuth": "מחובר דרך Google",
+      "changePassword": "שנה סיסמה",
+      "oldPassword": "סיסמה נוכחית",
+      "newPassword": "סיסמה חדשה",
+      "confirmPassword": "אשר סיסמה חדשה",
+      "passwordChanged": "הסיסמה שונתה בהצלחה.",
+      "passwordChangeError": "שינוי הסיסמה נכשל.",
+      "wrongOldPassword": "הסיסמה הנוכחית שגויה.",
+      "passwordMismatch": "הסיסמאות אינן תואמות.",
+      "passwordMinLength": "הסיסמה חייבת להכיל לפחות 8 תווים.",
+      "profileUpdated": "הפרופיל עודכן בהצלחה.",
+      "profileUpdateError": "עדכון הפרופיל נכשל.",
+      "emailInUse": "האימייל הזה כבר בשימוש.",
+      "noPhone": "אין מספר טלפון",
+      "avatar": "אווטר",
+      "memberSince": "חבר מאז",
+      "lastLogin": "כניסה אחרונה",
+      "fieldRequired": "שדה חובה.",
+      "invalidEmail": "נא להזין כתובת אימייל חוקית.",
+      "invalidPhone": "נא להזין מספר טלפון חוקי.",
+      "cancel": "ביטול"
+    },
+    "feedback": {
+      "title": "משוב",
+      "comingSoon": "פיצ׳ר המשוב בקרוב! תודה על הסבלנות."
+    }
   }
 }

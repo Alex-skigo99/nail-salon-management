@@ -9,6 +9,8 @@ import type {
   AppointmentReschedule,
   DaySlots,
   MasterSuggestion,
+  AppointmentRetrieve,
+  PaginatedAppointmentsOfUser,
 } from "@/types/appointmentTypes";
 
 // ─── Queries ──────────────────────────────────────────
@@ -118,6 +120,41 @@ export function useDeleteAppointment() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [queryKeys.slots] });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.appointments] });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.userAppointments] });
+    },
+  });
+}
+
+// ─── User Appointments ────────────────────────────────
+
+export function useUserAppointments(
+  userId: string | undefined,
+  params: { from?: string; to?: string; page?: number; perPage?: number }
+) {
+  return useQuery({
+    queryKey: [queryKeys.userAppointments, userId, params],
+    queryFn: async () => {
+      const res = await apiClient.get<PaginatedAppointmentsOfUser>(`${apiRoutes.appointment}/user/${userId}`, {
+        params,
+      });
+      return res.data;
+    },
+    enabled: !!userId,
+  });
+}
+
+export function useUpdateAppointmentComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, comments }: { id: number; comments: string }) => {
+      const res = await apiClient.patch<Appointment>(`${apiRoutes.appointment}/${id}`, {
+        comments,
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [queryKeys.userAppointments] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.appointments] });
     },
   });

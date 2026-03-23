@@ -18,6 +18,13 @@ export default auth((req) => {
     }
   }
 
+  // Protect client routes - requires authentication
+  if (pathname.startsWith("/client")) {
+    if (!isLoggedIn) {
+      return NextResponse.redirect(new URL("/login", req.nextUrl));
+    }
+  }
+
   // Redirect logged-in users away from auth pages
   if (isLoggedIn && (pathname === "/login" || pathname === "/signup")) {
     return NextResponse.redirect(new URL("/", req.nextUrl));
@@ -27,5 +34,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/admin/:path*", "/login", "/signup"],
+  matcher: ["/admin/:path*", "/client/:path*", "/login", "/signup"],
 };
