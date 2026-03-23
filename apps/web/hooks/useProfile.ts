@@ -8,8 +8,8 @@ export function useProfile() {
   return useQuery({
     queryKey: [queryKeys.userProfile],
     queryFn: async () => {
-      const res = await apiClient.get<AuthUser>(apiRoutes.auth.me);
-      return res.data;
+      const res = await apiClient.get<{ user: AuthUser }>(apiRoutes.auth.me);
+      return res.data.user;
     },
   });
 }
@@ -18,8 +18,8 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (data: UpdateMeInput) => {
-      const res = await apiClient.patch<AuthUser>(apiRoutes.auth.me, data);
-      return res.data;
+      const res = await apiClient.patch<{ user: AuthUser }>(apiRoutes.auth.me, data);
+      return res.data.user;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [queryKeys.userProfile] });
