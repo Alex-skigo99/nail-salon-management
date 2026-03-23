@@ -172,6 +172,7 @@
     }
   },
   "clientPage": {
+    "clientPortal": "Client Portal",
     "nav": {
       "backToMain": "Back to Main",
       "activeAppointments": "Active Appointments",

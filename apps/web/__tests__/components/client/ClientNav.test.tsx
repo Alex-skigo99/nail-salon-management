@@ -1,7 +1,18 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import ClientNav, { ClientTab } from "@/app/client/_components/ClientNav";
+import ClientNav from "@/app/client/_components/ClientNav";
+
+const mockPush = jest.fn();
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+  usePathname: () => "/client/appointments",
+}));
+
+jest.mock("@/hooks/use-mobile", () => ({
+  useIsMobile: jest.fn(() => false),
+}));
 
 jest.mock("next-intl", () => ({
   useTranslations: jest.fn(() => (key: string) => {
@@ -17,18 +28,12 @@ jest.mock("next-intl", () => ({
 }));
 
 describe("ClientNav", () => {
-  const defaultProps = {
-    activeTab: "appointments" as ClientTab,
-    onTabChange: jest.fn(),
-    isMobile: false,
-  };
-
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it("renders all navigation tabs", () => {
-    render(<ClientNav {...defaultProps} />);
+    render(<ClientNav />);
 
     expect(screen.getByText("Back to Main")).toBeInTheDocument();
     expect(screen.getByText("Active Appointments")).toBeInTheDocument();
@@ -37,33 +42,34 @@ describe("ClientNav", () => {
     expect(screen.getByText("Feedback")).toBeInTheDocument();
   });
 
-  it("highlights the active tab", () => {
-    render(<ClientNav {...defaultProps} activeTab="appointments" />);
+  it("highlights the active tab based on pathname", () => {
+    render(<ClientNav />);
 
     const activeBtn = screen.getByText("Active Appointments");
     expect(activeBtn).toHaveClass("bg-pink-200");
   });
 
-  it("calls onTabChange when a tab is clicked", async () => {
+  it("calls router.push with the correct path when a tab is clicked", async () => {
     const user = userEvent.setup();
-    const onTabChange = jest.fn();
-    render(<ClientNav {...defaultProps} onTabChange={onTabChange} />);
+    render(<ClientNav />);
 
     await user.click(screen.getByText("History"));
-    expect(onTabChange).toHaveBeenCalledWith("history");
+    expect(mockPush).toHaveBeenCalledWith("/client/history");
   });
 
-  it("calls onTabChange with 'back' when Back to Main is clicked", async () => {
+  it("calls router.push with /home when Back to Main is clicked", async () => {
     const user = userEvent.setup();
-    const onTabChange = jest.fn();
-    render(<ClientNav {...defaultProps} onTabChange={onTabChange} />);
+    render(<ClientNav />);
 
     await user.click(screen.getByText("Back to Main"));
-    expect(onTabChange).toHaveBeenCalledWith("back");
+    expect(mockPush).toHaveBeenCalledWith("/home");
   });
 
   it("applies mobile styles when isMobile is true", () => {
-    render(<ClientNav {...defaultProps} isMobile={true} />);
+    const { useIsMobile } = jest.requireMock("@/hooks/use-mobile");
+    useIsMobile.mockReturnValue(true);
+
+    render(<ClientNav />);
 
     const buttons = screen.getAllByRole("button");
     buttons.forEach((btn) => {

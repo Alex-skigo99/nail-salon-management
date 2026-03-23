@@ -171,6 +171,7 @@
     }
   },
   "clientPage": {
+    "clientPortal": "פורטל לקוחות",
     "nav": {
       "backToMain": "חזרה לדף הראשי",
       "activeAppointments": "תורים פעילים",

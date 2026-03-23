@@ -171,6 +171,7 @@
     }
   },
   "clientPage": {
+    "clientPortal": "Страница клиента",
     "nav": {
       "backToMain": "На главную",
       "activeAppointments": "Активные записи",

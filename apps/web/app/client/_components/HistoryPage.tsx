@@ -34,6 +34,12 @@ export default function HistoryPage({ isMobile }: HistoryPageProps) {
     {
       accessorKey: "date",
       header: t("date"),
+      cell: ({ getValue }) =>
+        new Date(getValue() as string)?.toLocaleDateString("en-US", {
+          day: "2-digit",
+          month: "long",
+          year: "2-digit",
+        }),
       size: isMobile ? 90 : 110,
     },
     {
@@ -86,7 +92,7 @@ export default function HistoryPage({ isMobile }: HistoryPageProps) {
   ];
 
   return (
-    <div className={cn(isMobile ? "" : "rounded-4xl border-2 border-blue-100 bg-blue-50 p-6")}>
+    <div className={cn(isMobile ? "" : "rounded-4xl border-2 border-blue-100 bg-blue-50/50 p-6")}>
       <h2 className="mb-4 text-xl font-semibold">{t("title")}</h2>
       <GeneralTable<AppointmentRetrieveOfUser, AppointmentRetrieveOfUser, unknown>
         columns={columns}
@@ -97,7 +103,8 @@ export default function HistoryPage({ isMobile }: HistoryPageProps) {
         pagination={pagination}
         setPagination={setPagination}
         totalRows={data?.pagination?.total ?? 0}
-        headerClass="bg-blue-50"
+        headerClass="bg-blue-50/50"
+        cellClass="bg-blue-50/50"
       />
     </div>
   );
