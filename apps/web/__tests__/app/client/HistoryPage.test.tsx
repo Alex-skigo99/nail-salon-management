@@ -80,7 +80,7 @@ describe("HistoryPage", () => {
             comments: "Test",
             created_at: "2026-03-01T00:00:00Z",
             updated_at: "2026-03-01T00:00:00Z",
-            user_data: null,
+            master_data: { id: 1, name: "Sarah" },
           },
         ],
         pagination: { total: 1, currentPage: 1, perPage: 10, lastPage: 1 },
@@ -89,7 +89,7 @@ describe("HistoryPage", () => {
     } as any);
 
     render(<HistoryPage isMobile={false} />);
-    expect(screen.getByText("2026-03-01")).toBeInTheDocument();
+    expect(screen.getByText("March 1, 2026")).toBeInTheDocument();
     expect(screen.getByText("10:00")).toBeInTheDocument();
     expect(screen.getByText("Sarah")).toBeInTheDocument();
   });

@@ -170,7 +170,7 @@ describe("Header", () => {
       const toggleButton = screen.getByRole("button", { name: "Toggle menu" });
       await user.click(toggleButton);
 
-      expect(screen.getByTestId("book-btn")).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: /Book Now/i })).toBeInTheDocument();
     });
 
     it("does not display user menu in mobile view header", () => {

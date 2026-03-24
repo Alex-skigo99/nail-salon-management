@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -8,6 +8,7 @@ import { useUserAppointments, useDeleteAppointment, useUpdateAppointmentComment 
 import { Spinner } from "@/components/ui/spinner";
 import InfoUserDialog from "@/components/modals/InfoUserDialog";
 import AppointmentCard from "./AppointmentCard";
+import { sortAppointments } from "@/utils/sortAppointments";
 
 type ActiveAppointmentsProps = {
   isMobile: boolean;
@@ -31,6 +32,8 @@ export default function ActiveAppointments({ isMobile }: ActiveAppointmentsProps
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const appointments = data?.data ?? [];
+
+  const sortedAppointments = useMemo(() => sortAppointments(appointments, "asc"), [appointments]);
 
   const handleDelete = () => {
     if (deleteId === null) return;
@@ -72,7 +75,7 @@ export default function ActiveAppointments({ isMobile }: ActiveAppointmentsProps
         <p className="text-center text-gray-500">{t("noAppointments")}</p>
       ) : (
         <div className={isMobile ? "space-y-4" : "grid grid-cols-2 gap-4"}>
-          {appointments.map((appointment) => (
+          {sortedAppointments.map((appointment) => (
             <AppointmentCard
               key={appointment.id}
               appointment={appointment}

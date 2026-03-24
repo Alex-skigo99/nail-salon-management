@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AppointmentCard from "@/app/client/_components/AppointmentCard";
-import type { AppointmentRetrieve } from "@/types/appointmentTypes";
+import type { AppointmentRetrieveOfUser } from "@/types/appointmentTypes";
 
 jest.mock("next-intl", () => ({
   useTranslations: jest.fn(() => {
@@ -31,7 +31,7 @@ jest.mock("next-intl", () => ({
   }),
 }));
 
-const mockAppointment: AppointmentRetrieve = {
+const mockAppointment: AppointmentRetrieveOfUser = {
   id: 1,
   master_id: 1,
   user_id: "user-123",
@@ -45,13 +45,12 @@ const mockAppointment: AppointmentRetrieve = {
   comments: "Please use gel polish",
   created_at: "2026-03-01T10:00:00Z",
   updated_at: "2026-03-01T10:00:00Z",
-  user_data: null,
+  master_data: { id: 1, name: "Sarah" },
 };
 
 describe("AppointmentCard", () => {
   const defaultProps = {
     appointment: mockAppointment,
-    masterName: "Sarah",
     onDelete: jest.fn(),
     onCommentUpdate: jest.fn(),
     isMobile: false,

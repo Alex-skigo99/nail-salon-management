@@ -700,7 +700,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/AppointmentRetrieve"
+                        "$ref": "#/components/schemas/AppointmentRetrieveOfUser"
                       }
                     },
                     "pagination": {
@@ -977,7 +977,7 @@
     },
     "/master": {
       "get": {
-        "summary": "Retrieve a list of masters (ADMIN only)",
+        "summary": "Retrieve a list of masters",
         "tags": [
           "Master"
         ],
@@ -2204,6 +2204,24 @@
                     "type": "null"
                   }
                 ]
+              }
+            }
+          }
+        ]
+      },
+      "AppointmentRetrieveOfUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Appointment"
+          },
+          {
+            "type": "object",
+            "required": [
+              "master_data"
+            ],
+            "properties": {
+              "master_data": {
+                "$ref": "#/components/schemas/Master"
               }
             }
           }

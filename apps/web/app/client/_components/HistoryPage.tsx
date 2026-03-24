@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { AppointmentRetrieveOfUser } from "@/types/appointmentTypes";
 import { STATUS_COLORS } from "@/types/appointmentTypes";
+import { getAppointmentDateString } from "@/utils/dateUtils";
 
 type HistoryPageProps = {
   isMobile: boolean;
@@ -34,12 +35,7 @@ export default function HistoryPage({ isMobile }: HistoryPageProps) {
     {
       accessorKey: "date",
       header: t("date"),
-      cell: ({ getValue }) =>
-        new Date(getValue() as string)?.toLocaleDateString("en-US", {
-          day: "2-digit",
-          month: "long",
-          year: "2-digit",
-        }),
+      cell: ({ getValue }) => getAppointmentDateString(getValue() as string),
       size: isMobile ? 90 : 110,
     },
     {
@@ -92,7 +88,7 @@ export default function HistoryPage({ isMobile }: HistoryPageProps) {
   ];
 
   return (
-    <div className={cn(isMobile ? "" : "rounded-4xl border-2 border-blue-100 bg-blue-50/50 p-6")}>
+    <div className={cn(!isMobile && "rounded-4xl border-2 border-blue-100 bg-blue-50/50 p-6")}>
       <h2 className="mb-4 text-xl font-semibold">{t("title")}</h2>
       <GeneralTable<AppointmentRetrieveOfUser, AppointmentRetrieveOfUser, unknown>
         columns={columns}

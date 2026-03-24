@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import type { AppointmentRetrieveOfUser } from "@/types/appointmentTypes";
 import { STATUS_COLORS } from "@/types/appointmentTypes";
+import { getDaysToGo, getAppointmentDateString } from "@/utils/dateUtils";
 
 type AppointmentCardProps = {
   appointment: AppointmentRetrieveOfUser;
@@ -18,12 +19,10 @@ type AppointmentCardProps = {
   isMobile: boolean;
 };
 
-function getDaysToGo(dateStr: string, t: ReturnType<typeof useTranslations>) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const target = new Date(dateStr + "T00:00:00");
-  const diff = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+function getDaysToGoLabel(dateStr: string, time: string, t: ReturnType<typeof useTranslations>) {
+  const diff = getDaysToGo(dateStr, time);
 
+  if (diff < 0) return t("past");
   if (diff === 0) return t("today");
   if (diff === 1) return t("tomorrow");
   return t("daysToGo", { days: diff });
@@ -34,7 +33,7 @@ export default function AppointmentCard({ appointment, onDelete, onCommentUpdate
   const [editingComment, setEditingComment] = useState(false);
   const [commentText, setCommentText] = useState(appointment.comments ?? "");
 
-  const daysLabel = getDaysToGo(appointment.date, t);
+  const daysLabel = getDaysToGoLabel(appointment.date, appointment.time, t);
 
   const handleSaveComment = () => {
     onCommentUpdate(appointment.id, commentText);
@@ -47,7 +46,7 @@ export default function AppointmentCard({ appointment, onDelete, onCommentUpdate
   };
 
   return (
-    <Card className={cn("relative", isMobile && "text-sm")}>
+    <Card className={cn("relative bg-amber-50/30 shadow", isMobile && "text-sm")}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="flex items-center gap-2">
           <Badge className={cn(STATUS_COLORS[appointment.status], "text-xs")}>{appointment.status}</Badge>
@@ -72,7 +71,7 @@ export default function AppointmentCard({ appointment, onDelete, onCommentUpdate
         </div>
         <div className="flex items-center gap-2 text-gray-700">
           <Calendar className="h-4 w-4 shrink-0" />
-          <span>{appointment.date}</span>
+          <span>{getAppointmentDateString(appointment.date)}</span>
           <Clock className="ml-2 h-4 w-4 shrink-0" />
           <span>
             {appointment.time?.slice(0, 5)} · {appointment.duration_minutes} {t("minutes")}
@@ -86,6 +85,7 @@ export default function AppointmentCard({ appointment, onDelete, onCommentUpdate
 
         {/* Comments section */}
         <div className="border-t pt-2">
+          <h1 className="text-sm">{t("comments")}:</h1>
           {editingComment ? (
             <div className="space-y-2">
               <Textarea

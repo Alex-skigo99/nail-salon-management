@@ -185,6 +185,7 @@
       "noAppointments": "You have no upcoming appointments.",
       "daysToGo": "{days} days to go",
       "dayToGo": "1 day to go",
+      "past": "Overdue",
       "today": "Today",
       "tomorrow": "Tomorrow",
       "master": "Master",

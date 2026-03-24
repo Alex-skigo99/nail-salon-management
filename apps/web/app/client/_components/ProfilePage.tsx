@@ -2,21 +2,19 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
 import { Shield, Calendar, Clock } from "lucide-react";
 import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import EditableMultiInputField from "./EditableMultiInputField";
+import ChangePasswordDialog from "@/components/modals/ChangePasswordDialog";
 import { AxiosError } from "axios";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { getCreatedAtString } from "@/utils/dateUtils";
 
 // Check if avatar component exists - let me handle it gracefully
 function UserAvatar({ name, image }: { name: string; image: string | null }) {
@@ -42,6 +40,8 @@ export default function ProfilePage() {
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [fieldErrorKey, setFieldErrorKey] = useState<string | null>(null);
+
+  const isMobile = useIsMobile();
 
   const handleFieldUpdate = (field: string, value: string) => {
     setFieldError(null);
@@ -73,15 +73,17 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={cn("space-y-6", !isMobile && "rounded-4xl border-2 border-green-100 bg-green-50/30 p-8")}>
       <h2 className="text-xl font-semibold">{t("title")}</h2>
 
       {/* Avatar + basic info */}
       <div className="flex items-center gap-4">
         <UserAvatar name={profile.name} image={profile.image} />
-        <div>
-          <h3 className="text-lg font-semibold">{profile.name}</h3>
-          <p className="text-sm text-gray-500">{profile.email}</p>
+        <div className={cn("flex gap-2", isMobile ? "flex-col" : "flex-row items-end gap-6")}>
+          <div>
+            <h3 className="text-lg font-semibold">{profile.name}</h3>
+            <p className="text-sm text-gray-500">{profile.email}</p>
+          </div>
           {profile.isGoogleAuth && (
             <Badge variant="outline" className="mt-1 border-blue-200 bg-blue-50 text-blue-700">
               <Shield className="mr-1 h-3 w-3" />
@@ -92,38 +94,44 @@ export default function ProfilePage() {
       </div>
 
       {/* Editable fields */}
-      <div className="max-w-md space-y-4 rounded-lg border p-4">
-        <EditableMultiInputField
-          label={t("name")}
-          value={profile.name}
-          onSave={(val) => handleFieldUpdate("name", val)}
-        />
-        <EditableMultiInputField
-          label={t("email")}
-          value={profile.email}
-          type="email"
-          onSave={(val) => handleFieldUpdate("email", val)}
-          errorMessage={fieldErrorKey === "email" ? (fieldError ?? undefined) : undefined}
-        />
-        <EditableMultiInputField
-          label={t("phone")}
-          value={profile.phone ?? ""}
-          type="tel"
-          onSave={(val) => handleFieldUpdate("phone", val)}
-          placeholder={t("noPhone")}
-        />
+      <div className="max-w-md space-y-4">
+        <div className={cn(!isMobile && "rounded-4xl border bg-white px-6 py-2")}>
+          <EditableMultiInputField
+            label={t("name")}
+            value={profile.name}
+            onSave={(val) => handleFieldUpdate("name", val)}
+          />
+        </div>
+        <div className={cn(!isMobile && "rounded-4xl border bg-white px-6 py-2")}>
+          <EditableMultiInputField
+            label={t("email")}
+            value={profile.email}
+            type="email"
+            onSave={(val) => handleFieldUpdate("email", val)}
+            errorMessage={fieldErrorKey === "email" ? (fieldError ?? undefined) : undefined}
+          />
+        </div>
+        <div className={cn(!isMobile && "rounded-4xl border bg-white px-6 py-2")}>
+          <EditableMultiInputField
+            label={t("phone")}
+            value={profile.phone ?? ""}
+            type="tel"
+            onSave={(val) => handleFieldUpdate("phone", val)}
+            placeholder={t("noPhone")}
+          />
+        </div>
       </div>
 
       {/* Meta info */}
-      <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+      <div className={cn("flex flex-wrap gap-2 text-sm text-gray-500", !isMobile && "justify-end gap-6")}>
         <span className="flex items-center gap-1">
           <Calendar className="h-4 w-4" />
-          {t("memberSince")}: {new Date(profile.created_at).toLocaleDateString()}
+          {t("memberSince")}: {getCreatedAtString(profile.created_at)}
         </span>
         {profile.last_login && (
           <span className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
-            {t("lastLogin")}: {new Date(profile.last_login).toLocaleDateString()}
+            {t("lastLogin")}: {getCreatedAtString(profile.last_login)}
           </span>
         )}
       </div>
@@ -137,106 +145,5 @@ export default function ProfilePage() {
 
       <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
     </div>
-  );
-}
-
-// ─── Change Password Dialog ───────────────────────────
-
-const passwordSchema = z
-  .object({
-    oldPassword: z.string().min(1),
-    newPassword: z.string().min(8),
-    confirmPassword: z.string().min(1),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "passwordMismatch",
-  });
-
-type PasswordFormValues = z.infer<typeof passwordSchema>;
-
-function ChangePasswordDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-  const t = useTranslations("clientPage.profile");
-  const updateProfile = useUpdateProfile();
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setError,
-    formState: { errors },
-  } = useForm<PasswordFormValues>({
-    resolver: zodResolver(passwordSchema),
-  });
-
-  const onSubmit = (data: PasswordFormValues) => {
-    updateProfile.mutate(
-      { oldPassword: data.oldPassword, newPassword: data.newPassword },
-      {
-        onSuccess: () => {
-          toast.success(t("passwordChanged"));
-          reset();
-          onOpenChange(false);
-        },
-        onError: (err) => {
-          const axiosErr = err as AxiosError;
-          if (axiosErr.response?.status === 401) {
-            setError("oldPassword", { message: t("wrongOldPassword") });
-          } else {
-            toast.error(t("passwordChangeError"));
-          }
-        },
-      }
-    );
-  };
-
-  const handleClose = (val: boolean) => {
-    if (!val) reset();
-    onOpenChange(val);
-  };
-
-  const getErrorMessage = (field: keyof PasswordFormValues) => {
-    const msg = errors[field]?.message;
-    if (!msg) return undefined;
-    // Handle refine messages as translation keys
-    if (msg === "passwordMismatch") return t("passwordMismatch");
-    return msg;
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("changePassword")}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-1">
-            <Label htmlFor="oldPassword">{t("oldPassword")}</Label>
-            <Input id="oldPassword" type="password" {...register("oldPassword")} />
-            {getErrorMessage("oldPassword") && <p className="text-xs text-red-600">{getErrorMessage("oldPassword")}</p>}
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="newPassword">{t("newPassword")}</Label>
-            <Input id="newPassword" type="password" {...register("newPassword")} />
-            {getErrorMessage("newPassword") && <p className="text-xs text-red-600">{getErrorMessage("newPassword")}</p>}
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
-            <Input id="confirmPassword" type="password" {...register("confirmPassword")} />
-            {getErrorMessage("confirmPassword") && (
-              <p className="text-xs text-red-600">{getErrorMessage("confirmPassword")}</p>
-            )}
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => handleClose(false)}>
-              {t("cancel") ?? "Cancel"}
-            </Button>
-            <Button type="submit" disabled={updateProfile.isPending}>
-              {t("changePassword")}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
   );
 }

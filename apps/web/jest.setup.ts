@@ -13,3 +13,19 @@ if (typeof (HTMLElement.prototype as any).hasPointerCapture !== "function") {
 if (typeof (Element.prototype as any).scrollIntoView !== "function") {
   (Element.prototype as any).scrollIntoView = () => {};
 }
+
+if (typeof window.matchMedia !== "function") {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }),
+  });
+}
