@@ -652,17 +652,27 @@ export const checkAvailability = async (req: Request, res: Response): Promise<vo
  *   get:
  *     summary: Get up to 6 appointment slot suggestions grouped by master
  *     description: >
- *       Returns upcoming empty time slots grouped by master.
+ *       Returns upcoming empty time slots (in the future relative to NowDate/NowTime) grouped by master.
  *       If masterId is provided, returns only that master.
  *     tags: [Appointment]
  *     parameters:
+ *       - in: query
+ *         name: NowDate
+ *         schema: { type: string, example: "2026-03-24" }
+ *         required: true
+ *         description: Current UTC date in YYYY-MM-DD format
+ *       - in: query
+ *         name: NowTime
+ *         schema: { type: string, example: "14:30" }
+ *         required: true
+ *         description: Current UTC time in HH:MM format
  *       - in: query
  *         name: masterId
  *         schema: { type: integer }
  *         required: false
  *     responses:
  *       200:
- *         description: Array of grouped suggestions by master
+ *         description: Array of grouped suggestions by master (future slots only)
  *         content:
  *           application/json:
  *             schema:
@@ -678,15 +688,24 @@ export const checkAvailability = async (req: Request, res: Response): Promise<vo
  *                     items:
  *                       $ref: '#/components/schemas/TimeSlot'
  *       400:
- *         description: Invalid masterId
+ *         description: Missing or invalid query parameters
  *       500:
  *         description: Internal server error
  */
 export const getSuggestions = async (req: Request, res: Response): Promise<void> => {
   try {
-    const queryMasterId = req.query.masterId;
-    let masterId: number | undefined;
+    const { NowDate, NowTime, masterId: queryMasterId } = req.query;
 
+    if (!NowDate || typeof NowDate !== "string") {
+      res.status(400).json({ error: "Query param 'NowDate' is required (YYYY-MM-DD)" });
+      return;
+    }
+    if (!NowTime || typeof NowTime !== "string") {
+      res.status(400).json({ error: "Query param 'NowTime' is required (HH:MM)" });
+      return;
+    }
+
+    let masterId: number | undefined;
     if (queryMasterId !== undefined) {
       masterId = Number(queryMasterId);
       if (isNaN(masterId)) {
@@ -695,7 +714,7 @@ export const getSuggestions = async (req: Request, res: Response): Promise<void>
       }
     }
 
-    const suggestions = await appointmentService.getSuggestionsByMaster(masterId);
+    const suggestions = await appointmentService.getSuggestionsByMaster(NowDate, NowTime, masterId);
     res.json(suggestions);
   } catch (err) {
     console.error("Error fetching suggestions:", err);

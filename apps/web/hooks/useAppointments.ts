@@ -58,8 +58,11 @@ export function useAppointmentSuggestions(masterId?: number) {
   return useQuery({
     queryKey: [queryKeys.appointmentSuggestions, masterId ?? null],
     queryFn: async () => {
+      const now = new Date();
+      const NowDate = now.toISOString().slice(0, 10);
+      const NowTime = now.toISOString().slice(11, 16);
       const res = await apiClient.get<MasterSuggestion[]>(`${apiRoutes.appointment}/suggestions`, {
-        params: masterId ? { masterId } : undefined,
+        params: { NowDate, NowTime, ...(masterId ? { masterId } : {}) },
       });
       return res.data;
     },

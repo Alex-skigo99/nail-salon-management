@@ -85,14 +85,26 @@ describe("GET /appointment/suggestions", () => {
       { master: { id: 1, name: "Jane" }, slots: [] },
     ]);
 
-    const res = await request(app).get("/appointment/suggestions");
+    const res = await request(app).get("/appointment/suggestions").query({ NowDate: "2026-03-24", NowTime: "14:30" });
 
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
+  it("returns 400 when NowDate is missing", async () => {
+    const res = await request(app).get("/appointment/suggestions").query({ NowTime: "14:30" });
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 400 when NowTime is missing", async () => {
+    const res = await request(app).get("/appointment/suggestions").query({ NowDate: "2026-03-24" });
+    expect(res.status).toBe(400);
+  });
+
   it("returns 400 when masterId is not a number", async () => {
-    const res = await request(app).get("/appointment/suggestions").query({ masterId: "abc" });
+    const res = await request(app)
+      .get("/appointment/suggestions")
+      .query({ NowDate: "2026-03-24", NowTime: "14:30", masterId: "abc" });
     expect(res.status).toBe(400);
   });
 });

@@ -467,20 +467,30 @@ export async function checkAvailability(
 // ─────────────────────────────────────────────
 
 /**
- * Returns up to 6 appointment slot suggestions starting from today.
+ * Returns up to 6 appointment slot suggestions starting from nowDate.
  * Strategy per day: take the 2 earliest empty slots + 1 closest to end of day.
  * Continues to next day until 6 total suggestions are collected.
+ * On nowDate, only slots strictly after nowTime (UTC) are included.
  */
-export async function getHomeSuggestions(masterId: number): Promise<SlotSuggestion[]> {
+export async function getHomeSuggestions(
+  masterId: number,
+  nowDate: string,
+  nowTime: string
+): Promise<SlotSuggestion[]> {
   const slotDuration = await getSettingValue(SETTINGS_KEYS.SLOT_DURATION, 30);
+  const nowMinutes = timeToMinutes(nowTime);
 
-  const todayStr = formatDate(new Date());
   const suggestions: SlotSuggestion[] = [];
   let day = 0;
 
   while (suggestions.length < 6 && day < 30) {
-    const date = addDays(todayStr, day);
-    const emptyTimes = await getEmptySlotsForDay(masterId, date, slotDuration, slotDuration);
+    const date = addDays(nowDate, day);
+    let emptyTimes = await getEmptySlotsForDay(masterId, date, slotDuration, slotDuration);
+
+    // On the current date, exclude slots at or before the current time
+    if (date === nowDate) {
+      emptyTimes = emptyTimes.filter((t) => timeToMinutes(t) > nowMinutes);
+    }
 
     if (emptyTimes.length > 0) {
       const needed = Math.min(3, 6 - suggestions.length);
@@ -507,7 +517,11 @@ export async function getHomeSuggestions(masterId: number): Promise<SlotSuggesti
   return suggestions.slice(0, 6);
 }
 
-export async function getSuggestionsByMaster(masterId?: number): Promise<MasterSuggestions[]> {
+export async function getSuggestionsByMaster(
+  nowDate: string,
+  nowTime: string,
+  masterId?: number
+): Promise<MasterSuggestions[]> {
   const mastersQuery = knex(DB_TABLES.MASTERS).select<Master[]>("id", "name", "description").orderBy("id", "asc");
 
   if (masterId) {
@@ -522,7 +536,7 @@ export async function getSuggestionsByMaster(masterId?: number): Promise<MasterS
 
   const result = await Promise.all(
     masters.map(async (master) => {
-      const slots = await getHomeSuggestions(master.id);
+      const slots = await getHomeSuggestions(master.id, nowDate, nowTime);
       return {
         master,
         slots,
