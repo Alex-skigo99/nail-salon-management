@@ -99,8 +99,8 @@
   },
   "appSidebar": {
     "title": "Xena Nails Studio",
-    "subtitle": "Salon Management",
-    "home": "Home",
+    "subtitle": "Salon Admin Portal",
+    "home": "Exit Admin Portal",
     "calendar": "Calendar",
     "masters": "Masters",
     "services": "Services"

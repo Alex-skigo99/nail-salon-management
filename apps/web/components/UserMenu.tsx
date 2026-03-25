@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useState } from "react";
-import { LogOut, User, Shield } from "lucide-react";
+import { LogOut, User, Shield, ArrowBigDownIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,7 +37,8 @@ export function UserMenu() {
 
   const user = session.user;
   const isAdmin = user.role === "ADMIN";
-  const accountPath = isAdmin ? "/admin" : "/client";
+  const accountPath = "/client";
+  const adminPortalPath = isAdmin ? "/admin" : "/client";
   const initials =
     user.name
       ?.split(" ")
@@ -68,10 +69,22 @@ export function UserMenu() {
             <span className="font-medium">{user.name}</span>
             <span className="text-muted-foreground">{user.email}</span>
           </div>
-          {isAdmin && <Shield className="text-primary ml-auto size-3.5" />}
+          {isAdmin ? (
+            <Shield className="text-primary ml-auto size-3.5" />
+          ) : (
+            <ArrowBigDownIcon className="text-primary ml-auto size-3.5" />
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-60">
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link href={adminPortalPath} className="flex items-center gap-2">
+              <Shield className="size-4" />
+              Admin Portal
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild>
           <Link href={accountPath} className="flex items-center gap-2">
             <User className="size-4" />
