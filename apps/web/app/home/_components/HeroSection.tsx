@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type SimpleT = (key: string) => string;
 type Props = { t: ReturnType<typeof useTranslations> | SimpleT; isMobile: boolean };
@@ -17,22 +18,23 @@ export default function HeroSection({ t, isMobile }: Props) {
         <div className="absolute inset-0 bg-linear-to-b from-black/50 via-black/30 to-black/60" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-3xl px-4 text-center sm:px-6">
+      <div className="relative z-20 mx-auto max-w-3xl px-4 text-center sm:px-6">
         <Badge variant="secondary" className="mb-6 border-white/30 bg-white/20 px-4 py-1 text-white backdrop-blur-sm">
           <Sparkles className="mr-1 size-3" />
           {t("salonName")}
         </Badge>
         <h1
-          className={`mb-6 leading-tight font-bold tracking-tight text-white ${
+          className={cn(
+            "mb-6 leading-tight font-bold tracking-tight text-white",
             isMobile ? "text-3xl" : "text-5xl lg:text-6xl"
-          }`}
+          )}
         >
           {t("heroTitle")}
         </h1>
-        <p className={`mx-auto mb-8 max-w-2xl leading-relaxed text-white/90 ${isMobile ? "text-base" : "text-lg"}`}>
+        <p className={cn("mx-auto mb-8 max-w-2xl leading-relaxed text-white/90", isMobile ? "text-base" : "text-lg")}>
           {t("heroSubtitle")}
         </p>
-        <div className={`flex justify-center gap-4 ${isMobile ? "flex-col items-center" : ""}`}>
+        <div className={cn("flex justify-center gap-4", isMobile && "flex-col items-center")}>
           <Button
             asChild
             size="lg"

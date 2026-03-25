@@ -6,7 +6,7 @@ import * as masterService from "../services/masterService";
  * @openapi
  * /master:
  *   get:
- *     summary: Retrieve a list of masters (ADMIN only)
+ *     summary: Retrieve a list of masters
  *     tags:
  *       - Master
  *     responses:

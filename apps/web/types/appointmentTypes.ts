@@ -1,3 +1,6 @@
+import { Master } from "./masterTypes";
+import { Pagination } from "@/types/paginationTypes";
+
 export type AppointmentStatus = "new" | "confirmed" | "reserved" | "pending" | "rejected";
 
 export type SlotStatus = "empty" | "reserved" | "none" | "part_book" | "book";
@@ -28,6 +31,15 @@ export type Appointment = {
 
 export type AppointmentRetrieve = Appointment & {
   user_data: UserData | null;
+};
+
+export type AppointmentRetrieveOfUser = Appointment & {
+  master_data: Master;
+};
+
+export type PaginatedAppointmentsOfUser = {
+  data: AppointmentRetrieveOfUser[];
+  pagination?: Pagination;
 };
 
 export type AppointmentCreate = {

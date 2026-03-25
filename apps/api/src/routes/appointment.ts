@@ -12,6 +12,9 @@ router.get("/slots/available", appointmentController.checkAvailability);
 // GET /appointment/suggestions?masterId=
 router.get("/suggestions", appointmentController.getSuggestions);
 
+// GET /appointment/user/:userId — appointments for a user (authenticated)
+router.get("/user/:userId", authenticate, appointmentController.getUserAppointments);
+
 // ── Master-scoped routes ──
 
 // GET /appointment/master/:masterId?from=&to=
@@ -33,6 +36,9 @@ router.put("/:id/reschedule", authenticate, requireRole("ADMIN"), appointmentCon
 
 // PUT /appointment/:id  (edit non-scheduling fields)
 router.put("/:id", authenticate, requireRole("ADMIN"), appointmentController.update);
+
+// PATCH /appointment/:id  (update comment only)
+router.patch("/:id", appointmentController.updateComment);
 
 // DELETE /appointment/:id
 router.delete("/:id", appointmentController.remove);

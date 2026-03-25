@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import type { User } from "./types/userTypes";
+import { apiRoutes } from "./const/apiRouts";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
@@ -16,7 +17,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         try {
-          const res = await fetch(`${API_URL}/auth/login`, {
+          const res = await fetch(`${API_URL}${apiRoutes.auth.login}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -65,7 +66,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         try {
-          const res = await fetch(`${API_URL}/auth/google`, {
+          const res = await fetch(`${API_URL}${apiRoutes.auth.google}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

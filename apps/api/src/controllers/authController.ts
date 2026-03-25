@@ -35,6 +35,18 @@ const GoogleAuthSchema = z.object({
   image: z.string().optional(),
 });
 
+const UpdateMeSchema = z
+  .object({
+    name: z.string().min(1, "Name is required").max(100).optional(),
+    email: z.email("Invalid email address").optional(),
+    phone: PhoneSchema.optional(),
+    oldPassword: z.string().optional(),
+    newPassword: z.string().min(8, "New password must be at least 8 characters").optional(),
+  })
+  .refine((d) => !d.newPassword || d.oldPassword !== undefined || true, {
+    message: "oldPassword is required when setting a new password",
+  });
+
 // ─────────────────────────────────────────────
 // Cookie config
 // ─────────────────────────────────────────────
@@ -77,6 +89,9 @@ function setTokenCookie(res: Response, token: string) {
  *         image:
  *           type: string
  *           nullable: true
+ *         isGoogleAuth:
+ *           type: boolean
+ *           description: True if the user authenticated via Google (google_id is set)
  *         last_login:
  *           type: string
  *           format: date-time
@@ -117,6 +132,23 @@ function setTokenCookie(res: Response, token: string) {
  *           format: email
  *         password:
  *           type: string
+ *     UpdateMeInput:
+ *       type: object
+ *       properties:
+ *         name:
+ *           type: string
+ *           maxLength: 100
+ *         email:
+ *           type: string
+ *           format: email
+ *         phone:
+ *           type: string
+ *         oldPassword:
+ *           type: string
+ *           description: Required when changing password and account has an existing password
+ *         newPassword:
+ *           type: string
+ *           minLength: 8
  */
 
 // ─────────────────────────────────────────────
@@ -293,9 +325,107 @@ export async function me(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    res.json({ user });
+    const { google_id, ...rest } = user as authService.SafeUser & { google_id: string | null };
+    res.json({ user: { ...rest, isGoogleAuth: google_id !== null } });
   } catch (err) {
     console.error("Me error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * @openapi
+ * /auth/me:
+ *   patch:
+ *     summary: Update current user profile or password
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateMeInput'
+ *     responses:
+ *       200:
+ *         description: Updated user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthUser'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Not authenticated or wrong old password
+ *       409:
+ *         description: Email already in use
+ */
+export async function updateMe(req: Request, res: Response): Promise<void> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userId = (req as any).user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: "Not authenticated" });
+      return;
+    }
+
+    const parsed = UpdateMeSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.flatten() });
+      return;
+    }
+
+    const user = await authService.updateMe(userId, parsed.data);
+    const { google_id, ...rest } = user as authService.SafeUser & { google_id: string | null };
+    res.json({ user: { ...rest, isGoogleAuth: google_id !== null } });
+  } catch (err: unknown) {
+    const e = err as { statusCode?: number; message?: string };
+    if (e?.statusCode === 409) {
+      res.status(409).json({ error: e.message });
+      return;
+    }
+    if (e?.statusCode === 401) {
+      res.status(401).json({ error: e.message });
+      return;
+    }
+    console.error("UpdateMe error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+/**
+ * @openapi
+ * /auth/me:
+ *   delete:
+ *     summary: Delete the current authenticated user account
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       204:
+ *         description: Account deleted successfully
+ *       401:
+ *         description: Not authenticated
+ */
+export async function deleteMe(req: Request, res: Response): Promise<void> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const userId = (req as any).user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: "Not authenticated" });
+      return;
+    }
+    await authService.deleteUser(userId);
+    res.clearCookie("auth_token", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      path: "/",
+    });
+    res.status(204).send();
+  } catch (err) {
+    console.error("DeleteMe error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 }

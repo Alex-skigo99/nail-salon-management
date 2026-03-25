@@ -9,6 +9,7 @@ import type {
   AppointmentReschedule,
   DaySlots,
   MasterSuggestion,
+  PaginatedAppointmentsOfUser,
 } from "@/types/appointmentTypes";
 
 // ─── Queries ──────────────────────────────────────────
@@ -56,8 +57,11 @@ export function useAppointmentSuggestions(masterId?: number) {
   return useQuery({
     queryKey: [queryKeys.appointmentSuggestions, masterId ?? null],
     queryFn: async () => {
+      const now = new Date();
+      const NowDate = now.toLocaleString("en-CA").slice(0, 10);
+      const NowTime = now.toLocaleString("en-CA", { hour: "2-digit", minute: "2-digit", hour12: false }).slice(0, 5);
       const res = await apiClient.get<MasterSuggestion[]>(`${apiRoutes.appointment}/suggestions`, {
-        params: masterId ? { masterId } : undefined,
+        params: { NowDate, NowTime, ...(masterId ? { masterId } : {}) },
       });
       return res.data;
     },
@@ -118,6 +122,41 @@ export function useDeleteAppointment() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [queryKeys.slots] });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.appointments] });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.userAppointments] });
+    },
+  });
+}
+
+// ─── User Appointments ────────────────────────────────
+
+export function useUserAppointments(
+  userId: string | undefined,
+  params: { from?: string; to?: string; page?: number; perPage?: number }
+) {
+  return useQuery({
+    queryKey: [queryKeys.userAppointments, userId, params],
+    queryFn: async () => {
+      const res = await apiClient.get<PaginatedAppointmentsOfUser>(`${apiRoutes.appointment}/user/${userId}`, {
+        params,
+      });
+      return res.data;
+    },
+    enabled: !!userId,
+  });
+}
+
+export function useUpdateAppointmentComment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, comments }: { id: number; comments: string }) => {
+      const res = await apiClient.patch<Appointment>(`${apiRoutes.appointment}/${id}`, {
+        comments,
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [queryKeys.userAppointments] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.appointments] });
     },
   });

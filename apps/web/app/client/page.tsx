@@ -1,5 +1,5 @@
-"use client";
+import { redirect } from "next/navigation";
 
 export default function ClientPage() {
-  return <div className="mt-80 w-full text-center">Client Page</div>;
+  redirect("/client/appointments");
 }

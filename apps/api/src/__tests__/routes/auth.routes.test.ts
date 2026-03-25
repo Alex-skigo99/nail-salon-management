@@ -15,6 +15,8 @@ vi.mock("../../services/authService", async (importActual) => {
     findUserById: vi.fn(),
     findUserByEmail: vi.fn(),
     findOrCreateGoogleUser: vi.fn(),
+    updateMe: vi.fn(),
+    deleteUser: vi.fn(),
   };
 });
 
@@ -135,12 +137,113 @@ describe("GET /auth/me", () => {
     expect(res.status).toBe(401);
   });
 
-  it("returns 200 and user data with a valid Bearer token", async () => {
+  it("returns 200 and user data with isGoogleAuth=false when google_id is null", async () => {
     (authService.findUserById as any).mockResolvedValue(mockUser);
     const token = generateToken({ id: mockUser.id, email: mockUser.email, role: "USER" });
 
     const res = await request(app).get("/auth/me").set("Authorization", `Bearer ${token}`);
 
     expect(res.status).toBe(200);
+    expect(res.body.user.isGoogleAuth).toBe(false);
+  });
+
+  it("returns 200 and isGoogleAuth=true when google_id is set", async () => {
+    (authService.findUserById as any).mockResolvedValue({ ...mockUser, google_id: "google-123" });
+    const token = generateToken({ id: mockUser.id, email: mockUser.email, role: "USER" });
+
+    const res = await request(app).get("/auth/me").set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.isGoogleAuth).toBe(true);
+  });
+});
+
+// ─── PATCH /auth/me ───────────────────────────────────────────────────────────
+
+describe("PATCH /auth/me", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("returns 401 when not authenticated", async () => {
+    const res = await request(app).patch("/auth/me").send({ name: "New Name" });
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 200 and updated user on valid input", async () => {
+    const updatedUser = { ...mockUser, name: "New Name" };
+    (authService.updateMe as any).mockResolvedValue(updatedUser);
+    const token = generateToken({ id: mockUser.id, email: mockUser.email, role: "USER" });
+
+    const res = await request(app).patch("/auth/me").set("Authorization", `Bearer ${token}`).send({ name: "New Name" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.user.name).toBe("New Name");
+  });
+
+  it("returns 400 on invalid email", async () => {
+    const token = generateToken({ id: mockUser.id, email: mockUser.email, role: "USER" });
+
+    const res = await request(app)
+      .patch("/auth/me")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ email: "not-an-email" });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 400 on short new password", async () => {
+    const token = generateToken({ id: mockUser.id, email: mockUser.email, role: "USER" });
+
+    const res = await request(app)
+      .patch("/auth/me")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ newPassword: "short" });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 401 when old password is wrong", async () => {
+    (authService.updateMe as any).mockRejectedValue(
+      Object.assign(new Error("Old password is incorrect"), { statusCode: 401 })
+    );
+    const token = generateToken({ id: mockUser.id, email: mockUser.email, role: "USER" });
+
+    const res = await request(app)
+      .patch("/auth/me")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ oldPassword: "wrongold", newPassword: "NewPassword1!" });
+
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 409 when email already in use", async () => {
+    (authService.updateMe as any).mockRejectedValue(Object.assign(new Error("Email exists"), { statusCode: 409 }));
+    const token = generateToken({ id: mockUser.id, email: mockUser.email, role: "USER" });
+
+    const res = await request(app)
+      .patch("/auth/me")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ email: "taken@example.com" });
+
+    expect(res.status).toBe(409);
+  });
+});
+
+// ─── DELETE /auth/me ──────────────────────────────────────────────────────────
+
+describe("DELETE /auth/me", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("returns 401 when not authenticated", async () => {
+    const res = await request(app).delete("/auth/me");
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 204 and clears auth cookie when authenticated", async () => {
+    (authService.deleteUser as any).mockResolvedValue(undefined);
+    const token = generateToken({ id: mockUser.id, email: mockUser.email, role: "USER" });
+
+    const res = await request(app).delete("/auth/me").set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(204);
   });
 });

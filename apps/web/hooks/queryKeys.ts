@@ -7,4 +7,6 @@ export const queryKeys = {
   appointmentSuggestions: "appointment_suggestions",
   emptySlots: "empty_slots",
   users: "users",
+  userAppointments: "user_appointments",
+  userProfile: "user_profile",
 };

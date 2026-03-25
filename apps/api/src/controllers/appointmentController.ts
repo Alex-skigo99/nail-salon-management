@@ -652,17 +652,27 @@ export const checkAvailability = async (req: Request, res: Response): Promise<vo
  *   get:
  *     summary: Get up to 6 appointment slot suggestions grouped by master
  *     description: >
- *       Returns upcoming empty time slots grouped by master.
+ *       Returns upcoming empty time slots (in the future relative to NowDate/NowTime) grouped by master.
  *       If masterId is provided, returns only that master.
  *     tags: [Appointment]
  *     parameters:
+ *       - in: query
+ *         name: NowDate
+ *         schema: { type: string, example: "2026-03-24" }
+ *         required: true
+ *         description: Current UTC date in YYYY-MM-DD format
+ *       - in: query
+ *         name: NowTime
+ *         schema: { type: string, example: "14:30" }
+ *         required: true
+ *         description: Current UTC time in HH:MM format
  *       - in: query
  *         name: masterId
  *         schema: { type: integer }
  *         required: false
  *     responses:
  *       200:
- *         description: Array of grouped suggestions by master
+ *         description: Array of grouped suggestions by master (future slots only)
  *         content:
  *           application/json:
  *             schema:
@@ -678,15 +688,24 @@ export const checkAvailability = async (req: Request, res: Response): Promise<vo
  *                     items:
  *                       $ref: '#/components/schemas/TimeSlot'
  *       400:
- *         description: Invalid masterId
+ *         description: Missing or invalid query parameters
  *       500:
  *         description: Internal server error
  */
 export const getSuggestions = async (req: Request, res: Response): Promise<void> => {
   try {
-    const queryMasterId = req.query.masterId;
-    let masterId: number | undefined;
+    const { NowDate, NowTime, masterId: queryMasterId } = req.query;
 
+    if (!NowDate || typeof NowDate !== "string") {
+      res.status(400).json({ error: "Query param 'NowDate' is required (YYYY-MM-DD)" });
+      return;
+    }
+    if (!NowTime || typeof NowTime !== "string") {
+      res.status(400).json({ error: "Query param 'NowTime' is required (HH:MM)" });
+      return;
+    }
+
+    let masterId: number | undefined;
     if (queryMasterId !== undefined) {
       masterId = Number(queryMasterId);
       if (isNaN(masterId)) {
@@ -695,10 +714,174 @@ export const getSuggestions = async (req: Request, res: Response): Promise<void>
       }
     }
 
-    const suggestions = await appointmentService.getSuggestionsByMaster(masterId);
+    const suggestions = await appointmentService.getSuggestionsByMaster(NowDate, NowTime, masterId);
     res.json(suggestions);
   } catch (err) {
     console.error("Error fetching suggestions:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const UpdateCommentSchema = z.object({
+  comments: z.string().nullable(),
+});
+
+/**
+ * @openapi
+ * /appointment/{id}:
+ *   patch:
+ *     summary: Update the comment of an appointment
+ *     tags: [Appointment]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema: { type: integer }
+ *         required: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [comments]
+ *             properties:
+ *               comments:
+ *                 type: string
+ *                 nullable: true
+ *                 example: "Please use gel polish"
+ *     responses:
+ *       200:
+ *         description: Updated appointment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Appointment'
+ *       400:
+ *         description: Validation error or invalid id
+ *       404:
+ *         description: Appointment not found
+ *       500:
+ *         description: Internal server error
+ */
+export const updateComment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ error: "Invalid id" });
+      return;
+    }
+    const parsed = UpdateCommentSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.flatten() });
+      return;
+    }
+    const appt = await appointmentService.updateAppointmentComment(id, parsed.data.comments);
+    if (!appt) {
+      res.status(404).json({ error: "Appointment not found" });
+      return;
+    }
+    res.json(appt);
+  } catch (err) {
+    console.error("Error updating appointment comment:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * @openapi
+ * /appointment/user/{userId}:
+ *   get:
+ *     summary: Get appointments for a user with pagination and optional date filters
+ *     tags: [Appointment]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema: { type: string, format: uuid }
+ *         required: true
+ *       - in: query
+ *         name: from
+ *         schema: { type: string, example: "2026-01-01" }
+ *         description: Filter appointments from this date (YYYY-MM-DD)
+ *       - in: query
+ *         name: to
+ *         schema: { type: string, example: "2026-12-31" }
+ *         description: Filter appointments up to this date (YYYY-MM-DD)
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: perPage
+ *         schema: { type: integer, default: 10 }
+ *     responses:
+ *       200:
+ *         description: Paginated list of appointments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/AppointmentRetrieveOfUser'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                     perPage:
+ *                       type: integer
+ *                     from:
+ *                       type: integer
+ *                     to:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     lastPage:
+ *                       type: integer
+ *                     prevPage:
+ *                       type: integer
+ *                     nextPage:
+ *                       type: integer
+ *       400:
+ *         description: Invalid parameters
+ *       401:
+ *         description: Not authenticated
+ *       500:
+ *         description: Internal server error
+ */
+export const getUserAppointments = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;
+    if (!userId) {
+      res.status(400).json({ error: "Invalid userId" });
+      return;
+    }
+
+    const page = req.query.page ? Number(req.query.page) : 1;
+    const perPage = req.query.perPage ? Number(req.query.perPage) : 10;
+    if (isNaN(page) || page < 1) {
+      res.status(400).json({ error: "Query param 'page' must be a positive integer" });
+      return;
+    }
+    if (isNaN(perPage) || perPage < 1) {
+      res.status(400).json({ error: "Query param 'perPage' must be a positive integer" });
+      return;
+    }
+
+    const { from, to } = req.query;
+    const result = await appointmentService.getAppointmentsByUserId({
+      userId: userId as string,
+      from: typeof from === "string" ? from : undefined,
+      to: typeof to === "string" ? to : undefined,
+      page,
+      perPage,
+    });
+    res.json(result);
+  } catch (err) {
+    console.error("Error fetching user appointments:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };

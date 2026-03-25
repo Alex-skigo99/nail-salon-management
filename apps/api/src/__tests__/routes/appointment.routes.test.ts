@@ -85,14 +85,26 @@ describe("GET /appointment/suggestions", () => {
       { master: { id: 1, name: "Jane" }, slots: [] },
     ]);
 
-    const res = await request(app).get("/appointment/suggestions");
+    const res = await request(app).get("/appointment/suggestions").query({ NowDate: "2026-03-24", NowTime: "14:30" });
 
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
+  it("returns 400 when NowDate is missing", async () => {
+    const res = await request(app).get("/appointment/suggestions").query({ NowTime: "14:30" });
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 400 when NowTime is missing", async () => {
+    const res = await request(app).get("/appointment/suggestions").query({ NowDate: "2026-03-24" });
+    expect(res.status).toBe(400);
+  });
+
   it("returns 400 when masterId is not a number", async () => {
-    const res = await request(app).get("/appointment/suggestions").query({ masterId: "abc" });
+    const res = await request(app)
+      .get("/appointment/suggestions")
+      .query({ NowDate: "2026-03-24", NowTime: "14:30", masterId: "abc" });
     expect(res.status).toBe(400);
   });
 });
@@ -327,6 +339,115 @@ describe("DELETE /appointment/:id", () => {
 
   it("returns 400 for invalid (non-numeric) id", async () => {
     const res = await request(app).delete("/appointment/abc");
+    expect(res.status).toBe(400);
+  });
+});
+
+// ─── PATCH /appointment/:id ───────────────────────────────────────────────────
+
+describe("PATCH /appointment/:id", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("returns 200 and updated appointment when comment is provided", async () => {
+    const updated = { ...mockAppointment, comments: "Please use gel polish" };
+    (appointmentService.updateAppointmentComment as Mock).mockResolvedValue(updated);
+
+    const res = await request(app).patch("/appointment/1").send({ comments: "Please use gel polish" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.comments).toBe("Please use gel polish");
+  });
+
+  it("returns 200 when comment is set to null", async () => {
+    const updated = { ...mockAppointment, comments: null };
+    (appointmentService.updateAppointmentComment as Mock).mockResolvedValue(updated);
+
+    const res = await request(app).patch("/appointment/1").send({ comments: null });
+
+    expect(res.status).toBe(200);
+  });
+
+  it("returns 400 when comments field is missing", async () => {
+    const res = await request(app).patch("/appointment/1").send({});
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 404 when appointment does not exist", async () => {
+    (appointmentService.updateAppointmentComment as Mock).mockResolvedValue(null);
+
+    const res = await request(app).patch("/appointment/999").send({ comments: "test" });
+
+    expect(res.status).toBe(404);
+  });
+
+  it("returns 400 for invalid (non-numeric) id", async () => {
+    const res = await request(app).patch("/appointment/abc").send({ comments: "test" });
+    expect(res.status).toBe(400);
+  });
+});
+
+// ─── GET /appointment/user/:userId ────────────────────────────────────────────
+
+describe("GET /appointment/user/:userId", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  const mockPaginatedResult = {
+    data: [
+      {
+        ...mockAppointment,
+        master_data: { id: 1, name: "Jane Smith", description: null },
+      },
+    ],
+    pagination: {
+      currentPage: 1,
+      perPage: 10,
+      from: 1,
+      to: 1,
+      total: 1,
+      lastPage: 1,
+      prevPage: 0,
+      nextPage: 2,
+    },
+  };
+
+  it("returns 401 when not authenticated", async () => {
+    const res = await request(app).get("/appointment/user/550e8400-e29b-41d4-a716-446655440001");
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 200 with paginated appointments when authenticated", async () => {
+    (appointmentService.getAppointmentsByUserId as Mock).mockResolvedValue(mockPaginatedResult);
+
+    const res = await request(app)
+      .get("/appointment/user/550e8400-e29b-41d4-a716-446655440001")
+      .set("Authorization", `Bearer ${adminToken()}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0].master_data).toEqual({ id: 1, name: "Jane Smith", description: null });
+    expect(res.body.pagination.total).toBe(1);
+  });
+
+  it("returns 200 with from/to filters", async () => {
+    (appointmentService.getAppointmentsByUserId as Mock).mockResolvedValue(mockPaginatedResult);
+
+    const res = await request(app)
+      .get("/appointment/user/550e8400-e29b-41d4-a716-446655440001")
+      .set("Authorization", `Bearer ${adminToken()}`)
+      .query({ from: "2026-01-01", to: "2026-12-31", page: "1", perPage: "5" });
+
+    expect(res.status).toBe(200);
+    expect(appointmentService.getAppointmentsByUserId).toHaveBeenCalledWith(
+      expect.objectContaining({ from: "2026-01-01", to: "2026-12-31", page: 1, perPage: 5 })
+    );
+  });
+
+  it("returns 400 when page is invalid", async () => {
+    const res = await request(app)
+      .get("/appointment/user/550e8400-e29b-41d4-a716-446655440001")
+      .set("Authorization", `Bearer ${adminToken()}`)
+      .query({ page: "abc" });
+
     expect(res.status).toBe(400);
   });
 });

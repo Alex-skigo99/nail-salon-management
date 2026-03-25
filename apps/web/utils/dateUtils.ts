@@ -1,6 +1,7 @@
 /**
  * Calendar date utilities – all weeks run Sunday → Saturday.
  */
+import { ONE_DAY } from "@/const/times";
 
 /** Return the Sunday that starts the week containing `date`. */
 export function getWeekStart(date: Date): Date {
@@ -143,4 +144,45 @@ export function getCreatedAtString(date: string | null | undefined): string | nu
         })
         .replace(",", "")
     : null;
+}
+
+// Get days to go from today for a given date string and time. Returns 0 for today, positive for future, negative for past.
+export function getDaysToGo(dateStr: string, time: string): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const targetDay = new Date(dateStr);
+  targetDay.setHours(0, 0, 0, 0);
+  const targetTime = new Date(dateStr);
+  const [hours, minutes] = time.split(":").map(Number);
+  targetTime.setHours(hours, minutes, 0, 0);
+
+  const diff = Math.ceil((targetDay.getTime() - today.getTime()) / ONE_DAY);
+
+  // If the target day is today, check the time to determine if it's past or future
+  if (diff === 0) {
+    const nowTime = new Date();
+
+    if (targetTime.getTime() < nowTime.getTime()) {
+      return -1; // Past
+    } else {
+      return 0; // Today but in the future
+    }
+  }
+
+  return diff;
+}
+
+/** Get a user-friendly label for an appointment date, e.g. "Mar 9, 2026". */
+export function getAppointmentDateString(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+}
+
+/** Compare two times in "HH:MM" format. Returns -1 if timeA < timeB, 0 if equal, 1 if timeA > timeB. */
+export function compareTimes(timeA: string, timeB: string): number {
+  const [hA, mA] = timeA.split(":").map(Number);
+  const [hB, mB] = timeB.split(":").map(Number);
+  if (hA !== hB) return hA - hB;
+  return mA - mB;
 }

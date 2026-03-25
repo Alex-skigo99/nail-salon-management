@@ -38,9 +38,9 @@ describe("GET /master", () => {
     expect(res.status).toBe(401);
   });
 
-  it("returns 403 when authenticated as USER role", async () => {
+  it("returns 200 when authenticated as USER role", async () => {
     const res = await request(app).get("/master").set("Authorization", `Bearer ${userToken()}`);
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(200);
   });
 
   it("returns 200 and list of masters when ADMIN", async () => {

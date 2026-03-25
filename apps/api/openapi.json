@@ -127,6 +127,63 @@
             "description": "Internal server error"
           }
         }
+      },
+      "patch": {
+        "summary": "Update the comment of an appointment",
+        "tags": [
+          "Appointment"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "comments"
+                ],
+                "properties": {
+                  "comments": {
+                    "type": "string",
+                    "nullable": true,
+                    "example": "Please use gel polish"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated appointment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Appointment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error or invalid id"
+          },
+          "404": {
+            "description": "Appointment not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
       }
     },
     "/appointment/{id}/reschedule": {
@@ -576,6 +633,122 @@
         }
       }
     },
+    "/appointment/user/{userId}": {
+      "get": {
+        "summary": "Get appointments for a user with pagination and optional date filters",
+        "tags": [
+          "Appointment"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "type": "string",
+              "example": "2026-01-01"
+            },
+            "description": "Filter appointments from this date (YYYY-MM-DD)"
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "type": "string",
+              "example": "2026-12-31"
+            },
+            "description": "Filter appointments up to this date (YYYY-MM-DD)"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "perPage",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of appointments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AppointmentRetrieveOfUser"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "currentPage": {
+                          "type": "integer"
+                        },
+                        "perPage": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "type": "integer"
+                        },
+                        "to": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "lastPage": {
+                          "type": "integer"
+                        },
+                        "prevPage": {
+                          "type": "integer"
+                        },
+                        "nextPage": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/auth/register": {
       "post": {
         "summary": "Register a new user (USER role only)",
@@ -726,6 +899,67 @@
             "description": "Not authenticated"
           }
         }
+      },
+      "patch": {
+        "summary": "Update current user profile or password",
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "Not authenticated or wrong old password"
+          },
+          "409": {
+            "description": "Email already in use"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete the current authenticated user account",
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Account deleted successfully"
+          },
+          "401": {
+            "description": "Not authenticated"
+          }
+        }
       }
     },
     "/auth/logout": {
@@ -743,7 +977,7 @@
     },
     "/master": {
       "get": {
-        "summary": "Retrieve a list of masters (ADMIN only)",
+        "summary": "Retrieve a list of masters",
         "tags": [
           "Master"
         ],
@@ -1515,6 +1749,10 @@
             "type": "string",
             "nullable": true
           },
+          "isGoogleAuth": {
+            "type": "boolean",
+            "description": "True if the user authenticated via Google (google_id is set)"
+          },
           "last_login": {
             "type": "string",
             "format": "date-time",
@@ -1578,6 +1816,30 @@
           },
           "password": {
             "type": "string"
+          }
+        }
+      },
+      "UpdateMeInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "oldPassword": {
+            "type": "string",
+            "description": "Required when changing password and account has an existing password"
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 8
           }
         }
       },
@@ -1942,6 +2204,24 @@
                     "type": "null"
                   }
                 ]
+              }
+            }
+          }
+        ]
+      },
+      "AppointmentRetrieveOfUser": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Appointment"
+          },
+          {
+            "type": "object",
+            "required": [
+              "master_data"
+            ],
+            "properties": {
+              "master_data": {
+                "$ref": "#/components/schemas/Master"
               }
             }
           }

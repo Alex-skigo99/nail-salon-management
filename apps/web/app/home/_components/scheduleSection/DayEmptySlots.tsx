@@ -9,7 +9,7 @@ import type { MasterSuggestion, TimeSlot } from "@/types/appointmentTypes";
 import { useMasterEmptySlots } from "@/hooks/useAppointments";
 import DaySlotsCard from "./DaySlotsCard";
 import { formatDateLabel } from "./formatDateLabel";
-import { shiftDate, todayStr } from "@/utils/dateUtils";
+import { shiftDate, todayStr, compareTimes, isSameDay } from "@/utils/dateUtils";
 
 type Props = {
   master: MasterSuggestion["master"];
@@ -24,6 +24,14 @@ export default function DayEmptySlots({ master, isMobile, t, onBook }: Props) {
   const { data: daySlots = [], isLoading, isError } = useMasterEmptySlots(master.id, selectedDate);
 
   const slots = daySlots[0]?.slots ?? [];
+  // Filter out past time slots if the selected date is today
+  let availableSlots = slots;
+  if (isSameDay(new Date(selectedDate), new Date())) {
+    const currentTime = new Date()
+      .toLocaleString("en-CA", { hour: "2-digit", minute: "2-digit", hour12: false })
+      .slice(0, 5);
+    availableSlots = slots.filter((slot) => compareTimes(slot.start_time, currentTime) > 0);
+  }
 
   const handlePrevDay = () => {
     const newDate = shiftDate(selectedDate, -1);
@@ -99,13 +107,13 @@ export default function DayEmptySlots({ master, isMobile, t, onBook }: Props) {
 
       {!isLoading && isError && <p className="py-4 text-center text-sm text-red-500">{t("loadingError")}</p>}
 
-      {!isLoading && !isError && slots.length === 0 && (
+      {!isLoading && !isError && availableSlots.length === 0 && (
         <p className="py-4 text-center text-sm text-gray-400">{t("scheduleNoEmptySlotsForDay")}</p>
       )}
 
-      {!isLoading && !isError && slots.length > 0 && (
+      {!isLoading && !isError && availableSlots.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {slots.map((slot) => (
+          {availableSlots.map((slot) => (
             <DaySlotsCard key={slot.start_time} time={slot.start_time} onClick={() => handleBookSlot(slot)} />
           ))}
         </div>
