@@ -9,7 +9,6 @@ import type {
   AppointmentReschedule,
   DaySlots,
   MasterSuggestion,
-  AppointmentRetrieve,
   PaginatedAppointmentsOfUser,
 } from "@/types/appointmentTypes";
 
@@ -59,8 +58,8 @@ export function useAppointmentSuggestions(masterId?: number) {
     queryKey: [queryKeys.appointmentSuggestions, masterId ?? null],
     queryFn: async () => {
       const now = new Date();
-      const NowDate = now.toISOString().slice(0, 10);
-      const NowTime = now.toISOString().slice(11, 16);
+      const NowDate = now.toLocaleString("en-CA").slice(0, 10);
+      const NowTime = now.toLocaleString("en-CA", { hour: "2-digit", minute: "2-digit", hour12: false }).slice(0, 5);
       const res = await apiClient.get<MasterSuggestion[]>(`${apiRoutes.appointment}/suggestions`, {
         params: { NowDate, NowTime, ...(masterId ? { masterId } : {}) },
       });

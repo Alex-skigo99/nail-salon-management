@@ -173,8 +173,16 @@ export function getDaysToGo(dateStr: string, time: string): number {
   return diff;
 }
 
-// Get a user-friendly label for an appointment date, e.g. "Mar 9, 2026".
+/** Get a user-friendly label for an appointment date, e.g. "Mar 9, 2026". */
 export function getAppointmentDateString(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+}
+
+/** Compare two times in "HH:MM" format. Returns -1 if timeA < timeB, 0 if equal, 1 if timeA > timeB. */
+export function compareTimes(timeA: string, timeB: string): number {
+  const [hA, mA] = timeA.split(":").map(Number);
+  const [hB, mB] = timeB.split(":").map(Number);
+  if (hA !== hB) return hA - hB;
+  return mA - mB;
 }

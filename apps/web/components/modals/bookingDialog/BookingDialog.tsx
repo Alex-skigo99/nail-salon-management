@@ -29,6 +29,7 @@ import AuthenticatedBookingForm from "@/components/modals/bookingDialog/Authenti
 import GuestBookingForm from "@/components/modals/bookingDialog/GuestBookingForm";
 import GuestAccessPanel from "@/components/modals/bookingDialog/GuestAccessPanel";
 import { AxiosError } from "axios";
+import { isPastTimeSlot } from "@/utils/isPastTimeSlot";
 
 type Props = {
   open: boolean;
@@ -232,6 +233,11 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
   const handleAuthenticatedSubmit = authForm.handleSubmit(async (values) => {
     if (!selectedSlot || !isAuthenticated || !userId) return;
 
+    if (isPastTimeSlot(selectedSlot)) {
+      openFeedbackDialog("error", t("feedback.errorTitle"), t("feedback.pastTimeError"));
+      return;
+    }
+
     const normalizedPhone = (values.phone || "").trim();
 
     try {
@@ -262,6 +268,11 @@ export default function BookingDialog({ open, onOpenChange, selectedSlot, isMobi
 
   const handleGuestSubmit = guestForm.handleSubmit(async (values) => {
     if (!selectedSlot) return;
+
+    if (isPastTimeSlot(selectedSlot)) {
+      openFeedbackDialog("error", t("feedback.errorTitle"), t("feedback.pastTimeError"));
+      return;
+    }
 
     try {
       await createAppointment.mutateAsync({
