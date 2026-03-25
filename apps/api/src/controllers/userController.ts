@@ -11,6 +11,29 @@ import * as userService from "../services/userService";
  *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by name, email, or phone
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: ["name", "appts_count", "created_asc", "created_desc", "last_appts"]
+ *         description: Sort order
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: ["ADMIN", "USER"]
+ *         description: Filter by role
+ *       - in: query
+ *         name: master_id
+ *         schema:
+ *           type: integer
+ *         description: Filter by master_id
  *     responses:
  *       200:
  *         description: A list of users
@@ -19,7 +42,7 @@ import * as userService from "../services/userService";
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/User'
+ *                 $ref: '#/components/schemas/UserListItem'
  *       401:
  *         description: Unauthorized
  *       403:
@@ -71,11 +94,11 @@ import * as userService from "../services/userService";
  *         description: UUID ID of the user
  *     responses:
  *       200:
- *         description: A single user
+ *         description: A single user with master data
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               $ref: '#/components/schemas/UserRetrieve'
  *       400:
  *         description: Invalid id
  *       401:
@@ -181,9 +204,36 @@ import * as userService from "../services/userService";
  *         image:
  *           type: string
  *           nullable: true
+ *         master_id:
+ *           type: integer
+ *           nullable: true
+ *         email_subscribed:
+ *           type: boolean
  *         created_at:
  *           type: string
  *           format: date-time
+ *     UserRetrieve:
+ *       allOf:
+ *         - $ref: '#/components/schemas/User'
+ *         - type: object
+ *           properties:
+ *             master_data:
+ *               nullable: true
+ *               oneOf:
+ *                 - $ref: '#/components/schemas/Master'
+ *                 - type: 'null'
+ *     UserListItem:
+ *       allOf:
+ *         - $ref: '#/components/schemas/User'
+ *         - type: object
+ *           properties:
+ *             appts_count:
+ *               type: integer
+ *               example: 5
+ *             last_appts:
+ *               type: string
+ *               format: date
+ *               nullable: true
  *     UserCreate:
  *       type: object
  *       required:
@@ -207,6 +257,11 @@ import * as userService from "../services/userService";
  *         image:
  *           type: string
  *           nullable: true
+ *         master_id:
+ *           type: integer
+ *           nullable: true
+ *         email_subscribed:
+ *           type: boolean
  *     UserUpdate:
  *       type: object
  *       properties:
@@ -225,6 +280,11 @@ import * as userService from "../services/userService";
  *         image:
  *           type: string
  *           nullable: true
+ *         master_id:
+ *           type: integer
+ *           nullable: true
+ *         email_subscribed:
+ *           type: boolean
  */
 
 const CreateUserSchema = z.object({
@@ -233,6 +293,8 @@ const CreateUserSchema = z.object({
   role: z.enum(["ADMIN", "USER"]),
   phone: z.string().nullable().optional(),
   image: z.string().nullable().optional(),
+  master_id: z.number().int().positive().nullable().optional(),
+  email_subscribed: z.boolean().optional(),
 });
 
 const UpdateUserSchema = z.object({
@@ -241,15 +303,29 @@ const UpdateUserSchema = z.object({
   phone: z.string().nullable().optional(),
   role: z.enum(["ADMIN", "USER"]).optional(),
   image: z.string().nullable().optional(),
+  master_id: z.number().int().positive().nullable().optional(),
+  email_subscribed: z.boolean().optional(),
+});
+
+const GetAllUsersQuerySchema = z.object({
+  search: z.string().optional(),
+  sort: z.enum(["name", "appts_count", "created_asc", "created_desc", "last_appts"]).optional(),
+  role: z.enum(["ADMIN", "USER"]).optional(),
+  master_id: z.coerce.number().int().positive().optional(),
 });
 
 const UserIdParamSchema = z.object({
   id: z.uuid(),
 });
 
-export const getAll = async (_req: Request, res: Response): Promise<void> => {
+export const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
-    const users = await userService.getAllUsers();
+    const parsed = GetAllUsersQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.flatten() });
+      return;
+    }
+    const users = await userService.getAllUsers(parsed.data);
     res.json(users);
   } catch (err) {
     console.error("Error fetching users:", err);

@@ -22,7 +22,20 @@ const mockUser = {
   role: "USER" as const,
   last_login: null,
   image: null,
+  master_id: null,
+  email_subscribed: true,
   created_at: new Date().toISOString(),
+};
+
+const mockUserListItem = {
+  ...mockUser,
+  appts_count: 3,
+  last_appts: "2026-03-20",
+};
+
+const mockUserRetrieve = {
+  ...mockUser,
+  master_data: null,
 };
 
 function adminToken() {
@@ -51,12 +64,12 @@ describe("GET /user", () => {
   });
 
   it("returns 200 and list of users when ADMIN", async () => {
-    (userService.getAllUsers as Mock).mockResolvedValue([mockUser]);
+    (userService.getAllUsers as Mock).mockResolvedValue([mockUserListItem]);
 
     const res = await request(app).get("/user").set("Authorization", `Bearer ${adminToken()}`);
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual([mockUser]);
+    expect(res.body).toEqual([mockUserListItem]);
   });
 
   it("returns 200 with empty array when no users", async () => {
@@ -66,6 +79,44 @@ describe("GET /user", () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual([]);
+  });
+
+  it("passes search query param to service", async () => {
+    (userService.getAllUsers as Mock).mockResolvedValue([]);
+
+    await request(app).get("/user?search=jane").set("Authorization", `Bearer ${adminToken()}`);
+
+    expect(userService.getAllUsers).toHaveBeenCalledWith(expect.objectContaining({ search: "jane" }));
+  });
+
+  it("passes sort query param to service", async () => {
+    (userService.getAllUsers as Mock).mockResolvedValue([]);
+
+    await request(app).get("/user?sort=name").set("Authorization", `Bearer ${adminToken()}`);
+
+    expect(userService.getAllUsers).toHaveBeenCalledWith(expect.objectContaining({ sort: "name" }));
+  });
+
+  it("passes role filter to service", async () => {
+    (userService.getAllUsers as Mock).mockResolvedValue([]);
+
+    await request(app).get("/user?role=ADMIN").set("Authorization", `Bearer ${adminToken()}`);
+
+    expect(userService.getAllUsers).toHaveBeenCalledWith(expect.objectContaining({ role: "ADMIN" }));
+  });
+
+  it("passes master_id filter to service", async () => {
+    (userService.getAllUsers as Mock).mockResolvedValue([]);
+
+    await request(app).get("/user?master_id=1").set("Authorization", `Bearer ${adminToken()}`);
+
+    expect(userService.getAllUsers).toHaveBeenCalledWith(expect.objectContaining({ master_id: 1 }));
+  });
+
+  it("returns 400 for invalid sort param", async () => {
+    const res = await request(app).get("/user?sort=invalid").set("Authorization", `Bearer ${adminToken()}`);
+
+    expect(res.status).toBe(400);
   });
 });
 
@@ -84,13 +135,14 @@ describe("GET /user/:id", () => {
     expect(res.status).toBe(403);
   });
 
-  it("returns 200 and user when ADMIN and user exists", async () => {
-    (userService.getUserById as Mock).mockResolvedValue(mockUser);
+  it("returns 200 and user with master_data when ADMIN and user exists", async () => {
+    (userService.getUserById as Mock).mockResolvedValue(mockUserRetrieve);
 
     const res = await request(app).get(`/user/${mockUser.id}`).set("Authorization", `Bearer ${adminToken()}`);
 
     expect(res.status).toBe(200);
     expect(res.body.email).toBe(mockUser.email);
+    expect(res.body).toHaveProperty("master_data");
   });
 
   it("returns 404 when user does not exist", async () => {
@@ -131,6 +183,18 @@ describe("POST /user", () => {
 
     expect(res.status).toBe(201);
     expect(res.body.email).toBe(mockUser.email);
+  });
+
+  it("returns 201 with master_id and email_subscribed", async () => {
+    const userWithMaster = { ...mockUser, master_id: 1, email_subscribed: false };
+    (userService.createUser as Mock).mockResolvedValue(userWithMaster);
+
+    const body = { ...createBody, master_id: 1, email_subscribed: false };
+    const res = await request(app).post("/user").set("Authorization", `Bearer ${adminToken()}`).send(body);
+
+    expect(res.status).toBe(201);
+    expect(res.body.master_id).toBe(1);
+    expect(res.body.email_subscribed).toBe(false);
   });
 
   it("returns 400 on missing required fields", async () => {
@@ -190,6 +254,20 @@ describe("PUT /user/:id", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.name).toBe("Jane Smith");
+  });
+
+  it("returns 200 when updating master_id and email_subscribed", async () => {
+    const updated = { ...mockUser, master_id: 2, email_subscribed: false };
+    (userService.updateUser as Mock).mockResolvedValue(updated);
+
+    const res = await request(app)
+      .put(`/user/${mockUser.id}`)
+      .set("Authorization", `Bearer ${adminToken()}`)
+      .send({ master_id: 2, email_subscribed: false });
+
+    expect(res.status).toBe(200);
+    expect(res.body.master_id).toBe(2);
+    expect(res.body.email_subscribed).toBe(false);
   });
 
   it("returns 404 when user does not exist", async () => {
