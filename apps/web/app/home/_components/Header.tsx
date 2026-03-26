@@ -45,20 +45,18 @@ export default function Header({ t, isMobile }: Props) {
                 {link.label}
               </a>
             ))}
-            <div className="flex items-center">
-              <LocaleSwitcher
-                handleLocaleChange={handleLocaleChange}
-                wrapperClassName="px-0"
-                triggerClassName="w-36 text-sm"
-              />
-            </div>
             <Button
               asChild
               size="sm"
-              className="border-0 bg-linear-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600"
+              className="border-0 bg-linear-to-r from-pink-500 to-rose-500 text-white opacity-50 backdrop-blur-md hover:from-pink-600 hover:to-rose-600"
             >
               <a href="#schedule">{t("heroBookBtn")}</a>
             </Button>
+            <LocaleSwitcher
+              handleLocaleChange={handleLocaleChange}
+              wrapperClassName="px-0"
+              triggerClassName="w-36 text-sm cursor-pointer hover:bg-gray-100"
+            />
             <div className="w-60">
               <UserMenu />
             </div>
@@ -92,7 +90,7 @@ export default function Header({ t, isMobile }: Props) {
             <LocaleSwitcher
               handleLocaleChange={handleLocaleChange}
               wrapperClassName="px-0 py-1"
-              triggerClassName="w-full text-sm"
+              triggerClassName="w-full text-sm cursor-pointer hover:bg-gray-100"
             />
           </div>
           <div className="w-full rounded-4xl border-2 border-pink-100 bg-pink-50 p-1">
