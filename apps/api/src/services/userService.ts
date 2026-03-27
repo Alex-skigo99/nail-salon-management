@@ -36,6 +36,7 @@ export const getAllUsers = async (params: GetAllUsersParams = {}): Promise<UserL
   const query = knex(`${DB_TABLES.USERS} as u`)
     .select(SAFE_COLUMNS.map((c) => `u.${c}`))
     .select(knex.raw(`COALESCE(appts.cnt, 0)::int AS appts_count`), knex.raw(`appts.last_date AS last_appts`))
+    .select(knex.raw(`(u.google_id IS NOT NULL) AS is_google_auth`))
     .leftJoin(
       knex(DB_TABLES.APPOINTMENTS)
         .select("user_id")
@@ -64,7 +65,7 @@ export const getAllUsers = async (params: GetAllUsersParams = {}): Promise<UserL
 
   switch (params.sort) {
     case "name":
-      query.orderBy("u.name", "asc");
+      query.orderByRaw("LOWER(u.name) ASC");
       break;
     case "appts_count":
       query.orderBy("appts_count", "desc");
@@ -89,6 +90,7 @@ export const getUserById = async (id: string): Promise<UserRetrieve | null> => {
   const user = await knex(`${DB_TABLES.USERS} as u`)
     .select(SAFE_COLUMNS.map((c) => `u.${c}`))
     .select(knex.raw(masterDataSelect))
+    .select(knex.raw(`(u.google_id IS NOT NULL) AS is_google_auth`))
     .leftJoin(`${DB_TABLES.MASTERS} as m`, "u.master_id", "m.id")
     .where("u.id", id)
     .first();
@@ -97,7 +99,7 @@ export const getUserById = async (id: string): Promise<UserRetrieve | null> => {
 
 export const createUser = async (
   data: Pick<User, "name" | "email" | "role"> &
-    Partial<Pick<User, "phone" | "image" | "master_id" | "email_subscribed">>
+    Partial<Pick<User, "phone" | "image" | "master_id" | "email_subscribed" | "password">>
 ): Promise<SafeUser> => {
   const [user] = await knex(DB_TABLES.USERS).insert(data).returning(SAFE_COLUMNS);
   return user;
@@ -105,7 +107,9 @@ export const createUser = async (
 
 export const updateUser = async (
   id: string,
-  data: Partial<Pick<User, "name" | "email" | "phone" | "role" | "image" | "master_id" | "email_subscribed">>
+  data: Partial<
+    Pick<User, "name" | "email" | "phone" | "role" | "image" | "master_id" | "email_subscribed" | "password">
+  >
 ): Promise<SafeUser | null> => {
   const [user] = await knex(DB_TABLES.USERS).where({ id }).update(data).returning(SAFE_COLUMNS);
   return user ?? null;

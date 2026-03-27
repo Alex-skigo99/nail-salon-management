@@ -74,6 +74,7 @@ const mockUserListItem = {
   ...mockUser,
   appts_count: 3,
   last_appts: "2026-03-20",
+  is_google_auth: false,
 };
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -133,7 +134,7 @@ describe("getUserById", () => {
   });
 
   it("returns the user with master_data when found", async () => {
-    const userWithMaster = { ...mockUser, master_data: null };
+    const userWithMaster = { ...mockUser, master_data: null, is_google_auth: false };
     chain.first.mockResolvedValue(userWithMaster);
     const result = await getUserById(mockUser.id);
     expect(result).toEqual(userWithMaster);
@@ -176,6 +177,21 @@ describe("createUser", () => {
     expect(result.email_subscribed).toBe(false);
     expect(chain.insert).toHaveBeenCalledWith(input);
   });
+
+  it("inserts user with hashed password", async () => {
+    chain.returning.mockResolvedValue([mockUser]);
+    const input = {
+      name: "Jane Doe",
+      email: "jane@example.com",
+      role: "USER" as const,
+      password: "hashed_password",
+    };
+
+    const result = await createUser(input);
+
+    expect(result).toEqual(mockUser);
+    expect(chain.insert).toHaveBeenCalledWith(input);
+  });
 });
 
 describe("updateUser", () => {
@@ -209,6 +225,16 @@ describe("updateUser", () => {
     chain.returning.mockResolvedValue([]);
     const result = await updateUser("non-existent-id", { name: "Ghost" });
     expect(result).toBeNull();
+  });
+
+  it("updates password when provided", async () => {
+    const updated = { ...mockUser };
+    chain.returning.mockResolvedValue([updated]);
+
+    const result = await updateUser(mockUser.id, { password: "new_hashed_password" });
+
+    expect(result).toEqual(updated);
+    expect(chain.update).toHaveBeenCalledWith({ password: "new_hashed_password" });
   });
 });
 

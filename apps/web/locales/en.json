@@ -103,7 +103,8 @@
     "home": "Exit Admin Portal",
     "calendar": "Calendar",
     "masters": "Masters",
-    "services": "Services"
+    "services": "Services",
+    "clients": "Clients"
   },
   "dialogs": {
     "infoUserDialog": {

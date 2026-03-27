@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import * as userService from "../services/userService";
+import { hashPassword } from "../services/authService";
 
 /**
  * @openapi
@@ -222,6 +223,8 @@ import * as userService from "../services/userService";
  *               oneOf:
  *                 - $ref: '#/components/schemas/Master'
  *                 - type: 'null'
+ *             is_google_auth:
+ *               type: boolean
  *     UserListItem:
  *       allOf:
  *         - $ref: '#/components/schemas/User'
@@ -234,12 +237,15 @@ import * as userService from "../services/userService";
  *               type: string
  *               format: date
  *               nullable: true
+ *             is_google_auth:
+ *               type: boolean
  *     UserCreate:
  *       type: object
  *       required:
  *         - name
  *         - email
  *         - role
+ *         - password
  *       properties:
  *         name:
  *           type: string
@@ -251,6 +257,10 @@ import * as userService from "../services/userService";
  *           type: string
  *           enum: ["ADMIN", "USER"]
  *           example: "USER"
+ *         password:
+ *           type: string
+ *           minLength: 8
+ *           example: "securepass123"
  *         phone:
  *           type: string
  *           nullable: true
@@ -285,12 +295,17 @@ import * as userService from "../services/userService";
  *           nullable: true
  *         email_subscribed:
  *           type: boolean
+ *         password:
+ *           type: string
+ *           nullable: true
+ *           minLength: 8
  */
 
 const CreateUserSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
   role: z.enum(["ADMIN", "USER"]),
+  password: z.string().min(8),
   phone: z.string().nullable().optional(),
   image: z.string().nullable().optional(),
   master_id: z.number().int().positive().nullable().optional(),
@@ -305,6 +320,7 @@ const UpdateUserSchema = z.object({
   image: z.string().nullable().optional(),
   master_id: z.number().int().positive().nullable().optional(),
   email_subscribed: z.boolean().optional(),
+  password: z.string().min(8).nullable().optional(),
 });
 
 const GetAllUsersQuerySchema = z.object({
@@ -360,7 +376,9 @@ export const create = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ error: parsed.error.flatten() });
       return;
     }
-    const user = await userService.createUser(parsed.data);
+    const { password, ...rest } = parsed.data;
+    const hashedPassword = await hashPassword(password);
+    const user = await userService.createUser({ ...rest, password: hashedPassword });
     res.status(201).json(user);
   } catch (err) {
     console.error("Error creating user:", err);
@@ -381,7 +399,12 @@ export const update = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ error: parsed.error.flatten() });
       return;
     }
-    const user = await userService.updateUser(id, parsed.data);
+    const { password, ...rest } = parsed.data;
+    const updateData: Record<string, unknown> = { ...rest };
+    if (typeof password === "string") {
+      updateData.password = await hashPassword(password);
+    }
+    const user = await userService.updateUser(id, updateData);
     if (!user) {
       res.status(404).json({ error: "User not found" });
       return;

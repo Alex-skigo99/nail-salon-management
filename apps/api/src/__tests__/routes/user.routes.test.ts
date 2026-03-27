@@ -5,12 +5,19 @@ import request from "supertest";
 
 vi.mock("../../lib/db", () => ({ knex: vi.fn() }));
 vi.mock("../../services/userService");
+vi.mock("../../services/authService", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../services/authService")>();
+  return {
+    ...actual,
+    hashPassword: vi.fn().mockResolvedValue("hashed_password"),
+  };
+});
 
 // ─── Imports ──────────────────────────────────────────────────────────────────
 
 import app from "../../app";
 import * as userService from "../../services/userService";
-import { generateToken } from "../../services/authService";
+import { generateToken, hashPassword } from "../../services/authService";
 
 // ─── Fixtures & helpers ───────────────────────────────────────────────────────
 
@@ -31,11 +38,13 @@ const mockUserListItem = {
   ...mockUser,
   appts_count: 3,
   last_appts: "2026-03-20",
+  is_google_auth: false,
 };
 
 const mockUserRetrieve = {
   ...mockUser,
   master_data: null,
+  is_google_auth: false,
 };
 
 function adminToken() {
@@ -46,7 +55,7 @@ function userToken() {
   return generateToken({ id: "550e8400-e29b-41d4-a716-446655440002", email: "user@example.com", role: "USER" });
 }
 
-const createBody = { name: "Jane Doe", email: "jane@example.com", role: "USER" };
+const createBody = { name: "Jane Doe", email: "jane@example.com", role: "USER", password: "securepass123" };
 
 // ─── GET /user ────────────────────────────────────────────────────────────────
 
@@ -183,6 +192,8 @@ describe("POST /user", () => {
 
     expect(res.status).toBe(201);
     expect(res.body.email).toBe(mockUser.email);
+    expect(hashPassword).toHaveBeenCalledWith("securepass123");
+    expect(userService.createUser).toHaveBeenCalledWith(expect.objectContaining({ password: "hashed_password" }));
   });
 
   it("returns 201 with master_id and email_subscribed", async () => {
@@ -201,7 +212,16 @@ describe("POST /user", () => {
     const res = await request(app)
       .post("/user")
       .set("Authorization", `Bearer ${adminToken()}`)
-      .send({ email: "jane@example.com" }); // missing name, role
+      .send({ email: "jane@example.com" }); // missing name, role, password
+
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 400 when password is too short", async () => {
+    const res = await request(app)
+      .post("/user")
+      .set("Authorization", `Bearer ${adminToken()}`)
+      .send({ ...createBody, password: "short" });
 
     expect(res.status).toBe(400);
   });
@@ -287,6 +307,37 @@ describe("PUT /user/:id", () => {
       .set("Authorization", `Bearer ${adminToken()}`)
       .send({ name: "X" });
     expect(res.status).toBe(400);
+  });
+
+  it("hashes password when provided in update", async () => {
+    const updated = { ...mockUser, name: "Jane Smith" };
+    (userService.updateUser as Mock).mockResolvedValue(updated);
+
+    const res = await request(app)
+      .put(`/user/${mockUser.id}`)
+      .set("Authorization", `Bearer ${adminToken()}`)
+      .send({ name: "Jane Smith", password: "newpassword123" });
+
+    expect(res.status).toBe(200);
+    expect(hashPassword).toHaveBeenCalledWith("newpassword123");
+    expect(userService.updateUser).toHaveBeenCalledWith(
+      mockUser.id,
+      expect.objectContaining({ password: "hashed_password" })
+    );
+  });
+
+  it("does not hash password when null in update", async () => {
+    const updated = { ...mockUser, name: "Jane Smith" };
+    (userService.updateUser as Mock).mockResolvedValue(updated);
+    (hashPassword as Mock).mockClear();
+
+    const res = await request(app)
+      .put(`/user/${mockUser.id}`)
+      .set("Authorization", `Bearer ${adminToken()}`)
+      .send({ name: "Jane Smith", password: null });
+
+    expect(res.status).toBe(200);
+    expect(hashPassword).not.toHaveBeenCalled();
   });
 });
 
