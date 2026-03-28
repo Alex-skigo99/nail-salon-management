@@ -1,6 +1,7 @@
-import { Table } from "@tanstack/react-table";
+import { PaginationState, Table } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const PAGINATION_PAGE_SIZES = [5, 10, 20, 50];
 
@@ -8,20 +9,30 @@ interface TablePaginationProps<TData> {
   table: Table<TData>;
   isPaginationNeeded?: boolean;
   totalItems: number;
-  // nextPageToken?: string | null;
+  nextPageToken?: string | null;
+  pagination?: PaginationState;
+  setPagination?: React.Dispatch<React.SetStateAction<PaginationState>>;
 }
 
 export function TablePagination<TData>({
   table,
   isPaginationNeeded = false,
   totalItems,
-  // nextPageToken,
+  nextPageToken,
+  pagination: controlledPagination,
+  setPagination,
 }: TablePaginationProps<TData>) {
-  const { pageIndex, pageSize } = table.getState().pagination;
+  const isMobile = useIsMobile();
+  const { pageIndex, pageSize } = controlledPagination ?? table.getState().pagination;
   const startItem = pageIndex * pageSize + 1;
   const endItem = Math.min((pageIndex + 1) * pageSize, totalItems);
 
-  const isMobile = typeof window !== "undefined" ? window.innerWidth < 640 : false;
+  const lastPage = Math.max(0, Math.ceil(totalItems / pageSize) - 1);
+  const canPreviousPage = pageIndex > 0;
+  const canNextPage = pageIndex < lastPage;
+
+  const prevButtonTitle = isMobile ? "Prev" : "Previous";
+  const nextButtonTitle = isMobile ? "Next" : "Next";
 
   return (
     <div className="flex w-full items-center justify-between py-4">
@@ -39,7 +50,21 @@ export function TablePagination<TData>({
               {!isMobile && <span>Rows </span>}
               per page:
             </p>
-            <Select value={pageSize.toString()} onValueChange={(value) => table.setPageSize(Number(value))}>
+            <Select
+              value={pageSize.toString()}
+              onValueChange={(value) => {
+                const newSize = Number(value);
+                if (setPagination) {
+                  setPagination((prev) => ({
+                    ...prev,
+                    pageSize: newSize,
+                    pageIndex: 0,
+                  }));
+                } else {
+                  table.setPageSize(newSize);
+                }
+              }}
+            >
               <SelectTrigger className="cursor-pointer">
                 <SelectValue placeholder="Page Size" />
               </SelectTrigger>
@@ -59,13 +84,30 @@ export function TablePagination<TData>({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
+              onClick={() => {
+                if (setPagination) {
+                  setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex - 1 }));
+                } else {
+                  table.previousPage();
+                }
+              }}
+              disabled={!canPreviousPage}
             >
-              Previous
+              {prevButtonTitle}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-              Next
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (setPagination) {
+                  setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex + 1 }));
+                } else {
+                  table.nextPage();
+                }
+              }}
+              disabled={!canNextPage && !nextPageToken}
+            >
+              {nextButtonTitle}
             </Button>
           </div>
         )}

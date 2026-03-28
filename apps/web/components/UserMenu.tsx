@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useState } from "react";
-import { LogOut, User, Shield, ArrowBigDownIcon } from "lucide-react";
+import { LogOut, User, Shield, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,7 +72,7 @@ export function UserMenu() {
           {isAdmin ? (
             <Shield className="text-primary ml-auto size-3.5" />
           ) : (
-            <ArrowBigDownIcon className="text-primary ml-auto size-3.5" />
+            <ChevronDown className="text-primary ml-auto size-3.5" />
           )}
         </Button>
       </DropdownMenuTrigger>

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { queryKeys } from "./queryKeys";
 import { apiRoutes } from "@/const/apiRouts";
@@ -148,6 +148,7 @@ export function useUserAppointments(
       return res.data;
     },
     enabled: !!userId,
+    placeholderData: keepPreviousData,
   });
 }
 

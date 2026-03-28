@@ -1,6 +1,7 @@
 import { knex } from "../lib/db";
 import { DB_TABLES } from "../constants/dbTables";
 import { User, UserRetrieve, UserListItem } from "../types/dbSchemaTypes";
+import type { IWithPagination } from "knex-paginate";
 
 type SafeUser = Omit<User, "password" | "google_id">;
 
@@ -30,9 +31,12 @@ export interface GetAllUsersParams {
   sort?: "name" | "appts_count" | "created_asc" | "created_desc" | "last_appts";
   role?: "ADMIN" | "USER";
   master_id?: number;
+  page?: number;
+  perPage?: number;
 }
 
-export const getAllUsers = async (params: GetAllUsersParams = {}): Promise<UserListItem[]> => {
+export const getAllUsers = async (params: GetAllUsersParams = {}): Promise<IWithPagination<UserListItem>> => {
+  const { page = 1, perPage = 10 } = params;
   const query = knex(`${DB_TABLES.USERS} as u`)
     .select(SAFE_COLUMNS.map((c) => `u.${c}`))
     .select(knex.raw(`COALESCE(appts.cnt, 0)::int AS appts_count`), knex.raw(`appts.last_date AS last_appts`))
@@ -83,7 +87,7 @@ export const getAllUsers = async (params: GetAllUsersParams = {}): Promise<UserL
       query.orderBy("u.created_at", "desc");
   }
 
-  return query;
+  return query.paginate({ currentPage: page, perPage, isLengthAware: true });
 };
 
 export const getUserById = async (id: string): Promise<UserRetrieve | null> => {

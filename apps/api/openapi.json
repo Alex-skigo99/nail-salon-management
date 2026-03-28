@@ -14,7 +14,9 @@
     "/appointment": {
       "post": {
         "summary": "Create a new appointment",
-        "tags": ["Appointment"],
+        "tags": [
+          "Appointment"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -51,7 +53,9 @@
     "/appointment/{id}": {
       "put": {
         "summary": "Update non-scheduling fields of an appointment (ADMIN only)",
-        "tags": ["Appointment"],
+        "tags": [
+          "Appointment"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -96,7 +100,9 @@
       },
       "delete": {
         "summary": "Delete an appointment",
-        "tags": ["Appointment"],
+        "tags": [
+          "Appointment"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -124,7 +130,9 @@
       },
       "patch": {
         "summary": "Update the comment of an appointment",
-        "tags": ["Appointment"],
+        "tags": [
+          "Appointment"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -141,7 +149,9 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["comments"],
+                "required": [
+                  "comments"
+                ],
                 "properties": {
                   "comments": {
                     "type": "string",
@@ -179,7 +189,9 @@
     "/appointment/{id}/reschedule": {
       "put": {
         "summary": "Move appointment to a new date/time (checks availability) (ADMIN only)",
-        "tags": ["Appointment"],
+        "tags": [
+          "Appointment"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -229,7 +241,9 @@
     "/appointment/master/{masterId}": {
       "get": {
         "summary": "Get all appointments for a master within a date range",
-        "tags": ["Appointment"],
+        "tags": [
+          "Appointment"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -285,7 +299,9 @@
       "get": {
         "summary": "Get slot map for a master over a date range (ADMIN only)",
         "description": "Returns one entry per day containing the date, working hours, slot duration, slot count, and an array of slots where each slot has status: empty | book | part_book | reserved | none. Only ADMIN can access this endpoint.\n",
-        "tags": ["Appointment"],
+        "tags": [
+          "Appointment"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -341,7 +357,9 @@
       "get": {
         "summary": "Get empty slots for a master over a date range",
         "description": "Returns one entry per day containing the date, working hours, slot duration, slot count, and an array of slots where each slot has status: empty | book | part_book | reserved | none.\n",
-        "tags": ["Appointment"],
+        "tags": [
+          "Appointment"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -397,7 +415,9 @@
       "get": {
         "summary": "Check if a slot is available; if not, return suggestions",
         "description": "Checks whether the requested masterId/date/time/duration slot is free. If occupied, returns suggestions: same-day slots just before & after the requested time, plus the nearest available days that have the same time.\n",
-        "tags": ["Appointment"],
+        "tags": [
+          "Appointment"
+        ],
         "parameters": [
           {
             "in": "query",
@@ -444,11 +464,16 @@
                   "oneOf": [
                     {
                       "type": "object",
-                      "required": ["available", "slot"],
+                      "required": [
+                        "available",
+                        "slot"
+                      ],
                       "properties": {
                         "available": {
                           "type": "boolean",
-                          "enum": [true]
+                          "enum": [
+                            true
+                          ]
                         },
                         "slot": {
                           "$ref": "#/components/schemas/TimeSlot"
@@ -458,19 +483,30 @@
                     },
                     {
                       "type": "object",
-                      "required": ["available", "suggestions"],
+                      "required": [
+                        "available",
+                        "suggestions"
+                      ],
                       "properties": {
                         "available": {
                           "type": "boolean",
-                          "enum": [false]
+                          "enum": [
+                            false
+                          ]
                         },
                         "suggestions": {
                           "type": "object",
-                          "required": ["same_day", "same_time"],
+                          "required": [
+                            "same_day",
+                            "same_time"
+                          ],
                           "properties": {
                             "same_day": {
                               "type": "object",
-                              "required": ["before", "after"],
+                              "required": [
+                                "before",
+                                "after"
+                              ],
                               "properties": {
                                 "before": {
                                   "oneOf": [
@@ -496,7 +532,10 @@
                             },
                             "same_time": {
                               "type": "object",
-                              "required": ["before", "after"],
+                              "required": [
+                                "before",
+                                "after"
+                              ],
                               "properties": {
                                 "before": {
                                   "oneOf": [
@@ -543,7 +582,9 @@
       "get": {
         "summary": "Get up to 6 appointment slot suggestions grouped by master",
         "description": "Returns upcoming empty time slots (in the future relative to NowDate/NowTime) grouped by master. If masterId is provided, returns only that master.\n",
-        "tags": ["Appointment"],
+        "tags": [
+          "Appointment"
+        ],
         "parameters": [
           {
             "in": "query",
@@ -583,7 +624,10 @@
                   "type": "array",
                   "items": {
                     "type": "object",
-                    "required": ["master", "slots"],
+                    "required": [
+                      "master",
+                      "slots"
+                    ],
                     "properties": {
                       "master": {
                         "$ref": "#/components/schemas/Master"
@@ -612,7 +656,9 @@
     "/appointment/user/{userId}": {
       "get": {
         "summary": "Get appointments for a user with pagination and optional date filters",
-        "tags": ["Appointment"],
+        "tags": [
+          "Appointment"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -726,7 +772,9 @@
     "/auth/register": {
       "post": {
         "summary": "Register a new user (USER role only)",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -760,7 +808,9 @@
     "/auth/login": {
       "post": {
         "summary": "Login with email and password",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -794,14 +844,20 @@
     "/auth/google": {
       "post": {
         "summary": "Authenticate with Google OAuth profile",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["googleId", "email", "name"],
+                "required": [
+                  "googleId",
+                  "email",
+                  "name"
+                ],
                 "properties": {
                   "googleId": {
                     "type": "string"
@@ -840,7 +896,9 @@
     "/auth/me": {
       "get": {
         "summary": "Get current authenticated user",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -864,7 +922,9 @@
       },
       "patch": {
         "summary": "Update current user profile or password",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -904,7 +964,9 @@
       },
       "delete": {
         "summary": "Delete the current authenticated user account",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -923,7 +985,9 @@
     "/auth/logout": {
       "post": {
         "summary": "Logout and clear auth cookie",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "responses": {
           "200": {
             "description": "Logged out successfully"
@@ -934,7 +998,9 @@
     "/master": {
       "get": {
         "summary": "Retrieve a list of masters",
-        "tags": ["Master"],
+        "tags": [
+          "Master"
+        ],
         "responses": {
           "200": {
             "description": "A list of masters",
@@ -956,7 +1022,9 @@
       },
       "post": {
         "summary": "Create a new master (ADMIN only)",
-        "tags": ["Master"],
+        "tags": [
+          "Master"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -990,7 +1058,9 @@
     "/master/{id}": {
       "put": {
         "summary": "Update an existing master (ADMIN only)",
-        "tags": ["Master"],
+        "tags": [
+          "Master"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -1036,7 +1106,9 @@
       },
       "delete": {
         "summary": "Delete a master (ADMIN only)",
-        "tags": ["Master"],
+        "tags": [
+          "Master"
+        ],
         "parameters": [
           {
             "in": "path",
@@ -1067,7 +1139,9 @@
     "/services": {
       "get": {
         "summary": "Get all services",
-        "tags": ["Services"],
+        "tags": [
+          "Services"
+        ],
         "responses": {
           "200": {
             "description": "List of services",
@@ -1086,7 +1160,9 @@
       },
       "post": {
         "summary": "Create a new service (ADMIN only)",
-        "tags": ["Services"],
+        "tags": [
+          "Services"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1114,7 +1190,9 @@
     "/services/{id}": {
       "put": {
         "summary": "Update a service (ADMIN only)",
-        "tags": ["Services"],
+        "tags": [
+          "Services"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1156,7 +1234,9 @@
       },
       "delete": {
         "summary": "Delete a service (ADMIN only)",
-        "tags": ["Services"],
+        "tags": [
+          "Services"
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1177,7 +1257,9 @@
     "/user": {
       "get": {
         "summary": "Retrieve a list of users (ADMIN only)",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1197,7 +1279,13 @@
             "name": "sort",
             "schema": {
               "type": "string",
-              "enum": ["name", "appts_count", "created_asc", "created_desc", "last_appts"]
+              "enum": [
+                "name",
+                "appts_count",
+                "created_asc",
+                "created_desc",
+                "last_appts"
+              ]
             },
             "description": "Sort order"
           },
@@ -1206,7 +1294,10 @@
             "name": "role",
             "schema": {
               "type": "string",
-              "enum": ["ADMIN", "USER"]
+              "enum": [
+                "ADMIN",
+                "USER"
+              ]
             },
             "description": "Filter by role"
           },
@@ -1217,17 +1308,69 @@
               "type": "integer"
             },
             "description": "Filter by master_id"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "perPage",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Items per page"
           }
         ],
         "responses": {
           "200": {
-            "description": "A list of users",
+            "description": "Paginated list of users",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserListItem"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UserListItem"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "currentPage": {
+                          "type": "integer"
+                        },
+                        "perPage": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "type": "integer"
+                        },
+                        "to": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "lastPage": {
+                          "type": "integer"
+                        },
+                        "prevPage": {
+                          "type": "integer"
+                        },
+                        "nextPage": {
+                          "type": "integer"
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -1246,7 +1389,9 @@
       },
       "post": {
         "summary": "Create a new user (ADMIN only)",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1291,7 +1436,9 @@
     "/user/{id}": {
       "get": {
         "summary": "Get a user by ID (ADMIN only)",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1339,7 +1486,9 @@
       },
       "put": {
         "summary": "Update an existing user (ADMIN only)",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1397,7 +1546,9 @@
       },
       "delete": {
         "summary": "Delete a user (ADMIN only)",
-        "tags": ["User"],
+        "tags": [
+          "User"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1440,7 +1591,9 @@
     "/working-hours": {
       "get": {
         "summary": "Get working hours for a master (ADMIN only)",
-        "tags": ["WorkingHours"],
+        "tags": [
+          "WorkingHours"
+        ],
         "parameters": [
           {
             "name": "master_id",
@@ -1469,7 +1622,9 @@
       },
       "post": {
         "summary": "Replace working hours for a master (ADMIN only)",
-        "tags": ["WorkingHours"],
+        "tags": [
+          "WorkingHours"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1498,7 +1653,9 @@
       },
       "delete": {
         "summary": "Delete working hours for a master (ADMIN only)",
-        "tags": ["WorkingHours"],
+        "tags": [
+          "WorkingHours"
+        ],
         "parameters": [
           {
             "name": "master_id",
@@ -1521,7 +1678,12 @@
     "schemas": {
       "AppointmentCreate": {
         "type": "object",
-        "required": ["master_id", "date", "time", "duration_minutes"],
+        "required": [
+          "master_id",
+          "date",
+          "time",
+          "duration_minutes"
+        ],
         "properties": {
           "master_id": {
             "type": "integer",
@@ -1573,7 +1735,13 @@
           },
           "status": {
             "type": "string",
-            "enum": ["new", "confirmed", "reserved", "pending", "rejected"],
+            "enum": [
+              "new",
+              "confirmed",
+              "reserved",
+              "pending",
+              "rejected"
+            ],
             "default": "new"
           }
         }
@@ -1608,13 +1776,22 @@
           },
           "status": {
             "type": "string",
-            "enum": ["new", "confirmed", "reserved", "pending", "rejected"]
+            "enum": [
+              "new",
+              "confirmed",
+              "reserved",
+              "pending",
+              "rejected"
+            ]
           }
         }
       },
       "AppointmentReschedule": {
         "type": "object",
-        "required": ["date", "time"],
+        "required": [
+          "date",
+          "time"
+        ],
         "properties": {
           "master_id": {
             "type": "integer",
@@ -1646,7 +1823,10 @@
       },
       "TimeSlot": {
         "type": "object",
-        "required": ["date", "time"],
+        "required": [
+          "date",
+          "time"
+        ],
         "properties": {
           "date": {
             "type": "string",
@@ -1677,7 +1857,10 @@
           },
           "role": {
             "type": "string",
-            "enum": ["USER", "ADMIN"]
+            "enum": [
+              "USER",
+              "ADMIN"
+            ]
           },
           "image": {
             "type": "string",
@@ -1712,7 +1895,12 @@
       },
       "RegisterInput": {
         "type": "object",
-        "required": ["email", "password", "name", "phone"],
+        "required": [
+          "email",
+          "password",
+          "name",
+          "phone"
+        ],
         "properties": {
           "email": {
             "type": "string",
@@ -1734,7 +1922,10 @@
       },
       "LoginInput": {
         "type": "object",
-        "required": ["email", "password"],
+        "required": [
+          "email",
+          "password"
+        ],
         "properties": {
           "email": {
             "type": "string",
@@ -1789,7 +1980,9 @@
       },
       "MasterCreate": {
         "type": "object",
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -1829,7 +2022,11 @@
           },
           "category": {
             "type": "string",
-            "enum": ["manicure", "pedicure", "other"]
+            "enum": [
+              "manicure",
+              "pedicure",
+              "other"
+            ]
           },
           "price": {
             "type": "string",
@@ -1842,7 +2039,12 @@
       },
       "CreateService": {
         "type": "object",
-        "required": ["name", "category", "price", "duration_minutes"],
+        "required": [
+          "name",
+          "category",
+          "price",
+          "duration_minutes"
+        ],
         "properties": {
           "name": {
             "type": "string"
@@ -1853,7 +2055,11 @@
           },
           "category": {
             "type": "string",
-            "enum": ["manicure", "pedicure", "other"]
+            "enum": [
+              "manicure",
+              "pedicure",
+              "other"
+            ]
           },
           "price": {
             "type": "string",
@@ -1895,7 +2101,10 @@
           },
           "role": {
             "type": "string",
-            "enum": ["ADMIN", "USER"],
+            "enum": [
+              "ADMIN",
+              "USER"
+            ],
             "example": "USER"
           },
           "last_login": {
@@ -1972,7 +2181,12 @@
       },
       "UserCreate": {
         "type": "object",
-        "required": ["name", "email", "role", "password"],
+        "required": [
+          "name",
+          "email",
+          "role",
+          "password"
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -1984,7 +2198,10 @@
           },
           "role": {
             "type": "string",
-            "enum": ["ADMIN", "USER"],
+            "enum": [
+              "ADMIN",
+              "USER"
+            ],
             "example": "USER"
           },
           "password": {
@@ -2026,7 +2243,10 @@
           },
           "role": {
             "type": "string",
-            "enum": ["ADMIN", "USER"]
+            "enum": [
+              "ADMIN",
+              "USER"
+            ]
           },
           "image": {
             "type": "string",
@@ -2066,7 +2286,10 @@
       },
       "ReplaceWorkingHours": {
         "type": "object",
-        "required": ["master_id", "records"],
+        "required": [
+          "master_id",
+          "records"
+        ],
         "properties": {
           "master_id": {
             "type": "integer"
@@ -2137,7 +2360,13 @@
           },
           "status": {
             "type": "string",
-            "enum": ["new", "confirmed", "reserved", "pending", "rejected"]
+            "enum": [
+              "new",
+              "confirmed",
+              "reserved",
+              "pending",
+              "rejected"
+            ]
           },
           "services": {
             "type": "string",
@@ -2186,7 +2415,9 @@
           },
           {
             "type": "object",
-            "required": ["master_data"],
+            "required": [
+              "master_data"
+            ],
             "properties": {
               "master_data": {
                 "$ref": "#/components/schemas/Master"
@@ -2208,7 +2439,13 @@
           },
           "status": {
             "type": "string",
-            "enum": ["empty", "reserved", "none", "part_book", "book"]
+            "enum": [
+              "empty",
+              "reserved",
+              "none",
+              "part_book",
+              "book"
+            ]
           },
           "appointment_data": {
             "oneOf": [

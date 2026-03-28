@@ -35,15 +35,49 @@ import { hashPassword } from "../services/authService";
  *         schema:
  *           type: integer
  *         description: Filter by master_id
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: perPage
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Items per page
  *     responses:
  *       200:
- *         description: A list of users
+ *         description: Paginated list of users
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/UserListItem'
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/UserListItem'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                     perPage:
+ *                       type: integer
+ *                     from:
+ *                       type: integer
+ *                     to:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     lastPage:
+ *                       type: integer
+ *                     prevPage:
+ *                       type: integer
+ *                     nextPage:
+ *                       type: integer
  *       401:
  *         description: Unauthorized
  *       403:
@@ -328,6 +362,8 @@ const GetAllUsersQuerySchema = z.object({
   sort: z.enum(["name", "appts_count", "created_asc", "created_desc", "last_appts"]).optional(),
   role: z.enum(["ADMIN", "USER"]).optional(),
   master_id: z.coerce.number().int().positive().optional(),
+  page: z.coerce.number().int().positive().optional(),
+  perPage: z.coerce.number().int().positive().optional(),
 });
 
 const UserIdParamSchema = z.object({

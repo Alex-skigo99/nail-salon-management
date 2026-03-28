@@ -13,15 +13,29 @@ import { usersColumns } from "./_components/usersColumns";
 import { UsersSearchFilterSection } from "./_components/UsersSearchFilterSection";
 import { UserDataModal } from "@/components/modals/userDataModal/UserDataModal";
 import { UserCreateUpdateDialog } from "@/components/modals/userCreateUpdateDialog/UserCreateUpdateDialog";
-import type { Row } from "@tanstack/react-table";
+import type { Row, PaginationState } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function ClientsPage() {
-  const [filterParams, setFilterParams] = useState<UseUsersParams>({});
+  const [filterParams, setFilterParams] = useState<UseUsersParams>({ sort: "name" });
   const { data: session } = useSession();
   const isMobile = useIsMobile();
-  const { data: users, isLoading, error } = useUsers(filterParams, !!session?.user?.id);
+
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
+  const handleFilterChange = useCallback((params: UseUsersParams) => {
+    setFilterParams(params);
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  }, []);
+
+  const { data, isLoading, error } = useUsers(
+    { ...filterParams, page: pagination.pageIndex + 1, perPage: pagination.pageSize },
+    !!session?.user?.id
+  );
   const { data: masters = [] } = useMasters(!!session?.user?.id);
 
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -68,7 +82,7 @@ export default function ClientsPage() {
       </div>
 
       <div className={cn("flex-1 p-6", { "px-0 py-2": isMobile })}>
-        <UsersSearchFilterSection params={filterParams} onChange={setFilterParams} masters={masters} />
+        <UsersSearchFilterSection params={filterParams} onChange={handleFilterChange} masters={masters} />
 
         {error ? (
           <div className="flex h-48 flex-col items-center justify-center gap-2 text-center">
@@ -78,10 +92,14 @@ export default function ClientsPage() {
         ) : (
           <GeneralTable<UserListItem, UserListItem, unknown>
             columns={columns}
-            data={users ?? []}
+            data={data?.data ?? []}
             isPending={isLoading}
             handleRowClick={handleRowClick}
             customNoResultsMessage="No users found"
+            isPaginationNeeded
+            pagination={pagination}
+            setPagination={setPagination}
+            totalRows={data?.pagination?.total ?? 0}
           />
         )}
       </div>

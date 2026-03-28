@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { Master } from "./masterTypes";
+import type { Pagination } from "./paginationTypes";
 
 export const UserRoleSchema = z.enum(["ADMIN", "USER"]);
 
@@ -52,4 +53,9 @@ export type UpdateUserInput = {
   master_id?: number | null;
   email_subscribed?: boolean;
   password?: string | null;
+};
+
+export type PaginatedUsers = {
+  data: UserListItem[];
+  pagination?: Pagination;
 };

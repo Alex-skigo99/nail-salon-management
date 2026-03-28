@@ -21,6 +21,9 @@ const { mockKnex, chain } = vi.hoisted(() => {
     count: vi.fn(),
     max: vi.fn(),
     groupBy: vi.fn(),
+    paginate: vi
+      .fn()
+      .mockResolvedValue({ data: [], pagination: { currentPage: 1, perPage: 10, total: 0, lastPage: 1 } }),
   };
 
   for (const key of [
@@ -82,46 +85,78 @@ const mockUserListItem = {
 describe("getAllUsers", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("returns all users with appts_count and last_appts", async () => {
-    chain.then = vi.fn((resolve: (v: unknown) => void) => resolve([mockUserListItem]));
+  it("returns paginated users with appts_count and last_appts", async () => {
+    chain.paginate.mockResolvedValue({
+      data: [mockUserListItem],
+      pagination: { currentPage: 1, perPage: 10, total: 1, lastPage: 1 },
+    });
     const result = await getAllUsers();
-    expect(result).toEqual([mockUserListItem]);
+    expect(result.data).toEqual([mockUserListItem]);
+    expect(result.pagination).toBeDefined();
     expect(mockKnex).toHaveBeenCalledWith("users as u");
   });
 
-  it("returns empty array when no users exist", async () => {
-    chain.then = vi.fn((resolve: (v: unknown) => void) => resolve([]));
-    expect(await getAllUsers()).toEqual([]);
+  it("returns empty data array when no users exist", async () => {
+    chain.paginate.mockResolvedValue({ data: [], pagination: { currentPage: 1, perPage: 10, total: 0, lastPage: 1 } });
+    const result = await getAllUsers();
+    expect(result.data).toEqual([]);
   });
 
   it("applies search filter", async () => {
-    chain.then = vi.fn((resolve: (v: unknown) => void) => resolve([mockUserListItem]));
+    chain.paginate.mockResolvedValue({
+      data: [mockUserListItem],
+      pagination: { currentPage: 1, perPage: 10, total: 1, lastPage: 1 },
+    });
     await getAllUsers({ search: "jane" });
     expect(chain.where).toHaveBeenCalled();
   });
 
   it("applies role filter", async () => {
-    chain.then = vi.fn((resolve: (v: unknown) => void) => resolve([mockUserListItem]));
+    chain.paginate.mockResolvedValue({
+      data: [mockUserListItem],
+      pagination: { currentPage: 1, perPage: 10, total: 1, lastPage: 1 },
+    });
     await getAllUsers({ role: "USER" });
     expect(chain.where).toHaveBeenCalledWith("u.role", "USER");
   });
 
   it("applies master_id filter", async () => {
-    chain.then = vi.fn((resolve: (v: unknown) => void) => resolve([mockUserListItem]));
+    chain.paginate.mockResolvedValue({
+      data: [mockUserListItem],
+      pagination: { currentPage: 1, perPage: 10, total: 1, lastPage: 1 },
+    });
     await getAllUsers({ master_id: 1 });
     expect(chain.where).toHaveBeenCalledWith("u.master_id", 1);
   });
 
   it("applies sort by name", async () => {
-    chain.then = vi.fn((resolve: (v: unknown) => void) => resolve([mockUserListItem]));
+    chain.paginate.mockResolvedValue({
+      data: [mockUserListItem],
+      pagination: { currentPage: 1, perPage: 10, total: 1, lastPage: 1 },
+    });
     await getAllUsers({ sort: "name" });
-    expect(chain.orderBy).toHaveBeenCalledWith("u.name", "asc");
+    expect(chain.orderByRaw).toHaveBeenCalledWith("LOWER(u.name) ASC");
   });
 
   it("applies sort by appts_count desc", async () => {
-    chain.then = vi.fn((resolve: (v: unknown) => void) => resolve([mockUserListItem]));
+    chain.paginate.mockResolvedValue({
+      data: [mockUserListItem],
+      pagination: { currentPage: 1, perPage: 10, total: 1, lastPage: 1 },
+    });
     await getAllUsers({ sort: "appts_count" });
     expect(chain.orderBy).toHaveBeenCalledWith("appts_count", "desc");
+  });
+
+  it("passes page and perPage to paginate", async () => {
+    chain.paginate.mockResolvedValue({ data: [], pagination: { currentPage: 2, perPage: 5, total: 10, lastPage: 2 } });
+    await getAllUsers({ page: 2, perPage: 5 });
+    expect(chain.paginate).toHaveBeenCalledWith({ currentPage: 2, perPage: 5, isLengthAware: true });
+  });
+
+  it("uses default page=1 and perPage=10 when not specified", async () => {
+    chain.paginate.mockResolvedValue({ data: [], pagination: { currentPage: 1, perPage: 10, total: 0, lastPage: 1 } });
+    await getAllUsers();
+    expect(chain.paginate).toHaveBeenCalledWith({ currentPage: 1, perPage: 10, isLengthAware: true });
   });
 });
 

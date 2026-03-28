@@ -73,25 +73,36 @@ describe("GET /user", () => {
   });
 
   it("returns 200 and list of users when ADMIN", async () => {
-    (userService.getAllUsers as Mock).mockResolvedValue([mockUserListItem]);
+    (userService.getAllUsers as Mock).mockResolvedValue({
+      data: [mockUserListItem],
+      pagination: { currentPage: 1, perPage: 10, total: 1, lastPage: 1 },
+    });
 
     const res = await request(app).get("/user").set("Authorization", `Bearer ${adminToken()}`);
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual([mockUserListItem]);
+    expect(res.body.data).toEqual([mockUserListItem]);
+    expect(res.body.pagination).toBeDefined();
+    expect(res.body.pagination.total).toBe(1);
   });
 
   it("returns 200 with empty array when no users", async () => {
-    (userService.getAllUsers as Mock).mockResolvedValue([]);
+    (userService.getAllUsers as Mock).mockResolvedValue({
+      data: [],
+      pagination: { currentPage: 1, perPage: 10, total: 0, lastPage: 1 },
+    });
 
     const res = await request(app).get("/user").set("Authorization", `Bearer ${adminToken()}`);
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual([]);
+    expect(res.body.data).toEqual([]);
   });
 
   it("passes search query param to service", async () => {
-    (userService.getAllUsers as Mock).mockResolvedValue([]);
+    (userService.getAllUsers as Mock).mockResolvedValue({
+      data: [],
+      pagination: { currentPage: 1, perPage: 10, total: 0, lastPage: 1 },
+    });
 
     await request(app).get("/user?search=jane").set("Authorization", `Bearer ${adminToken()}`);
 
@@ -99,7 +110,10 @@ describe("GET /user", () => {
   });
 
   it("passes sort query param to service", async () => {
-    (userService.getAllUsers as Mock).mockResolvedValue([]);
+    (userService.getAllUsers as Mock).mockResolvedValue({
+      data: [],
+      pagination: { currentPage: 1, perPage: 10, total: 0, lastPage: 1 },
+    });
 
     await request(app).get("/user?sort=name").set("Authorization", `Bearer ${adminToken()}`);
 
@@ -107,7 +121,10 @@ describe("GET /user", () => {
   });
 
   it("passes role filter to service", async () => {
-    (userService.getAllUsers as Mock).mockResolvedValue([]);
+    (userService.getAllUsers as Mock).mockResolvedValue({
+      data: [],
+      pagination: { currentPage: 1, perPage: 10, total: 0, lastPage: 1 },
+    });
 
     await request(app).get("/user?role=ADMIN").set("Authorization", `Bearer ${adminToken()}`);
 
@@ -115,11 +132,25 @@ describe("GET /user", () => {
   });
 
   it("passes master_id filter to service", async () => {
-    (userService.getAllUsers as Mock).mockResolvedValue([]);
+    (userService.getAllUsers as Mock).mockResolvedValue({
+      data: [],
+      pagination: { currentPage: 1, perPage: 10, total: 0, lastPage: 1 },
+    });
 
     await request(app).get("/user?master_id=1").set("Authorization", `Bearer ${adminToken()}`);
 
     expect(userService.getAllUsers).toHaveBeenCalledWith(expect.objectContaining({ master_id: 1 }));
+  });
+
+  it("passes page and perPage params to service", async () => {
+    (userService.getAllUsers as Mock).mockResolvedValue({
+      data: [],
+      pagination: { currentPage: 2, perPage: 5, total: 10, lastPage: 2 },
+    });
+
+    await request(app).get("/user?page=2&perPage=5").set("Authorization", `Bearer ${adminToken()}`);
+
+    expect(userService.getAllUsers).toHaveBeenCalledWith(expect.objectContaining({ page: 2, perPage: 5 }));
   });
 
   it("returns 400 for invalid sort param", async () => {

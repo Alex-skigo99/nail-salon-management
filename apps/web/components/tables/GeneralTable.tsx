@@ -150,7 +150,13 @@ export default function GeneralTable<TState, TData extends TState, TValue>({
           </TableBody>
         </Table>
       </div>
-      <TablePagination table={table} isPaginationNeeded={isPaginationNeeded} totalItems={totalRows ?? 0} />
+      <TablePagination
+        table={table}
+        isPaginationNeeded={isPaginationNeeded}
+        totalItems={totalRows ?? 0}
+        pagination={pagination}
+        setPagination={setPagination}
+      />
     </div>
   );
 }

@@ -49,13 +49,34 @@ const mockUsers = [
   },
 ];
 
+const paginatedMockUsers = {
+  data: mockUsers,
+  pagination: { currentPage: 1, perPage: 10, from: 1, to: 2, total: 2, lastPage: 1, prevPage: null, nextPage: null },
+};
+
 describe("ClientsPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("renders page header and Add User button", () => {
-    mockUseUsers.mockReturnValue({ data: [], isLoading: false, error: null } as any);
+    mockUseUsers.mockReturnValue({
+      data: {
+        data: [],
+        pagination: {
+          currentPage: 1,
+          perPage: 10,
+          from: 0,
+          to: 0,
+          total: 0,
+          lastPage: 1,
+          prevPage: null,
+          nextPage: null,
+        },
+      },
+      isLoading: false,
+      error: null,
+    } as any);
     render(<ClientsPage />);
 
     expect(screen.getByText("Clients")).toBeInTheDocument();
@@ -70,7 +91,7 @@ describe("ClientsPage", () => {
   });
 
   it("renders users in table", () => {
-    mockUseUsers.mockReturnValue({ data: mockUsers, isLoading: false, error: null } as any);
+    mockUseUsers.mockReturnValue({ data: paginatedMockUsers, isLoading: false, error: null } as any);
     render(<ClientsPage />);
 
     expect(screen.getByText("Alice")).toBeInTheDocument();
@@ -80,7 +101,23 @@ describe("ClientsPage", () => {
 
   it("opens create dialog on Add User click", async () => {
     const user = userEvent.setup();
-    mockUseUsers.mockReturnValue({ data: [], isLoading: false, error: null } as any);
+    mockUseUsers.mockReturnValue({
+      data: {
+        data: [],
+        pagination: {
+          currentPage: 1,
+          perPage: 10,
+          from: 0,
+          to: 0,
+          total: 0,
+          lastPage: 1,
+          prevPage: null,
+          nextPage: null,
+        },
+      },
+      isLoading: false,
+      error: null,
+    } as any);
     render(<ClientsPage />);
 
     await user.click(screen.getByText("Add User"));
@@ -89,7 +126,7 @@ describe("ClientsPage", () => {
 
   it("opens view modal when row is clicked", async () => {
     const user = userEvent.setup();
-    mockUseUsers.mockReturnValue({ data: mockUsers, isLoading: false, error: null } as any);
+    mockUseUsers.mockReturnValue({ data: paginatedMockUsers, isLoading: false, error: null } as any);
     render(<ClientsPage />);
 
     const aliceRow = screen.getByText("Alice").closest("tr");
