@@ -56,7 +56,8 @@ export default function SearchUserInput({
   className,
   wrapperClassName = "grid gap-1.5",
 }: SearchUserInputProps) {
-  const { data: users = [] } = useUsers();
+  const { data: usersResponse } = useUsers();
+  const users = usersResponse?.data ?? [];
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const wasJustSelected = useRef(false);
