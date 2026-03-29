@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,6 +34,7 @@ export default function ChangePasswordDialog({
 }) {
   const t = useTranslations("clientPage.profile");
   const updateProfile = useUpdateProfile();
+  const [errorText, setErrorText] = useState<string | undefined>(undefined);
 
   const {
     register,
@@ -56,7 +58,9 @@ export default function ChangePasswordDialog({
         onError: (err) => {
           const axiosErr = err as AxiosError;
           if (axiosErr.response?.status === 401) {
-            setError("oldPassword", { message: t("wrongOldPassword") });
+            setErrorText(t("wrongOldPassword"));
+            setError("oldPassword", { type: "manual", message: t("wrongOldPassword") });
+            toast.error(t("wrongOldPassword"));
           } else {
             toast.error(t("passwordChangeError"));
           }
@@ -67,6 +71,7 @@ export default function ChangePasswordDialog({
 
   const handleClose = (val: boolean) => {
     if (!val) reset();
+    setErrorText(undefined);
     onOpenChange(val);
   };
 
@@ -91,6 +96,7 @@ export default function ChangePasswordDialog({
             showIcon={false}
             {...register("oldPassword")}
           />
+          {errorText && <p className="text-xs text-red-600">{errorText}</p>}
           <PasswordInput
             id="newPassword"
             label={t("newPassword")}
