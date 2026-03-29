@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/hooks/useUsers";
 import { UserIcon, Pencil } from "lucide-react";
 import Image from "next/image";
-import { getCreatedAtString } from "@/utils/dateUtils";
+import { getCreatedAtString, getAppointmentDateString } from "@/utils/dateUtils";
 import { Field } from "@/components/elements/Field";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 
@@ -77,6 +77,11 @@ export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataMo
                 }
               />
               <Field label="Master" value={user.master_data?.name} />
+              <Field label="Appointments" value={String(user.appts_count)} />
+              <Field
+                label="Last Appointment"
+                value={user.last_appts ? getAppointmentDateString(user.last_appts) : null}
+              />
               <Field label="Email Subscribed" value={user.email_subscribed ? "Yes" : "No"} />
               <Field label="Last Login" value={user.last_login ? getCreatedAtString(user.last_login) : null} />
               <Field label="Created" value={getCreatedAtString(user.created_at)} />

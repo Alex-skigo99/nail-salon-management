@@ -170,7 +170,13 @@ describe("getUserById", () => {
   });
 
   it("returns the user with master_data when found", async () => {
-    const userWithMaster = { ...mockUser, master_data: null, is_google_auth: false };
+    const userWithMaster = {
+      ...mockUser,
+      master_data: null,
+      is_google_auth: false,
+      appts_count: 3,
+      last_appts: "2026-03-20",
+    };
     chain.first.mockResolvedValue(userWithMaster);
     const result = await getUserById(mockUser.id);
     expect(result).toEqual(userWithMaster);

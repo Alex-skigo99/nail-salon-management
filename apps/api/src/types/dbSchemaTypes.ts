@@ -24,6 +24,8 @@ export type User = {
 export type UserRetrieve = Omit<User, "password" | "google_id"> & {
   master_data: Master | null;
   is_google_auth: boolean;
+  appts_count: number;
+  last_appts: string | null;
 };
 
 export type UserListItem = Omit<User, "password" | "google_id"> & {

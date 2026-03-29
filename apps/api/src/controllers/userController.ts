@@ -259,6 +259,13 @@ import { hashPassword } from "../services/authService";
  *                 - type: 'null'
  *             is_google_auth:
  *               type: boolean
+ *             appts_count:
+ *               type: integer
+ *               example: 5
+ *             last_appts:
+ *               type: string
+ *               format: date
+ *               nullable: true
  *     UserListItem:
  *       allOf:
  *         - $ref: '#/components/schemas/User'

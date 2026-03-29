@@ -45,6 +45,8 @@ const mockUserRetrieve = {
   ...mockUser,
   master_data: null,
   is_google_auth: false,
+  appts_count: 3,
+  last_appts: "2026-03-20",
 };
 
 function adminToken() {
@@ -183,6 +185,8 @@ describe("GET /user/:id", () => {
     expect(res.status).toBe(200);
     expect(res.body.email).toBe(mockUser.email);
     expect(res.body).toHaveProperty("master_data");
+    expect(res.body).toHaveProperty("appts_count");
+    expect(res.body).toHaveProperty("last_appts");
   });
 
   it("returns 404 when user does not exist", async () => {

@@ -95,7 +95,18 @@ export const getUserById = async (id: string): Promise<UserRetrieve | null> => {
     .select(SAFE_COLUMNS.map((c) => `u.${c}`))
     .select(knex.raw(masterDataSelect))
     .select(knex.raw(`(u.google_id IS NOT NULL) AS is_google_auth`))
+    .select(knex.raw(`COALESCE(appts.cnt, 0)::int AS appts_count`), knex.raw(`appts.last_date AS last_appts`))
     .leftJoin(`${DB_TABLES.MASTERS} as m`, "u.master_id", "m.id")
+    .leftJoin(
+      knex(DB_TABLES.APPOINTMENTS)
+        .select("user_id")
+        .count("* as cnt")
+        .max("date as last_date")
+        .groupBy("user_id")
+        .as("appts"),
+      "u.id",
+      "appts.user_id"
+    )
     .where("u.id", id)
     .first();
   return user ?? null;
