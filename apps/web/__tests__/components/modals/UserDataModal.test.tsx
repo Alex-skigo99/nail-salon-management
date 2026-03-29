@@ -5,6 +5,9 @@ import { UserDataModal } from "@/components/modals/userDataModal/UserDataModal";
 import { useUser } from "@/hooks/useUsers";
 
 jest.mock("@/hooks/useUsers");
+jest.mock("@/components/modals/historyUserApptsModal/HistoryUserApptsModal", () => ({
+  HistoryUserApptsModal: ({ open }: { open: boolean }) => (open ? <div>Appointment History</div> : null),
+}));
 
 const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
 
@@ -71,15 +74,12 @@ describe("UserDataModal", () => {
     expect(screen.queryByText("User Details")).not.toBeInTheDocument();
   });
 
-  it("calls onApptsClick when appointments field is clicked", async () => {
+  it("opens history modal when appointments field is clicked", async () => {
     const user = userEvent.setup();
-    const onApptsClick = jest.fn();
     mockUseUser.mockReturnValue({ data: mockUser, isLoading: false } as any);
-    render(
-      <UserDataModal open={true} onOpenChange={jest.fn()} userId="u1" onEdit={jest.fn()} onApptsClick={onApptsClick} />
-    );
+    render(<UserDataModal open={true} onOpenChange={jest.fn()} userId="u1" onEdit={jest.fn()} />);
 
     await user.click(screen.getByText("3"));
-    expect(onApptsClick).toHaveBeenCalled();
+    expect(screen.getByText("Appointment History")).toBeInTheDocument();
   });
 });
