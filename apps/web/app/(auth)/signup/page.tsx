@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Mail, Lock, User, UserPlus, ArrowLeft, Phone } from "lucide-react";
+import { Mail, User, UserPlus, ArrowLeft, Phone } from "lucide-react";
 import * as z from "zod";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/inputs/PasswordInput";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { useRegister, useGoogleSignIn } from "@/hooks/useAuth";
@@ -35,8 +35,6 @@ type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 export default function SignUpPage() {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register: formRegister,
@@ -141,60 +139,22 @@ export default function SignUpPage() {
             </div>
 
             {/* Password */}
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="At least 8 characters"
-                  className="pr-10 pl-10"
-                  {...formRegister("password")}
-                />
-                <button
-                  type="button"
-                  className="absolute top-1/2 right-3 -translate-y-1/2"
-                  onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
-                >
-                  {showPassword ? (
-                    <EyeOff className="text-muted-foreground size-4" />
-                  ) : (
-                    <Eye className="text-muted-foreground size-4" />
-                  )}
-                </button>
-              </div>
-              {errors.password && <p className="text-destructive text-sm">{errors.password.message}</p>}
-            </div>
+            <PasswordInput
+              id="password"
+              label="Password"
+              placeholder="At least 8 characters"
+              error={errors.password?.message}
+              {...formRegister("password")}
+            />
 
             {/* Confirm Password */}
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Lock className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Re-enter your password"
-                  className="pr-10 pl-10"
-                  {...formRegister("confirmPassword")}
-                />
-                <button
-                  type="button"
-                  className="absolute top-1/2 right-3 -translate-y-1/2"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  tabIndex={-1}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="text-muted-foreground size-4" />
-                  ) : (
-                    <Eye className="text-muted-foreground size-4" />
-                  )}
-                </button>
-              </div>
-              {errors.confirmPassword && <p className="text-destructive text-sm">{errors.confirmPassword.message}</p>}
-            </div>
+            <PasswordInput
+              id="confirmPassword"
+              label="Confirm Password"
+              placeholder="Re-enter your password"
+              error={errors.confirmPassword?.message}
+              {...formRegister("confirmPassword")}
+            />
 
             {/* Submit */}
             <Button type="submit" className="w-full" size="lg" disabled={registerMutation.isPending}>

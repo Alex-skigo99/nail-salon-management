@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { KeyRound } from "lucide-react";
+import { PasswordInput } from "@/components/inputs/PasswordInput";
 
 type ChangePasswordSectionProps = {
   value: string | null;
@@ -73,29 +72,23 @@ export function ChangePasswordSection({ value, onChange }: ChangePasswordSection
 
       {showFields && (
         <div className="mt-3 grid gap-2">
-          <div className="grid gap-1">
-            <Label htmlFor="new-password" className="text-xs">
-              New Password
-            </Label>
-            <Input
-              id="new-password"
-              type="password"
-              value={password}
-              onChange={(e) => handlePasswordChange(e.target.value)}
-              placeholder="Min 8 characters"
-            />
-          </div>
-          <div className="grid gap-1">
-            <Label htmlFor="confirm-new-password" className="text-xs">
-              Confirm New Password
-            </Label>
-            <Input
-              id="confirm-new-password"
-              type="password"
-              value={confirm}
-              onChange={(e) => handleConfirmChange(e.target.value)}
-            />
-          </div>
+          <PasswordInput
+            id="new-password"
+            label="New Password"
+            value={password}
+            onChange={(e) => handlePasswordChange(e.target.value)}
+            placeholder="Min 8 characters"
+            showIcon={false}
+            wrapperClassName="grid gap-1"
+          />
+          <PasswordInput
+            id="confirm-new-password"
+            label="Confirm New Password"
+            value={confirm}
+            onChange={(e) => handleConfirmChange(e.target.value)}
+            showIcon={false}
+            wrapperClassName="grid gap-1"
+          />
           {error && <p className="text-xs text-red-600">{error}</p>}
           {value && <p className="text-xs text-green-600">Password will be updated on save</p>}
         </div>

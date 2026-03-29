@@ -7,9 +7,8 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { useUpdateProfile } from "@/hooks/useProfile";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/inputs/PasswordInput";
 import { AxiosError } from "axios";
 
 const passwordSchema = z
@@ -85,27 +84,27 @@ export default function ChangePasswordDialog({
           <DialogTitle>{t("changePassword")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-1">
-            <Label htmlFor="oldPassword">{t("oldPassword")}</Label>
-            <Input id="oldPassword" type="password" {...register("oldPassword")} />
-            {getErrorMessage("oldPassword") && (
-              <p className="text-xs text-red-600">{getErrorMessage("oldPassword")}</p>
-            )}
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="newPassword">{t("newPassword")}</Label>
-            <Input id="newPassword" type="password" {...register("newPassword")} />
-            {getErrorMessage("newPassword") && (
-              <p className="text-xs text-red-600">{getErrorMessage("newPassword")}</p>
-            )}
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
-            <Input id="confirmPassword" type="password" {...register("confirmPassword")} />
-            {getErrorMessage("confirmPassword") && (
-              <p className="text-xs text-red-600">{getErrorMessage("confirmPassword")}</p>
-            )}
-          </div>
+          <PasswordInput
+            id="oldPassword"
+            label={t("oldPassword")}
+            error={getErrorMessage("oldPassword")}
+            showIcon={false}
+            {...register("oldPassword")}
+          />
+          <PasswordInput
+            id="newPassword"
+            label={t("newPassword")}
+            error={getErrorMessage("newPassword")}
+            showIcon={false}
+            {...register("newPassword")}
+          />
+          <PasswordInput
+            id="confirmPassword"
+            label={t("confirmPassword")}
+            error={getErrorMessage("confirmPassword")}
+            showIcon={false}
+            {...register("confirmPassword")}
+          />
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => handleClose(false)}>
               {t("cancel") ?? "Cancel"}

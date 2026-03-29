@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, Mail, Lock, LogIn, ArrowLeft } from "lucide-react";
+import { Mail, LogIn, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/inputs/PasswordInput";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { useLogin, useGoogleSignIn } from "@/hooks/useAuth";
@@ -22,7 +22,6 @@ interface LoginFormValues {
 
 export default function LoginPage() {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -84,34 +83,15 @@ export default function LoginPage() {
             </div>
 
             {/* Password */}
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  className="pr-10 pl-10"
-                  {...register("password", {
-                    required: "Password is required",
-                  })}
-                />
-                <button
-                  type="button"
-                  className="absolute top-1/2 right-3 -translate-y-1/2"
-                  onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
-                >
-                  {showPassword ? (
-                    <EyeOff className="text-muted-foreground size-4" />
-                  ) : (
-                    <Eye className="text-muted-foreground size-4" />
-                  )}
-                </button>
-              </div>
-              {errors.password && <p className="text-destructive text-sm">{errors.password.message}</p>}
-            </div>
+            <PasswordInput
+              id="password"
+              label="Password"
+              placeholder="Enter your password"
+              error={errors.password?.message}
+              {...register("password", {
+                required: "Password is required",
+              })}
+            />
 
             {/* Submit */}
             <Button type="submit" className="w-full" size="lg" disabled={loginMutation.isPending}>

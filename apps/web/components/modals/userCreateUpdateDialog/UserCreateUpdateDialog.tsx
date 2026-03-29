@@ -29,6 +29,7 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { Checkbox } from "@/components/ui/checkbox";
 import SelectInput from "@/components/inputs/SelectInput";
+import { PasswordInput } from "@/components/inputs/PasswordInput";
 import { useUser, useCreateUser, useUpdateUser, useDeleteUser } from "@/hooks/useUsers";
 import { useMasters } from "@/hooks/useMasters";
 import { Trash2 } from "lucide-react";
@@ -264,24 +265,24 @@ export function UserCreateUpdateDialog({ open, onOpenChange, userId }: UserCreat
 
               {!isEditMode && (
                 <>
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="user-password">Password</Label>
-                    <Input id="user-password" type="password" {...register("password" as keyof CreateFormValues)} />
-                    {"password" in errors && errors.password && (
-                      <p className="text-xs text-red-600">{errors.password.message}</p>
-                    )}
-                  </div>
-                  <div className="grid gap-1.5">
-                    <Label htmlFor="user-confirm-password">Confirm Password</Label>
-                    <Input
-                      id="user-confirm-password"
-                      type="password"
-                      {...register("confirmPassword" as keyof CreateFormValues)}
-                    />
-                    {"confirmPassword" in errors && errors.confirmPassword && (
-                      <p className="text-xs text-red-600">{errors.confirmPassword.message}</p>
-                    )}
-                  </div>
+                  <PasswordInput
+                    id="user-password"
+                    label="Password"
+                    showIcon={false}
+                    wrapperClassName="grid gap-1.5"
+                    error={"password" in errors && errors.password ? errors.password.message : undefined}
+                    {...register("password" as keyof CreateFormValues)}
+                  />
+                  <PasswordInput
+                    id="user-confirm-password"
+                    label="Confirm Password"
+                    showIcon={false}
+                    wrapperClassName="grid gap-1.5"
+                    error={
+                      "confirmPassword" in errors && errors.confirmPassword ? errors.confirmPassword.message : undefined
+                    }
+                    {...register("confirmPassword" as keyof CreateFormValues)}
+                  />
                 </>
               )}
 
