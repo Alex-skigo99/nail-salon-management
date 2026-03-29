@@ -98,11 +98,13 @@
   },
   "appSidebar": {
     "title": "Xena Nails Studio",
-    "subtitle": "ניהול סלון",
-    "home": "בית",
+    "subtitle": "פורטל ניהול הסלון",
+    "home": "חזרה לדף הראשי",
     "calendar": "לוח שנה",
     "masters": "מאסטרים",
-    "services": "שירותים"
+    "services": "שירותים",
+    "clients": "לקוחות",
+    "settings": "הגדרות"
   },
   "dialogs": {
     "infoUserDialog": {

@@ -3,6 +3,7 @@ import apiClient from "@/lib/api-client";
 import type { WorkingHours, ReplaceWorkingHoursInput } from "@/types/workingHoursTypes";
 import { queryKeys } from "./queryKeys";
 import { apiRoutes } from "@/const/apiRouts";
+import { CACHE_TIME } from "@/const/cacheTime";
 
 export const workingHoursQueryKey = (masterId: number) => [queryKeys.workingHours, masterId];
 
@@ -15,6 +16,7 @@ export function useWorkingHours(masterId: number) {
       });
       return res.data;
     },
+    staleTime: CACHE_TIME,
   });
 }
 

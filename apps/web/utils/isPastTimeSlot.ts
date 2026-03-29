@@ -1,4 +1,4 @@
-import { compareTimes, isSameDay } from "@/utils/dateUtils";
+import { compareTimes, isPastDate, isSameDay } from "@/utils/dateUtils";
 import type { SelectedSlot } from "@/types/appointmentTypes";
 
 export function isPastTimeSlot(selectedSlot: SelectedSlot): boolean {
@@ -8,5 +8,5 @@ export function isPastTimeSlot(selectedSlot: SelectedSlot): boolean {
       .slice(0, 5);
     return compareTimes(selectedSlot.time, currentTime) <= 0;
   }
-  return true;
+  return isPastDate(selectedSlot.date);
 }

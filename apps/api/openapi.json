@@ -581,11 +581,31 @@
     "/appointment/suggestions": {
       "get": {
         "summary": "Get up to 6 appointment slot suggestions grouped by master",
-        "description": "Returns upcoming empty time slots grouped by master. If masterId is provided, returns only that master.\n",
+        "description": "Returns upcoming empty time slots (in the future relative to NowDate/NowTime) grouped by master. If masterId is provided, returns only that master.\n",
         "tags": [
           "Appointment"
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "NowDate",
+            "schema": {
+              "type": "string",
+              "example": "2026-03-24"
+            },
+            "required": true,
+            "description": "Current UTC date in YYYY-MM-DD format"
+          },
+          {
+            "in": "query",
+            "name": "NowTime",
+            "schema": {
+              "type": "string",
+              "example": "14:30"
+            },
+            "required": true,
+            "description": "Current UTC time in HH:MM format"
+          },
           {
             "in": "query",
             "name": "masterId",
@@ -597,7 +617,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Array of grouped suggestions by master",
+            "description": "Array of grouped suggestions by master (future slots only)",
             "content": {
               "application/json": {
                 "schema": {
@@ -625,7 +645,7 @@
             }
           },
           "400": {
-            "description": "Invalid masterId"
+            "description": "Missing or invalid query parameters"
           },
           "500": {
             "description": "Internal server error"
@@ -1245,15 +1265,112 @@
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search by name, email, or phone"
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "appts_count",
+                "created_asc",
+                "created_desc",
+                "last_appts"
+              ]
+            },
+            "description": "Sort order"
+          },
+          {
+            "in": "query",
+            "name": "role",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ADMIN",
+                "USER"
+              ]
+            },
+            "description": "Filter by role"
+          },
+          {
+            "in": "query",
+            "name": "master_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by master_id"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number"
+          },
+          {
+            "in": "query",
+            "name": "perPage",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Items per page"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "A list of users",
+            "description": "Paginated list of users",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/User"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UserListItem"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "currentPage": {
+                          "type": "integer"
+                        },
+                        "perPage": {
+                          "type": "integer"
+                        },
+                        "from": {
+                          "type": "integer"
+                        },
+                        "to": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "lastPage": {
+                          "type": "integer"
+                        },
+                        "prevPage": {
+                          "type": "integer"
+                        },
+                        "nextPage": {
+                          "type": "integer"
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -1341,11 +1458,11 @@
         ],
         "responses": {
           "200": {
-            "description": "A single user",
+            "description": "A single user with master data",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/UserRetrieve"
                 }
               }
             }
@@ -1999,18 +2116,76 @@
             "type": "string",
             "nullable": true
           },
+          "master_id": {
+            "type": "integer",
+            "nullable": true
+          },
+          "email_subscribed": {
+            "type": "boolean"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time"
           }
         }
       },
+      "UserRetrieve": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "master_data": {
+                "nullable": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Master"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "is_google_auth": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "UserListItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "appts_count": {
+                "type": "integer",
+                "example": 5
+              },
+              "last_appts": {
+                "type": "string",
+                "format": "date",
+                "nullable": true
+              },
+              "is_google_auth": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
       "UserCreate": {
         "type": "object",
         "required": [
           "name",
           "email",
-          "role"
+          "role",
+          "password"
         ],
         "properties": {
           "name": {
@@ -2029,6 +2204,11 @@
             ],
             "example": "USER"
           },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "example": "securepass123"
+          },
           "phone": {
             "type": "string",
             "nullable": true
@@ -2036,6 +2216,13 @@
           "image": {
             "type": "string",
             "nullable": true
+          },
+          "master_id": {
+            "type": "integer",
+            "nullable": true
+          },
+          "email_subscribed": {
+            "type": "boolean"
           }
         }
       },
@@ -2064,6 +2251,18 @@
           "image": {
             "type": "string",
             "nullable": true
+          },
+          "master_id": {
+            "type": "integer",
+            "nullable": true
+          },
+          "email_subscribed": {
+            "type": "boolean"
+          },
+          "password": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 8
           }
         }
       },

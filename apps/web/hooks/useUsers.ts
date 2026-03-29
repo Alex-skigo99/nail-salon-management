@@ -1,18 +1,40 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { queryKeys } from "./queryKeys";
 import { apiRoutes } from "@/const/apiRouts";
-import type { User, CreateUserInput, UpdateUserInput } from "@/types/userTypes";
+import type { User, UserRetrieve, CreateUserInput, UpdateUserInput, PaginatedUsers } from "@/types/userTypes";
+import { CACHE_TIME } from "@/const/cacheTime";
 
 const USERS_QUERY_KEY = [queryKeys.users];
 
-export function useUsers() {
+export interface UseUsersParams {
+  search?: string;
+  sort?: string;
+  role?: string;
+  master_id?: number;
+  page?: number;
+  perPage?: number;
+}
+
+export function useUsers(params: UseUsersParams = {}, enabled = true) {
   return useQuery({
-    queryKey: USERS_QUERY_KEY,
+    queryKey: [queryKeys.users, params],
     queryFn: async () => {
-      const res = await apiClient.get<User[]>(apiRoutes.user);
+      const searchParams = new URLSearchParams();
+      if (params.search) searchParams.set("search", params.search);
+      if (params.sort) searchParams.set("sort", params.sort);
+      if (params.role) searchParams.set("role", params.role);
+      if (params.master_id) searchParams.set("master_id", String(params.master_id));
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.perPage) searchParams.set("perPage", String(params.perPage));
+      const qs = searchParams.toString();
+      const url = qs ? `${apiRoutes.user}?${qs}` : apiRoutes.user;
+      const res = await apiClient.get<PaginatedUsers>(url);
       return res.data;
     },
+    enabled,
+    staleTime: CACHE_TIME,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -20,10 +42,11 @@ export function useUser(id: string | null) {
   return useQuery({
     queryKey: [queryKeys.users, id],
     queryFn: async () => {
-      const res = await apiClient.get<User>(`${apiRoutes.user}/${id}`);
+      const res = await apiClient.get<UserRetrieve>(`${apiRoutes.user}/${id}`);
       return res.data;
     },
     enabled: !!id,
+    staleTime: CACHE_TIME,
   });
 }
 

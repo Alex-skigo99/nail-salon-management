@@ -14,7 +14,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { LayoutDashboard, Users, Menu, Scissors, HomeIcon } from "lucide-react";
+import { LayoutDashboard, Users, Contact, Menu, Scissors, HomeIcon } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isRTLLocale } from "@/lib/rtl";
@@ -39,7 +39,7 @@ function MenuContent({
   onItemClick?: () => void;
 }) {
   return (
-    <SidebarMenu>
+    <SidebarMenu className="mt-4">
       {menuItems.map((item) => {
         const Icon = item.icon;
         const isActive = pathname === item.href;
@@ -48,7 +48,7 @@ function MenuContent({
             <SidebarMenuButton asChild isActive={isActive}>
               <Link
                 href={item.href}
-                className={cn("flex items-center gap-2", isActive && "bg-accent")}
+                className={cn("flex items-center gap-3", isActive && "bg-accent")}
                 onClick={() => onItemClick?.()}
               >
                 <Icon className="h-4 w-4" />
@@ -85,6 +85,11 @@ export function AppSidebar() {
       label: t("services"),
       href: "/admin/services",
       icon: Scissors,
+    },
+    {
+      label: t("clients"),
+      href: "/admin/clients",
+      icon: Contact,
     },
     {
       label: t("home"),
@@ -126,11 +131,11 @@ export function AppSidebar() {
   return (
     <Sidebar side={sidebarSide}>
       <SidebarHeader className="border-b">
-        <div className="px-2 py-3">
-          <h1 data-testid="sidebar-title" className="text-lg font-bold">
+        <div className="px-2 py-2">
+          <h1 data-testid="sidebar-title" className="text-xl font-bold">
             💅 {t("title")}
           </h1>
-          <p className="text-muted-foreground text-xs">{t("subtitle")}</p>
+          <p className="text-muted-foreground mt-1 text-sm">{t("subtitle")}</p>
         </div>
       </SidebarHeader>
       <SidebarContent>

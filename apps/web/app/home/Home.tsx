@@ -21,16 +21,18 @@ export default function Home({ t }: HomeProps) {
   const isMobile = useIsMobile();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="flex h-screen flex-col bg-white">
       <Header t={t} isMobile={isMobile} />
-      <HeroSection t={t} isMobile={isMobile} />
-      <AboutSection t={t} isMobile={isMobile} />
-      <GallerySection isMobile={isMobile} />
-      <PricesSection t={t} isMobile={isMobile} />
-      <ScheduleSection t={t} isMobile={isMobile} />
-      <ShopSection t={t} isMobile={isMobile} />
-      <MapSection t={t} isMobile={isMobile} />
-      <Footer t={t} isMobile={isMobile} />
+      <div className="flex-1 overflow-y-auto">
+        <HeroSection t={t} isMobile={isMobile} />
+        <AboutSection t={t} isMobile={isMobile} />
+        <GallerySection isMobile={isMobile} />
+        <PricesSection t={t} isMobile={isMobile} />
+        <ScheduleSection t={t} isMobile={isMobile} />
+        <ShopSection t={t} isMobile={isMobile} />
+        <MapSection t={t} isMobile={isMobile} />
+        <Footer t={t} isMobile={isMobile} />
+      </div>
     </div>
   );
 }

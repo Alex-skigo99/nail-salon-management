@@ -3,6 +3,7 @@ import apiClient from "@/lib/api-client";
 import { queryKeys } from "./queryKeys";
 import { apiRoutes } from "@/const/apiRouts";
 import type { AuthUser, UpdateMeInput } from "@/types/authUserType";
+import { CACHE_TIME } from "@/const/cacheTime";
 
 export function useProfile() {
   return useQuery({
@@ -11,6 +12,7 @@ export function useProfile() {
       const res = await apiClient.get<{ user: AuthUser }>(apiRoutes.auth.me);
       return res.data.user;
     },
+    staleTime: CACHE_TIME,
   });
 }
 

@@ -64,9 +64,12 @@ describe("isPastTimeSlot", () => {
   });
 
   describe("when the slot is on a future date", () => {
-    it("returns true (future date is treated as past by the function)", () => {
-      // The function only checks same-day; non-today dates fall through to `return true`
-      expect(isPastTimeSlot(makeSlot(FUTURE_DATE, "09:00"))).toBe(true);
+    it("returns false", () => {
+      expect(isPastTimeSlot(makeSlot(FUTURE_DATE, "09:00"))).toBe(false);
+    });
+
+    it("returns false for any time on a future date", () => {
+      expect(isPastTimeSlot(makeSlot(FUTURE_DATE, "00:00"))).toBe(false);
     });
   });
 });

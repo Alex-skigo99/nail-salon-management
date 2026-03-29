@@ -35,7 +35,7 @@ const mockUsers = [
 describe("SearchUserInput", () => {
   beforeEach(() => {
     mockUseUsers.mockReturnValue({
-      data: mockUsers,
+      data: { data: mockUsers },
       isLoading: false,
       error: null,
     } as any);

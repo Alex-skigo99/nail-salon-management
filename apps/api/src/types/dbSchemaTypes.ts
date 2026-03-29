@@ -16,7 +16,22 @@ export type User = {
   password: string | null;
   google_id: string | null;
   image: string | null;
+  master_id: number | null;
+  email_subscribed: boolean;
   created_at: string;
+};
+
+export type UserRetrieve = Omit<User, "password" | "google_id"> & {
+  master_data: Master | null;
+  is_google_auth: boolean;
+  appts_count: number;
+  last_appts: string | null;
+};
+
+export type UserListItem = Omit<User, "password" | "google_id"> & {
+  appts_count: number;
+  last_appts: string | null;
+  is_google_auth: boolean;
 };
 
 export type Service = {

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
 import { queryKeys } from "./queryKeys";
 import { apiRoutes } from "@/const/apiRouts";
@@ -11,6 +11,7 @@ import type {
   MasterSuggestion,
   PaginatedAppointmentsOfUser,
 } from "@/types/appointmentTypes";
+import { CACHE_TIME } from "@/const/cacheTime";
 
 // ─── Queries ──────────────────────────────────────────
 
@@ -24,6 +25,7 @@ export function useMasterEmptySlots(masterId: number | null, date: string) {
       return res.data;
     },
     enabled: !!masterId && !!date,
+    staleTime: CACHE_TIME,
   });
 }
 
@@ -37,6 +39,7 @@ export function useMasterSlots(masterId: number | null, from: string, to: string
       return res.data;
     },
     enabled: !!masterId && !!from && !!to,
+    staleTime: CACHE_TIME,
   });
 }
 
@@ -50,6 +53,7 @@ export function useMasterAppointments(masterId: number | null, from: string, to:
       return res.data;
     },
     enabled: !!masterId && !!from && !!to,
+    staleTime: CACHE_TIME,
   });
 }
 
@@ -65,6 +69,7 @@ export function useAppointmentSuggestions(masterId?: number) {
       });
       return res.data;
     },
+    staleTime: CACHE_TIME,
   });
 }
 
@@ -143,6 +148,7 @@ export function useUserAppointments(
       return res.data;
     },
     enabled: !!userId,
+    placeholderData: keepPreviousData,
   });
 }
 

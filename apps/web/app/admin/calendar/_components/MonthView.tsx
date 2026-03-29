@@ -68,9 +68,10 @@ export function MonthView({ days, isLoading, currentDate, onWeekClick }: MonthVi
                   onClick={() => handleWeekClick(start, d, weekHasToday)}
                   className={cn(
                     "min-h-20 border-r px-1 py-1 last:border-r-0",
-                    !isCurrentMonth && "bg-muted/10 opacity-40",
-                    isCurrentMonth && isTodayDate && "bg-violet-100",
+                    !isCurrentMonth && "bg-muted/10 opacity-20",
+                    isCurrentMonth && isTodayDate && "border-primary border-4",
                     isCurrentMonth && !isTodayDate && !past && "bg-green-50",
+                    isCurrentMonth && !isTodayDate && past && "opacity-50",
                     isCurrentMonth && "cursor-pointer transition-opacity hover:opacity-75"
                   )}
                 >

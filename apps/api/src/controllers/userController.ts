@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import * as userService from "../services/userService";
+import { hashPassword } from "../services/authService";
 
 /**
  * @openapi
@@ -11,15 +12,72 @@ import * as userService from "../services/userService";
  *       - User
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by name, email, or phone
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: ["name", "appts_count", "created_asc", "created_desc", "last_appts"]
+ *         description: Sort order
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: ["ADMIN", "USER"]
+ *         description: Filter by role
+ *       - in: query
+ *         name: master_id
+ *         schema:
+ *           type: integer
+ *         description: Filter by master_id
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: perPage
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Items per page
  *     responses:
  *       200:
- *         description: A list of users
+ *         description: Paginated list of users
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/UserListItem'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                     perPage:
+ *                       type: integer
+ *                     from:
+ *                       type: integer
+ *                     to:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     lastPage:
+ *                       type: integer
+ *                     prevPage:
+ *                       type: integer
+ *                     nextPage:
+ *                       type: integer
  *       401:
  *         description: Unauthorized
  *       403:
@@ -71,11 +129,11 @@ import * as userService from "../services/userService";
  *         description: UUID ID of the user
  *     responses:
  *       200:
- *         description: A single user
+ *         description: A single user with master data
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               $ref: '#/components/schemas/UserRetrieve'
  *       400:
  *         description: Invalid id
  *       401:
@@ -181,15 +239,54 @@ import * as userService from "../services/userService";
  *         image:
  *           type: string
  *           nullable: true
+ *         master_id:
+ *           type: integer
+ *           nullable: true
+ *         email_subscribed:
+ *           type: boolean
  *         created_at:
  *           type: string
  *           format: date-time
+ *     UserRetrieve:
+ *       allOf:
+ *         - $ref: '#/components/schemas/User'
+ *         - type: object
+ *           properties:
+ *             master_data:
+ *               nullable: true
+ *               oneOf:
+ *                 - $ref: '#/components/schemas/Master'
+ *                 - type: 'null'
+ *             is_google_auth:
+ *               type: boolean
+ *             appts_count:
+ *               type: integer
+ *               example: 5
+ *             last_appts:
+ *               type: string
+ *               format: date
+ *               nullable: true
+ *     UserListItem:
+ *       allOf:
+ *         - $ref: '#/components/schemas/User'
+ *         - type: object
+ *           properties:
+ *             appts_count:
+ *               type: integer
+ *               example: 5
+ *             last_appts:
+ *               type: string
+ *               format: date
+ *               nullable: true
+ *             is_google_auth:
+ *               type: boolean
  *     UserCreate:
  *       type: object
  *       required:
  *         - name
  *         - email
  *         - role
+ *         - password
  *       properties:
  *         name:
  *           type: string
@@ -201,12 +298,21 @@ import * as userService from "../services/userService";
  *           type: string
  *           enum: ["ADMIN", "USER"]
  *           example: "USER"
+ *         password:
+ *           type: string
+ *           minLength: 8
+ *           example: "securepass123"
  *         phone:
  *           type: string
  *           nullable: true
  *         image:
  *           type: string
  *           nullable: true
+ *         master_id:
+ *           type: integer
+ *           nullable: true
+ *         email_subscribed:
+ *           type: boolean
  *     UserUpdate:
  *       type: object
  *       properties:
@@ -225,14 +331,26 @@ import * as userService from "../services/userService";
  *         image:
  *           type: string
  *           nullable: true
+ *         master_id:
+ *           type: integer
+ *           nullable: true
+ *         email_subscribed:
+ *           type: boolean
+ *         password:
+ *           type: string
+ *           nullable: true
+ *           minLength: 8
  */
 
 const CreateUserSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
   role: z.enum(["ADMIN", "USER"]),
+  password: z.string().min(8),
   phone: z.string().nullable().optional(),
   image: z.string().nullable().optional(),
+  master_id: z.number().int().positive().nullable().optional(),
+  email_subscribed: z.boolean().optional(),
 });
 
 const UpdateUserSchema = z.object({
@@ -241,15 +359,32 @@ const UpdateUserSchema = z.object({
   phone: z.string().nullable().optional(),
   role: z.enum(["ADMIN", "USER"]).optional(),
   image: z.string().nullable().optional(),
+  master_id: z.number().int().positive().nullable().optional(),
+  email_subscribed: z.boolean().optional(),
+  password: z.string().min(8).nullable().optional(),
+});
+
+const GetAllUsersQuerySchema = z.object({
+  search: z.string().optional(),
+  sort: z.enum(["name", "appts_count", "created_asc", "created_desc", "last_appts"]).optional(),
+  role: z.enum(["ADMIN", "USER"]).optional(),
+  master_id: z.coerce.number().int().positive().optional(),
+  page: z.coerce.number().int().positive().optional(),
+  perPage: z.coerce.number().int().positive().optional(),
 });
 
 const UserIdParamSchema = z.object({
   id: z.uuid(),
 });
 
-export const getAll = async (_req: Request, res: Response): Promise<void> => {
+export const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
-    const users = await userService.getAllUsers();
+    const parsed = GetAllUsersQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.flatten() });
+      return;
+    }
+    const users = await userService.getAllUsers(parsed.data);
     res.json(users);
   } catch (err) {
     console.error("Error fetching users:", err);
@@ -284,7 +419,9 @@ export const create = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ error: parsed.error.flatten() });
       return;
     }
-    const user = await userService.createUser(parsed.data);
+    const { password, ...rest } = parsed.data;
+    const hashedPassword = await hashPassword(password);
+    const user = await userService.createUser({ ...rest, password: hashedPassword });
     res.status(201).json(user);
   } catch (err) {
     console.error("Error creating user:", err);
@@ -305,7 +442,12 @@ export const update = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ error: parsed.error.flatten() });
       return;
     }
-    const user = await userService.updateUser(id, parsed.data);
+    const { password, ...rest } = parsed.data;
+    const updateData: Record<string, unknown> = { ...rest };
+    if (typeof password === "string") {
+      updateData.password = await hashPassword(password);
+    }
+    const user = await userService.updateUser(id, updateData);
     if (!user) {
       res.status(404).json({ error: "User not found" });
       return;

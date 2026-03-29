@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import type { Master } from "@/types/masterTypes";
 import type { ViewMode, DisplayMode } from "@/types/appointmentTypes";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type CalendarHeaderProps = {
   masters: Master[] | undefined;
@@ -28,8 +30,10 @@ export function CalendarHeader({
   displayMode,
   onDisplayModeChange,
 }: CalendarHeaderProps) {
+  const isMobile = useIsMobile();
+
   return (
-    <div className="border-b px-3 py-3 md:px-6 md:py-4">
+    <div className={cn("border-b-0 px-3 py-3 md:px-6 md:py-4", !isMobile && "h-21")}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Left – title */}
         <div className="flex items-center gap-3">
