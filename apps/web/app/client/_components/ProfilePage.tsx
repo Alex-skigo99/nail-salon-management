@@ -122,6 +122,13 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* Change password */}
+      {!profile.isGoogleAuth && (
+        <Button variant="outline" onClick={() => setPasswordOpen(true)}>
+          {t("changePassword")}
+        </Button>
+      )}
+
       {/* Meta info */}
       <div className={cn("flex flex-wrap gap-2 text-sm text-gray-500", !isMobile && "justify-end gap-6")}>
         <span className="flex items-center gap-1">
@@ -135,13 +142,6 @@ export default function ProfilePage() {
           </span>
         )}
       </div>
-
-      {/* Change password */}
-      {!profile.isGoogleAuth && (
-        <Button variant="outline" onClick={() => setPasswordOpen(true)}>
-          {t("changePassword")}
-        </Button>
-      )}
 
       <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
     </div>
