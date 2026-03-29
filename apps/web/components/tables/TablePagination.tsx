@@ -35,7 +35,7 @@ export function TablePagination<TData>({
   const nextButtonTitle = isMobile ? "Next" : "Next";
 
   return (
-    <div className="flex w-full items-center justify-between py-4">
+    <div className="flex w-full items-center justify-between px-2 py-4">
       <div className="text-sm text-gray-700">
         {totalItems > 0 && !isMobile
           ? `Showing ${startItem} to ${endItem} of ${totalItems} ${totalItems === 1 ? "entry" : "entries"}`
