@@ -13,6 +13,7 @@ import { usersColumns } from "./_components/usersColumns";
 import { UsersSearchFilterSection } from "./_components/UsersSearchFilterSection";
 import { UserDataModal } from "@/components/modals/userDataModal/UserDataModal";
 import { UserCreateUpdateDialog } from "@/components/modals/userCreateUpdateDialog/UserCreateUpdateDialog";
+import { HistoryUserApptsModal } from "@/components/modals/historyUserApptsModal/HistoryUserApptsModal";
 import type { Row, PaginationState } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -42,6 +43,9 @@ export default function ClientsPage() {
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [editUserId, setEditUserId] = useState<string | null>(null);
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [historyUserId, setHistoryUserId] = useState<string | null>(null);
+  const [historyUserName, setHistoryUserName] = useState<string>("");
 
   const handleRowClick = useCallback((row: Row<UserListItem>) => {
     setSelectedUserId(row.original.id);
@@ -59,7 +63,21 @@ export default function ClientsPage() {
     setFormDialogOpen(true);
   }, [selectedUserId]);
 
-  const columns = usersColumns(masters);
+  const handleApptsClick = useCallback((userId: string, userName: string) => {
+    setHistoryUserId(userId);
+    setHistoryUserName(userName);
+    setHistoryModalOpen(true);
+  }, []);
+
+  const handleApptsFromModal = useCallback(() => {
+    if (!selectedUserId) return;
+    const user = data?.data?.find((u) => u.id === selectedUserId);
+    setHistoryUserId(selectedUserId);
+    setHistoryUserName(user?.name ?? "");
+    setHistoryModalOpen(true);
+  }, [selectedUserId, data?.data]);
+
+  const columns = usersColumns(masters, handleApptsClick);
 
   return (
     <div className={cn("flex flex-1 flex-col", { "overflow-hidden": !isMobile })}>
@@ -109,9 +127,17 @@ export default function ClientsPage() {
         onOpenChange={setViewModalOpen}
         userId={selectedUserId}
         onEdit={handleEditFromModal}
+        onApptsClick={handleApptsFromModal}
       />
 
       <UserCreateUpdateDialog open={formDialogOpen} onOpenChange={setFormDialogOpen} userId={editUserId} />
+
+      <HistoryUserApptsModal
+        open={historyModalOpen}
+        onOpenChange={setHistoryModalOpen}
+        userId={historyUserId}
+        userName={historyUserName}
+      />
     </div>
   );
 }

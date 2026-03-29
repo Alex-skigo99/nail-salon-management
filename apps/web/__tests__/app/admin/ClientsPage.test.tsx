@@ -17,6 +17,14 @@ jest.mock("@/components/modals/userCreateUpdateDialog/UserCreateUpdateDialog", (
   UserCreateUpdateDialog: ({ open, userId }: any) =>
     open ? <div data-testid="user-form-dialog">{userId ? `Edit ${userId}` : "Create"}</div> : null,
 }));
+jest.mock("@/components/modals/historyUserApptsModal/HistoryUserApptsModal", () => ({
+  HistoryUserApptsModal: ({ open, userId, userName }: any) =>
+    open ? (
+      <div data-testid="history-modal">
+        History for {userName} ({userId})
+      </div>
+    ) : null,
+}));
 
 const mockUseUsers = useUsers as jest.MockedFunction<typeof useUsers>;
 
@@ -134,6 +142,19 @@ describe("ClientsPage", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("user-data-modal")).toHaveTextContent("Modal for u1");
+    });
+  });
+
+  it("opens history modal when appts count is clicked", async () => {
+    const user = userEvent.setup();
+    mockUseUsers.mockReturnValue({ data: paginatedMockUsers, isLoading: false, error: null } as any);
+    render(<ClientsPage />);
+
+    const apptsLink = screen.getByRole("button", { name: "5" });
+    await user.click(apptsLink);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("history-modal")).toHaveTextContent("History for Alice (u1)");
     });
   });
 });

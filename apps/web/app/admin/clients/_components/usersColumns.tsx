@@ -9,7 +9,10 @@ import type { Master } from "@/types/masterTypes";
 import { getAppointmentDateString } from "@/utils/dateUtils";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 
-export function usersColumns(masters: Master[]): ColumnDef<UserListItem, unknown>[] {
+export function usersColumns(
+  masters: Master[],
+  onApptsClick?: (userId: string, userName: string) => void
+): ColumnDef<UserListItem, unknown>[] {
   return [
     {
       id: "image",
@@ -90,6 +93,22 @@ export function usersColumns(masters: Master[]): ColumnDef<UserListItem, unknown
       accessorKey: "appts_count",
       header: "Appts",
       size: 70,
+      cell: ({ row }) => {
+        const count = row.original.appts_count;
+        if (!count || !onApptsClick) return count;
+        return (
+          <button
+            type="button"
+            className="text-primary hover:text-primary/80 cursor-pointer font-medium underline underline-offset-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              onApptsClick(row.original.id, row.original.name);
+            }}
+          >
+            {count}
+          </button>
+        );
+      },
     },
     {
       accessorKey: "last_appts",

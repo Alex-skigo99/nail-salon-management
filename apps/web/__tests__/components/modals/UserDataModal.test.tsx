@@ -20,6 +20,8 @@ const mockUser = {
   email_subscribed: true,
   created_at: "2026-01-15T10:00:00Z",
   master_data: { id: 1, name: "Master A" },
+  appts_count: 3,
+  last_appts: "2026-03-15",
 };
 
 describe("UserDataModal", () => {
@@ -67,5 +69,17 @@ describe("UserDataModal", () => {
     render(<UserDataModal open={false} onOpenChange={jest.fn()} userId="u1" onEdit={jest.fn()} />);
 
     expect(screen.queryByText("User Details")).not.toBeInTheDocument();
+  });
+
+  it("calls onApptsClick when appointments field is clicked", async () => {
+    const user = userEvent.setup();
+    const onApptsClick = jest.fn();
+    mockUseUser.mockReturnValue({ data: mockUser, isLoading: false } as any);
+    render(
+      <UserDataModal open={true} onOpenChange={jest.fn()} userId="u1" onEdit={jest.fn()} onApptsClick={onApptsClick} />
+    );
+
+    await user.click(screen.getByText("3"));
+    expect(onApptsClick).toHaveBeenCalled();
   });
 });

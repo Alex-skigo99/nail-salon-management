@@ -23,9 +23,10 @@ type UserDataModalProps = {
   onOpenChange: (open: boolean) => void;
   userId: string | null;
   onEdit: () => void;
+  onApptsClick?: () => void;
 };
 
-export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataModalProps) {
+export function UserDataModal({ open, onOpenChange, userId, onEdit, onApptsClick }: UserDataModalProps) {
   const { data: user, isLoading } = useUser(userId);
 
   return (
@@ -77,7 +78,12 @@ export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataMo
                 }
               />
               <Field label="Master" value={user.master_data?.name} />
-              <Field label="Appointments" value={String(user.appts_count)} />
+              <Field
+                label="Appointments"
+                value={String(user.appts_count)}
+                title="Click to open a history of appointments"
+                onClick={user.appts_count > 0 ? onApptsClick : undefined}
+              />
               <Field
                 label="Last Appointment"
                 value={user.last_appts ? getAppointmentDateString(user.last_appts) : null}
