@@ -102,7 +102,9 @@
     "home": "חזרה לדף הראשי",
     "calendar": "לוח שנה",
     "masters": "מאסטרים",
-    "services": "שירותים"
+    "services": "שירותים",
+    "clients": "לקוחות",
+    "settings": "הגדרות"
   },
   "dialogs": {
     "infoUserDialog": {

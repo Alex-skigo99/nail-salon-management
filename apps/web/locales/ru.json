@@ -102,7 +102,9 @@
     "home": "Выйти из админ-портала",
     "calendar": "Календарь",
     "masters": "Мастера",
-    "services": "Услуги"
+    "services": "Услуги",
+    "clients": "Клиенты",
+    "settings": "Настройки"
   },
   "dialogs": {
     "infoUserDialog": {
