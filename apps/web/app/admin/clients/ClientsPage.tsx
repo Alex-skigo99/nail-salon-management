@@ -37,6 +37,9 @@ export default function ClientsPage() {
     { ...filterParams, page: pagination.pageIndex + 1, perPage: pagination.pageSize },
     !!session?.user?.id
   );
+  const users = data?.data ?? [];
+  const paginationData = data?.pagination;
+
   const { data: masters = [] } = useMasters(!!session?.user?.id);
 
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -71,11 +74,11 @@ export default function ClientsPage() {
 
   const handleApptsFromModal = useCallback(() => {
     if (!selectedUserId) return;
-    const user = data?.data?.find((u) => u.id === selectedUserId);
+    const user = users.find((u) => u.id === selectedUserId);
     setHistoryUserId(selectedUserId);
     setHistoryUserName(user?.name ?? "");
     setHistoryModalOpen(true);
-  }, [selectedUserId, data?.data]);
+  }, [selectedUserId, users]);
 
   const columns = usersColumns(masters, handleApptsClick);
 
@@ -110,14 +113,14 @@ export default function ClientsPage() {
         ) : (
           <GeneralTable<UserListItem, UserListItem, unknown>
             columns={columns}
-            data={data?.data ?? []}
+            data={users}
             isPending={isLoading}
             handleRowClick={handleRowClick}
             customNoResultsMessage="No users found"
             isPaginationNeeded
             pagination={pagination}
             setPagination={setPagination}
-            totalRows={data?.pagination?.total ?? 0}
+            totalRows={paginationData?.total ?? 0}
           />
         )}
       </div>
@@ -127,7 +130,6 @@ export default function ClientsPage() {
         onOpenChange={setViewModalOpen}
         userId={selectedUserId}
         onEdit={handleEditFromModal}
-        onApptsClick={handleApptsFromModal}
       />
 
       <UserCreateUpdateDialog open={formDialogOpen} onOpenChange={setFormDialogOpen} userId={editUserId} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,17 +18,18 @@ import Image from "next/image";
 import { getCreatedAtString, getAppointmentDateString } from "@/utils/dateUtils";
 import { Field } from "@/components/elements/Field";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
+import { HistoryUserApptsModal } from "@/components/modals/historyUserApptsModal/HistoryUserApptsModal";
 
 type UserDataModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: string | null;
   onEdit: () => void;
-  onApptsClick?: () => void;
 };
 
-export function UserDataModal({ open, onOpenChange, userId, onEdit, onApptsClick }: UserDataModalProps) {
+export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataModalProps) {
   const { data: user, isLoading } = useUser(userId);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -82,7 +84,7 @@ export function UserDataModal({ open, onOpenChange, userId, onEdit, onApptsClick
                 label="Appointments"
                 value={String(user.appts_count)}
                 title="Click to open a history of appointments"
-                onClick={user.appts_count > 0 ? onApptsClick : undefined}
+                onClick={user.appts_count > 0 ? () => setHistoryOpen(true) : undefined}
               />
               <Field
                 label="Last Appointment"
@@ -107,6 +109,8 @@ export function UserDataModal({ open, onOpenChange, userId, onEdit, onApptsClick
           )}
         </DialogFooter>
       </DialogContent>
+
+      <HistoryUserApptsModal open={historyOpen} onOpenChange={setHistoryOpen} userId={userId} userName={user?.name} />
     </Dialog>
   );
 }

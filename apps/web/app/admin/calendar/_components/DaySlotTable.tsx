@@ -7,11 +7,12 @@ import { cn } from "@/lib/utils";
 import { DAY_NAMES } from "@/const/days";
 import { formatTimeToHHMM } from "@/utils/formatTime";
 import { StatusBadge } from "./StatusBadge";
-import { TruncatedText } from "./TruncatedText";
+import { TruncatedText } from "../../../../components/elements/TruncatedText";
 import { AvatarPopup } from "./AvatarPopup";
 import type { DaySlots, Slot, SlotStatus } from "@/types/appointmentTypes";
 import { isPastDate, parseLocalDate, formatShortDate, isSameDay, getCreatedAtString } from "@/utils/dateUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { UserDataModal } from "@/components/modals/userDataModal/UserDataModal";
 
 type DaySlotTableProps = {
   daySlots: DaySlots;
@@ -30,12 +31,20 @@ function countStatuses(slots: Slot[]): Record<string, number> {
 
 export function DaySlotTable({ daySlots, onSlotClick, defaultOpen = true }: DaySlotTableProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const [userModalOpen, setUserModalOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const date = parseLocalDate(daySlots.date);
   const dayName = DAY_NAMES[date.getDay()];
   const past = isPastDate(daySlots.date);
   const statusCounts = countStatuses(daySlots.slots);
   const isMobile = useIsMobile();
   const isOff = daySlots.slots.length === 0 || daySlots.slots.every((s) => s.status === "none");
+
+  const handleNameClick = (userId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedUserId(userId);
+    setUserModalOpen(true);
+  };
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
@@ -137,16 +146,32 @@ export function DaySlotTable({ daySlots, onSlotClick, defaultOpen = true }: DayS
                             ) : null}
                           </td>
                           <td className={cn("px-3 py-1.5", isMobile && "text-xs")}>
-                            <TruncatedText text={appointmentData?.user_data?.name ?? appointmentData?.guest_name} />
+                            {appointmentData?.user_id ? (
+                              <button
+                                type="button"
+                                className="cursor-pointer text-left hover:text-blue-700 hover:underline"
+                                onClick={(e) => handleNameClick(appointmentData.user_id!, e)}
+                              >
+                                <TruncatedText text={appointmentData.user_data?.name} />
+                              </button>
+                            ) : (
+                              <TruncatedText text={appointmentData?.guest_name} />
+                            )}
                           </td>
                           <td className={cn("px-3 py-1.5 text-xs", !isMobile && "hidden text-sm md:table-cell")}>
-                            <TruncatedText text={appointmentData?.user_data?.phone ?? appointmentData?.guest_phone} />
+                            <TruncatedText
+                              text={appointmentData?.user_data?.phone ?? appointmentData?.guest_phone}
+                              isTooltipDisabled={true}
+                            />
                           </td>
                           <td className={cn("hidden px-3 py-1.5 lg:table-cell", isMobile && "text-xs")}>
                             <TruncatedText text={appointmentData?.comments} />
                           </td>
                           <td className={cn("hidden px-3 py-1.5 sm:table-cell", isMobile && "text-xs")}>
-                            <TruncatedText text={getCreatedAtString(appointmentData?.created_at)} />
+                            <TruncatedText
+                              text={getCreatedAtString(appointmentData?.created_at)}
+                              isTooltipDisabled={true}
+                            />
                           </td>
                         </>
                       )}
@@ -158,6 +183,12 @@ export function DaySlotTable({ daySlots, onSlotClick, defaultOpen = true }: DayS
           </div>
         )}
       </CollapsibleContent>
+      <UserDataModal
+        open={userModalOpen}
+        onOpenChange={setUserModalOpen}
+        userId={selectedUserId}
+        onEdit={() => setUserModalOpen(false)}
+      />
     </Collapsible>
   );
 }
