@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Shield, Calendar, Clock } from "lucide-react";
@@ -9,6 +10,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ImageUpload } from "@/components/ImageUpload";
 import EditableMultiInputField from "@/components/inputs/EditableMultiInputField";
 import ChangePasswordDialog from "@/components/modals/ChangePasswordDialog";
 import { AxiosError } from "axios";
@@ -35,6 +37,7 @@ function UserAvatar({ name, image }: { name: string; image: string | null }) {
 
 export default function ProfilePage() {
   const t = useTranslations("clientPage.profile");
+  const { update } = useSession();
   const { data: profile, isPending } = useProfile();
   const updateProfile = useUpdateProfile();
   const [passwordOpen, setPasswordOpen] = useState(false);
@@ -78,7 +81,23 @@ export default function ProfilePage() {
 
       {/* Avatar + basic info */}
       <div className="flex items-center gap-4">
-        <UserAvatar name={profile.name} image={profile.image} />
+        <ImageUpload
+          currentImageUrl={profile.image}
+          name={profile.name}
+          entityType="user-profile"
+          onUpload={(key) => {
+            updateProfile.mutate(
+              { image: key },
+              {
+                onSuccess: (data) => {
+                  toast.success(t("profileUpdated"));
+                  update({ image: data.image });
+                },
+                onError: () => toast.error(t("profileUpdateError")),
+              }
+            );
+          }}
+        />
         <div className={cn("flex gap-2", isMobile ? "flex-col" : "flex-row items-end gap-6")}>
           <div>
             <h3 className="text-lg font-semibold">{profile.name}</h3>

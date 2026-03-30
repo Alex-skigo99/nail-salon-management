@@ -2,6 +2,7 @@ import { knex } from "../lib/db";
 import { DB_TABLES } from "../constants/dbTables";
 import { User, UserRetrieve, UserListItem } from "../types/dbSchemaTypes";
 import type { IWithPagination } from "knex-paginate";
+import { resolveImageUrl, isS3Key, deleteObject } from "./s3Service";
 
 type SafeUser = Omit<User, "password" | "google_id">;
 
@@ -109,7 +110,9 @@ export const getUserById = async (id: string): Promise<UserRetrieve | null> => {
     )
     .where("u.id", id)
     .first();
-  return user ?? null;
+  if (!user) return null;
+  user.image = await resolveImageUrl(user.image);
+  return user;
 };
 
 export const createUser = async (
@@ -126,11 +129,22 @@ export const updateUser = async (
     Pick<User, "name" | "email" | "phone" | "role" | "image" | "master_id" | "email_subscribed" | "password">
   >
 ): Promise<SafeUser | null> => {
+  // Clean up old S3 image if being replaced
+  if (data.image !== undefined) {
+    const existing = await knex(DB_TABLES.USERS).where({ id }).select("image").first();
+    if (existing && isS3Key(existing.image)) {
+      await deleteObject(existing.image).catch(() => {});
+    }
+  }
   const [user] = await knex(DB_TABLES.USERS).where({ id }).update(data).returning(SAFE_COLUMNS);
   return user ?? null;
 };
 
 export const deleteUser = async (id: string): Promise<boolean> => {
+  const existing = await knex(DB_TABLES.USERS).where({ id }).select("image").first();
   const deleted = await knex(DB_TABLES.USERS).where({ id }).delete();
+  if (deleted > 0 && existing && isS3Key(existing.image)) {
+    await deleteObject(existing.image).catch(() => {});
+  }
   return deleted > 0;
 };

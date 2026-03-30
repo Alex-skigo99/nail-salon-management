@@ -40,7 +40,7 @@ export default function MastersPage() {
             <p className="text-muted-foreground text-sm">Please try refreshing the page</p>
           </div>
         ) : masters && masters.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {masters.map((master) => (
               <MasterCard key={master.id} master={master} />
             ))}

@@ -9,6 +9,7 @@ import welcomeRouter from "./routes/welcome";
 import appointmentRouter from "./routes/appointment";
 import authRouter from "./routes/auth";
 import userRouter from "./routes/user";
+import uploadRouter from "./routes/upload";
 
 const app: Express = express();
 
@@ -33,5 +34,6 @@ app.use("/working_hours", workingHoursRouter);
 app.use("/service", serviceRouter);
 app.use("/appointment", appointmentRouter);
 app.use("/user", userRouter);
+app.use("/upload", uploadRouter);
 
 export default app;
