@@ -6,6 +6,7 @@ import type { User, UserRetrieve, CreateUserInput, UpdateUserInput, PaginatedUse
 import { CACHE_TIME } from "@/const/cacheTime";
 
 const USERS_QUERY_KEY = [queryKeys.users];
+const SLOTS_QUERY_KEY = [queryKeys.slots];
 
 export interface UseUsersParams {
   search?: string;
@@ -73,6 +74,7 @@ export function useUpdateUser() {
     onSuccess: (_data, { id }) => {
       queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: [queryKeys.users, id] });
+      queryClient.invalidateQueries({ queryKey: SLOTS_QUERY_KEY });
     },
   });
 }

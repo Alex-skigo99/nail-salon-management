@@ -16,21 +16,21 @@ import { useUser } from "@/hooks/useUsers";
 import { Pencil } from "lucide-react";
 import { getCreatedAtString, getAppointmentDateString } from "@/utils/dateUtils";
 import { Field } from "@/components/elements/Field";
-import { EntityAvatar } from "@/components/elements/EntityAvatar";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { HistoryUserApptsModal } from "@/components/modals/historyUserApptsModal/HistoryUserApptsModal";
 import { AvatarPopup } from "@/components/elements/AvatarPopup";
+import { UserCreateUpdateDialog } from "@/components/modals/userCreateUpdateDialog/UserCreateUpdateDialog";
 
 type UserDataModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: string | null;
-  onEdit: () => void;
 };
 
-export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataModalProps) {
+export function UserDataModal({ open, onOpenChange, userId }: UserDataModalProps) {
   const { data: user, isLoading } = useUser(userId);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -74,17 +74,7 @@ export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataMo
                   </Badge>
                 }
               />
-              <Field
-                label="Master"
-                value={
-                  user.master_data ? (
-                    <span className="flex items-center gap-2">
-                      <EntityAvatar src={user.master_data.image} alt={user.master_data.name} size="xs" />
-                      {user.master_data.name}
-                    </span>
-                  ) : null
-                }
-              />
+              <Field label="Master" value={user.master_data ? <>{user.master_data.name}</> : null} />
               <Field
                 label="Appointments"
                 value={String(user.appts_count)}
@@ -107,7 +97,7 @@ export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataMo
             Close
           </Button>
           {user && (
-            <Button onClick={onEdit}>
+            <Button onClick={() => setEditOpen(true)}>
               <Pencil className="mr-1 h-4 w-4" />
               Edit
             </Button>
@@ -116,6 +106,7 @@ export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataMo
       </DialogContent>
 
       <HistoryUserApptsModal open={historyOpen} onOpenChange={setHistoryOpen} userId={userId} userName={user?.name} />
+      <UserCreateUpdateDialog open={editOpen} onOpenChange={setEditOpen} userId={userId} />
     </Dialog>
   );
 }

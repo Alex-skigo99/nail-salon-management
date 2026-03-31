@@ -176,12 +176,7 @@ export function DaySlotTable({ daySlots, onSlotClick, defaultOpen = true }: DayS
           </div>
         )}
       </CollapsibleContent>
-      <UserDataModal
-        open={userModalOpen}
-        onOpenChange={setUserModalOpen}
-        userId={selectedUserId}
-        onEdit={() => setUserModalOpen(false)}
-      />
+      <UserDataModal open={userModalOpen} onOpenChange={setUserModalOpen} userId={selectedUserId} />
     </Collapsible>
   );
 }

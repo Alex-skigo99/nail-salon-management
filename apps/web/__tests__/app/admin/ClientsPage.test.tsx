@@ -10,8 +10,7 @@ jest.mock("@/hooks/useMasters", () => ({
   useMasters: () => ({ data: [], isLoading: false }),
 }));
 jest.mock("@/components/modals/userDataModal/UserDataModal", () => ({
-  UserDataModal: ({ open, userId, onEdit }: any) =>
-    open ? <div data-testid="user-data-modal">Modal for {userId}</div> : null,
+  UserDataModal: ({ open, userId }: any) => (open ? <div data-testid="user-data-modal">Modal for {userId}</div> : null),
 }));
 jest.mock("@/components/modals/userCreateUpdateDialog/UserCreateUpdateDialog", () => ({
   UserCreateUpdateDialog: ({ open, userId }: any) =>
