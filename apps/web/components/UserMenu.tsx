@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLogout } from "@/hooks/useAuth";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EntityAvatar } from "@/components/elements/EntityAvatar";
 
 export function UserMenu() {
   const { data: session, status } = useSession();
@@ -37,24 +37,12 @@ export function UserMenu() {
   const isAdmin = user.role === "ADMIN";
   const accountPath = "/client";
   const adminPortalPath = isAdmin ? "/admin" : "/client";
-  const initials =
-    user.name
-      ?.split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) ?? "U";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="cursor-pointer">
         <Button variant="ghost" className="w-full justify-start gap-2 px-2">
-          <Avatar className="size-7">
-            {user.image && <AvatarImage src={user.image} alt={user.name ?? ""} />}
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
+          <EntityAvatar src={user.image} alt={user.name ?? ""} size="sm" />
           <div className="flex flex-col items-start text-left text-xs">
             <span className="font-medium">{user.name}</span>
             <span className="text-muted-foreground">{user.email}</span>

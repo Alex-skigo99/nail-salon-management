@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
@@ -18,10 +17,7 @@ export default function ShopSection({ t, isMobile }: ShopSectionProps) {
       <div className="container mx-auto px-4 text-center">
         <h2 className={cn("mb-4 font-bold", isMobile ? "text-2xl" : "text-3xl")}>{t("shopSection.title")}</h2>
         <p className="mb-6 text-lg">{t("shopSection.description")}</p>
-        <Button disabled onClick={() => router.push("/shop")}>
-          {t("shopSection.buttonText")}
-        </Button>
-        <p className="mt-4 text-sm text-gray-500">{t("shopSection.comingSoon")}</p>
+        <p className="mt-10 text-sm text-gray-500">{t("shopSection.comingSoon")}</p>
       </div>
     </section>
   );
