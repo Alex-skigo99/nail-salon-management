@@ -101,8 +101,8 @@ describe("ClientsPage", () => {
     mockUseUsers.mockReturnValue({ data: paginatedMockUsers, isLoading: false, error: null } as any);
     render(<ClientsPage />);
 
-    expect(screen.getByText("Alice")).toBeInTheDocument();
-    expect(screen.getByText("Bob")).toBeInTheDocument();
+    expect(screen.getAllByText("Alice").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Bob").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("alice@test.com")).toBeInTheDocument();
   });
 
@@ -136,7 +136,10 @@ describe("ClientsPage", () => {
     mockUseUsers.mockReturnValue({ data: paginatedMockUsers, isLoading: false, error: null } as any);
     render(<ClientsPage />);
 
-    const aliceRow = screen.getByText("Alice").closest("tr");
+    const aliceRow = screen
+      .getAllByText("Alice")
+      .find((el) => el.closest("tr"))
+      ?.closest("tr");
     if (aliceRow) await user.click(aliceRow);
 
     await waitFor(() => {

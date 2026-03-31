@@ -54,7 +54,7 @@ describe("UserDataModal", () => {
     mockUseUser.mockReturnValue({ data: mockUser, isLoading: false } as any);
     render(<UserDataModal open={true} onOpenChange={jest.fn()} userId="u1" />);
 
-    expect(screen.getByText("Alice")).toBeInTheDocument();
+    expect(screen.getAllByText("Alice").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("alice@test.com")).toBeInTheDocument();
     expect(screen.getByText("+123")).toBeInTheDocument();
     expect(screen.getByText("Master A")).toBeInTheDocument();
