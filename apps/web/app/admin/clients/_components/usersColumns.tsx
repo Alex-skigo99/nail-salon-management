@@ -2,12 +2,11 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { UserIcon } from "lucide-react";
-import Image from "next/image";
 import type { UserListItem } from "@/types/userTypes";
 import type { Master } from "@/types/masterTypes";
 import { getAppointmentDateString } from "@/utils/dateUtils";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
+import { AvatarPopup } from "@/components/elements/AvatarPopup";
 
 export function usersColumns(
   masters: Master[],
@@ -20,22 +19,7 @@ export function usersColumns(
       size: 40,
       cell: ({ row }) => {
         const user = row.original;
-        return user.image ? (
-          <Image
-            src={user.image}
-            alt={user.name}
-            width={28}
-            height={28}
-            className="rounded-full object-cover"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).style.display = "none";
-            }}
-          />
-        ) : (
-          <span className="bg-muted text-muted-foreground flex h-7 w-7 items-center justify-center rounded-full">
-            <UserIcon className="h-3.5 w-3.5" />
-          </span>
-        );
+        return <AvatarPopup src={user.image} alt={user.name} size="sm" />;
       },
     },
     {

@@ -75,6 +75,7 @@ export type MasterSuggestions = {
     id: number;
     name: string;
     description?: string | null;
+    image?: string | null;
   };
   slots: SlotSuggestion[];
 };

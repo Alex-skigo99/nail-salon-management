@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2, UserCircle } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ImageUpload } from "@/components/ImageUpload";
 import type { Master } from "@/types/masterTypes";
+import { useUpdateMaster } from "@/hooks/useMasters";
 import { MasterForm } from "./MasterForm";
 import { DeleteMasterDialog } from "./DeleteMasterDialog";
 import { WorkingHoursSection } from "./WorkingHoursSection";
@@ -18,6 +19,11 @@ type Props = {
 export function MasterCard({ master }: Props) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const updateMaster = useUpdateMaster();
+
+  const handleImageUpload = (key: string) => {
+    updateMaster.mutate({ id: master.id, data: { image: key } });
+  };
 
   return (
     <>
@@ -26,12 +32,14 @@ export function MasterCard({ master }: Props) {
           <div className="flex flex-col gap-2">
             <div className="flex w-full items-start justify-between gap-2">
               <div className="flex min-w-0 items-center gap-3">
-                <Avatar className="h-25 w-25 shrink-0">
-                  {master.image && <AvatarImage src={master.image} alt={master.name} />}
-                  <AvatarFallback className="bg-primary/10 text-primary">
-                    <UserCircle className="h-5 w-5" />
-                  </AvatarFallback>
-                </Avatar>
+                <ImageUpload
+                  currentImageUrl={master.image}
+                  name={master.name}
+                  entityType="master-photo"
+                  entityId={master.id}
+                  onUpload={handleImageUpload}
+                  size="lg"
+                />
                 <div className="min-w-0">
                   <CardTitle className="truncate font-semibold">{master.name}</CardTitle>
                 </div>

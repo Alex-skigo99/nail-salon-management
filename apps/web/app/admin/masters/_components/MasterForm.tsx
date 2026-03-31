@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
-import { ImageUpload } from "@/components/ImageUpload";
 import { useCreateMaster, useUpdateMaster } from "@/hooks/useMasters";
 import type { Master } from "@/types/masterTypes";
 
@@ -24,14 +23,12 @@ export function MasterForm({ open, onOpenChange, master }: Props) {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [image, setImage] = useState<string | null>(null);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (open) {
       setName(master?.name ?? "");
       setDescription(master?.description ?? "");
-      setImage(master?.image ?? null);
     }
   }, [open, master]);
 
@@ -44,13 +41,12 @@ export function MasterForm({ open, onOpenChange, master }: Props) {
     if (isEditing && master) {
       await updateMaster.mutateAsync({
         id: master.id,
-        data: { name: name.trim(), description: description.trim() || null, image },
+        data: { name: name.trim(), description: description.trim() || null },
       });
     } else {
       await createMaster.mutateAsync({
         name: name.trim(),
         description: description.trim() || undefined,
-        image,
       });
     }
     onOpenChange(false);
@@ -63,16 +59,6 @@ export function MasterForm({ open, onOpenChange, master }: Props) {
           <DialogTitle>{isEditing ? "Edit Master" : "Add Master"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex justify-center">
-            <ImageUpload
-              currentImageUrl={isEditing ? master?.image : image ? undefined : null}
-              name={name}
-              entityType="master-photo"
-              entityId={master?.id}
-              onUpload={(key) => setImage(key)}
-              size="lg"
-            />
-          </div>
           <div className="space-y-2">
             <Label htmlFor="master-name">Name</Label>
             <Input

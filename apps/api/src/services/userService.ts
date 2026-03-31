@@ -88,7 +88,14 @@ export const getAllUsers = async (params: GetAllUsersParams = {}): Promise<IWith
       query.orderBy("u.created_at", "desc");
   }
 
-  return query.paginate({ currentPage: page, perPage, isLengthAware: true });
+  const users = await query.paginate({ currentPage: page, perPage, isLengthAware: true });
+  const dataWithResolvedImages = await Promise.all(
+    users.data.map(async (user) => ({
+      ...user,
+      image: await resolveImageUrl(user.image ?? null),
+    }))
+  );
+  return { ...users, data: dataWithResolvedImages };
 };
 
 export const getUserById = async (id: string): Promise<UserRetrieve | null> => {

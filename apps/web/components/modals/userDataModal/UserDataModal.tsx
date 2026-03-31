@@ -13,12 +13,13 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/hooks/useUsers";
-import { UserIcon, Pencil } from "lucide-react";
-import Image from "next/image";
+import { Pencil } from "lucide-react";
 import { getCreatedAtString, getAppointmentDateString } from "@/utils/dateUtils";
 import { Field } from "@/components/elements/Field";
+import { EntityAvatar } from "@/components/elements/EntityAvatar";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { HistoryUserApptsModal } from "@/components/modals/historyUserApptsModal/HistoryUserApptsModal";
+import { AvatarPopup } from "@/components/elements/AvatarPopup";
 
 type UserDataModalProps = {
   open: boolean;
@@ -48,13 +49,7 @@ export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataMo
         ) : (
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              {user.image ? (
-                <Image src={user.image} alt={user.name} width={48} height={48} className="rounded-full object-cover" />
-              ) : (
-                <span className="bg-muted text-muted-foreground flex h-12 w-12 items-center justify-center rounded-full">
-                  <UserIcon className="h-6 w-6" />
-                </span>
-              )}
+              <AvatarPopup src={user.image} alt={user.name} size="lg" />
               <div>
                 <div className="flex items-center gap-2">
                   <p className="font-semibold">{user.name}</p>
@@ -79,7 +74,17 @@ export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataMo
                   </Badge>
                 }
               />
-              <Field label="Master" value={user.master_data?.name} />
+              <Field
+                label="Master"
+                value={
+                  user.master_data ? (
+                    <span className="flex items-center gap-2">
+                      <EntityAvatar src={user.master_data.image} alt={user.master_data.name} size="xs" />
+                      {user.master_data.name}
+                    </span>
+                  ) : null
+                }
+              />
               <Field
                 label="Appointments"
                 value={String(user.appts_count)}

@@ -10,6 +10,7 @@ import BookingDialog from "@/components/modals/bookingDialog/BookingDialog";
 import { useTranslations } from "next-intl";
 import HotSlots from "./scheduleSection/HotSlots";
 import DayEmptySlots from "./scheduleSection/DayEmptySlots";
+import { EntityAvatar } from "@/components/elements/EntityAvatar";
 
 type Props = { isMobile: boolean; t: ReturnType<typeof useTranslations> };
 
@@ -94,11 +95,14 @@ export default function ScheduleSection({ isMobile, t }: Props) {
                   className="rounded-2xl border border-pink-100 bg-pink-50/20"
                 >
                   <CollapsibleTrigger className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-pink-50">
-                    <div>
-                      <p className="font-semibold text-gray-900">{group.master.name}</p>
-                      <p className="text-xs text-gray-500">
-                        {group.master.description || t("scheduleAvailableSpecialist")}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <EntityAvatar src={group.master.image} alt={group.master.name} size="md" />
+                      <div>
+                        <p className="font-semibold text-gray-900">{group.master.name}</p>
+                        <p className="text-xs text-gray-500">
+                          {group.master.description || t("scheduleAvailableSpecialist")}
+                        </p>
+                      </div>
                     </div>
                     <div className="flex items-center gap-3 text-sm text-gray-500">
                       <ChevronsUpDown className="size-4" />

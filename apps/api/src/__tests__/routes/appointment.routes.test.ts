@@ -82,7 +82,7 @@ describe("GET /appointment/suggestions", () => {
 
   it("returns 200 and suggestions (public route)", async () => {
     (appointmentService.getSuggestionsByMaster as Mock).mockResolvedValue([
-      { master: { id: 1, name: "Jane" }, slots: [] },
+      { master: { id: 1, name: "Jane", description: null, image: null }, slots: [] },
     ]);
 
     const res = await request(app).get("/appointment/suggestions").query({ NowDate: "2026-03-24", NowTime: "14:30" });
