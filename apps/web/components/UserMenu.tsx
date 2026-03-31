@@ -1,7 +1,6 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useState } from "react";
 import { LogOut, User, Shield, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -13,12 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLogout } from "@/hooks/useAuth";
-import Image from "next/image";
+import { EntityAvatar } from "@/components/elements/EntityAvatar";
 
 export function UserMenu() {
   const { data: session, status } = useSession();
   const logoutMutation = useLogout();
-  const [imgError, setImgError] = useState(false);
 
   if (status === "unauthenticated" || !session) {
     return (
@@ -39,32 +37,12 @@ export function UserMenu() {
   const isAdmin = user.role === "ADMIN";
   const accountPath = "/client";
   const adminPortalPath = isAdmin ? "/admin" : "/client";
-  const initials =
-    user.name
-      ?.split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) ?? "U";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild className="cursor-pointer">
         <Button variant="ghost" className="w-full justify-start gap-2 px-2">
-          {user.image && !imgError ? (
-            <Image
-              src={user.image}
-              alt={user.name ?? ""}
-              className="rounded-full"
-              width={28}
-              height={28}
-              onError={() => setImgError(true)}
-            />
-          ) : (
-            <div className="bg-primary text-primary-foreground flex size-7 items-center justify-center rounded-full text-xs font-medium">
-              {initials}
-            </div>
-          )}
+          <EntityAvatar src={user.image} alt={user.name ?? ""} size="sm" />
           <div className="flex flex-col items-start text-left text-xs">
             <span className="font-medium">{user.name}</span>
             <span className="text-muted-foreground">{user.email}</span>

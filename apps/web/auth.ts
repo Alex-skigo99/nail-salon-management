@@ -95,12 +95,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
 
     // ─── Persist custom fields in the JWT ──────────
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.phone = user.phone;
         token.accessToken = user.accessToken;
+      }
+      if (trigger === "update" && session?.image !== undefined) {
+        token.picture = session.image;
       }
       return token;
     },

@@ -109,6 +109,10 @@ import * as masterService from "../services/masterService";
  *           type: string
  *           nullable: true
  *           example: "Senior nail technician"
+ *         image:
+ *           type: string
+ *           nullable: true
+ *           description: Presigned URL or null
  *     MasterCreate:
  *       type: object
  *       required:
@@ -120,6 +124,10 @@ import * as masterService from "../services/masterService";
  *         description:
  *           type: string
  *           nullable: true
+ *         image:
+ *           type: string
+ *           nullable: true
+ *           description: S3 key returned from upload endpoint
  *     MasterUpdate:
  *       type: object
  *       properties:
@@ -129,16 +137,22 @@ import * as masterService from "../services/masterService";
  *         description:
  *           type: string
  *           nullable: true
+ *         image:
+ *           type: string
+ *           nullable: true
+ *           description: S3 key returned from upload endpoint
  */
 
 const CreateMasterSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
+  image: z.string().nullable().optional(),
 });
 
 const UpdateMasterSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().nullable().optional(),
+  image: z.string().nullable().optional(),
 });
 
 export const getAll = async (_req: Request, res: Response): Promise<void> => {

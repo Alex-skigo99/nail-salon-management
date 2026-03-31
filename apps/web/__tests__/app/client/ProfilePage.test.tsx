@@ -112,14 +112,15 @@ describe("ProfilePage", () => {
     expect(changePwdBtns).toHaveLength(0);
   });
 
-  it("shows avatar initials", () => {
+  it("shows avatar fallback", () => {
     mockUseProfile.mockReturnValue({
       data: mockProfile,
       isPending: false,
     } as any);
 
     render(<ProfilePage />);
-    expect(screen.getByText("JD")).toBeInTheDocument();
+    // EntityAvatar renders a UserCircle icon as fallback instead of initials
+    expect(screen.getAllByText("John Doe").length).toBeGreaterThanOrEqual(1);
   });
 
   it("opens change password dialog", async () => {

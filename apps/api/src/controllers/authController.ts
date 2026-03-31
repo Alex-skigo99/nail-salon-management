@@ -40,6 +40,7 @@ const UpdateMeSchema = z
     name: z.string().min(1, "Name is required").max(100).optional(),
     email: z.email("Invalid email address").optional(),
     phone: PhoneSchema.optional(),
+    image: z.string().nullable().optional(),
     oldPassword: z.string().optional(),
     newPassword: z.string().min(8, "New password must be at least 8 characters").optional(),
   })

@@ -45,7 +45,6 @@ export default function ClientsPage() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
-  const [editUserId, setEditUserId] = useState<string | null>(null);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [historyUserId, setHistoryUserId] = useState<string | null>(null);
   const [historyUserName, setHistoryUserName] = useState<string>("");
@@ -56,15 +55,8 @@ export default function ClientsPage() {
   }, []);
 
   const handleAddUser = useCallback(() => {
-    setEditUserId(null);
     setFormDialogOpen(true);
   }, []);
-
-  const handleEditFromModal = useCallback(() => {
-    setViewModalOpen(false);
-    setEditUserId(selectedUserId);
-    setFormDialogOpen(true);
-  }, [selectedUserId]);
 
   const handleApptsClick = useCallback((userId: string, userName: string) => {
     setHistoryUserId(userId);
@@ -125,14 +117,9 @@ export default function ClientsPage() {
         )}
       </div>
 
-      <UserDataModal
-        open={viewModalOpen}
-        onOpenChange={setViewModalOpen}
-        userId={selectedUserId}
-        onEdit={handleEditFromModal}
-      />
+      <UserDataModal open={viewModalOpen} onOpenChange={setViewModalOpen} userId={selectedUserId} />
 
-      <UserCreateUpdateDialog open={formDialogOpen} onOpenChange={setFormDialogOpen} userId={editUserId} />
+      <UserCreateUpdateDialog open={formDialogOpen} onOpenChange={setFormDialogOpen} userId={null} />
 
       <HistoryUserApptsModal
         open={historyModalOpen}

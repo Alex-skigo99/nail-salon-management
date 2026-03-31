@@ -1254,6 +1254,50 @@
         }
       }
     },
+    "/upload/presigned-url": {
+      "post": {
+        "summary": "Get a presigned S3 URL for image upload",
+        "tags": [
+          "Upload"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PresignedUrlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Presigned upload URL and S3 key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresignedUrlResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          }
+        }
+      }
+    },
     "/user": {
       "get": {
         "summary": "Retrieve a list of users (ADMIN only)",
@@ -1975,6 +2019,11 @@
             "type": "string",
             "nullable": true,
             "example": "Senior nail technician"
+          },
+          "image": {
+            "type": "string",
+            "nullable": true,
+            "description": "Presigned URL or null"
           }
         }
       },
@@ -1991,6 +2040,11 @@
           "description": {
             "type": "string",
             "nullable": true
+          },
+          "image": {
+            "type": "string",
+            "nullable": true,
+            "description": "S3 key returned from upload endpoint"
           }
         }
       },
@@ -2004,6 +2058,11 @@
           "description": {
             "type": "string",
             "nullable": true
+          },
+          "image": {
+            "type": "string",
+            "nullable": true,
+            "description": "S3 key returned from upload endpoint"
           }
         }
       },
@@ -2078,6 +2137,49 @@
         ],
         "nullable": true
       },
+      "PresignedUrlRequest": {
+        "type": "object",
+        "required": [
+          "entityType",
+          "contentType",
+          "fileName"
+        ],
+        "properties": {
+          "entityType": {
+            "type": "string",
+            "enum": [
+              "user-profile",
+              "master-photo"
+            ]
+          },
+          "entityId": {
+            "type": "integer",
+            "description": "Required for master-photo"
+          },
+          "contentType": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "image/webp"
+            ]
+          },
+          "fileName": {
+            "type": "string"
+          }
+        }
+      },
+      "PresignedUrlResponse": {
+        "type": "object",
+        "properties": {
+          "uploadUrl": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          }
+        }
+      },
       "User": {
         "type": "object",
         "properties": {
@@ -2150,6 +2252,15 @@
               },
               "is_google_auth": {
                 "type": "boolean"
+              },
+              "appts_count": {
+                "type": "integer",
+                "example": 5
+              },
+              "last_appts": {
+                "type": "string",
+                "format": "date",
+                "nullable": true
               }
             }
           }

@@ -13,23 +13,24 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/hooks/useUsers";
-import { UserIcon, Pencil } from "lucide-react";
-import Image from "next/image";
+import { Pencil } from "lucide-react";
 import { getCreatedAtString, getAppointmentDateString } from "@/utils/dateUtils";
 import { Field } from "@/components/elements/Field";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { HistoryUserApptsModal } from "@/components/modals/historyUserApptsModal/HistoryUserApptsModal";
+import { AvatarPopup } from "@/components/elements/AvatarPopup";
+import { UserCreateUpdateDialog } from "@/components/modals/userCreateUpdateDialog/UserCreateUpdateDialog";
 
 type UserDataModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: string | null;
-  onEdit: () => void;
 };
 
-export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataModalProps) {
+export function UserDataModal({ open, onOpenChange, userId }: UserDataModalProps) {
   const { data: user, isLoading } = useUser(userId);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -48,13 +49,7 @@ export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataMo
         ) : (
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              {user.image ? (
-                <Image src={user.image} alt={user.name} width={48} height={48} className="rounded-full object-cover" />
-              ) : (
-                <span className="bg-muted text-muted-foreground flex h-12 w-12 items-center justify-center rounded-full">
-                  <UserIcon className="h-6 w-6" />
-                </span>
-              )}
+              <AvatarPopup src={user.image} alt={user.name} size="lg" />
               <div>
                 <div className="flex items-center gap-2">
                   <p className="font-semibold">{user.name}</p>
@@ -79,7 +74,7 @@ export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataMo
                   </Badge>
                 }
               />
-              <Field label="Master" value={user.master_data?.name} />
+              <Field label="Master" value={user.master_data ? <>{user.master_data.name}</> : null} />
               <Field
                 label="Appointments"
                 value={String(user.appts_count)}
@@ -102,7 +97,7 @@ export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataMo
             Close
           </Button>
           {user && (
-            <Button onClick={onEdit}>
+            <Button onClick={() => setEditOpen(true)}>
               <Pencil className="mr-1 h-4 w-4" />
               Edit
             </Button>
@@ -111,6 +106,7 @@ export function UserDataModal({ open, onOpenChange, userId, onEdit }: UserDataMo
       </DialogContent>
 
       <HistoryUserApptsModal open={historyOpen} onOpenChange={setHistoryOpen} userId={userId} userName={user?.name} />
+      <UserCreateUpdateDialog open={editOpen} onOpenChange={setEditOpen} userId={userId} />
     </Dialog>
   );
 }

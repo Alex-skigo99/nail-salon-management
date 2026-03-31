@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Shield, Calendar, Clock } from "lucide-react";
@@ -8,7 +9,7 @@ import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ImageUpload } from "@/components/ImageUpload";
 import EditableMultiInputField from "@/components/inputs/EditableMultiInputField";
 import ChangePasswordDialog from "@/components/modals/ChangePasswordDialog";
 import { AxiosError } from "axios";
@@ -16,25 +17,9 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getCreatedAtString } from "@/utils/dateUtils";
 
-// Check if avatar component exists - let me handle it gracefully
-function UserAvatar({ name, image }: { name: string; image: string | null }) {
-  const initials = (name ?? "")
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-
-  return (
-    <Avatar className="h-20 w-20">
-      {image && <AvatarImage src={image} alt={name} />}
-      <AvatarFallback className="bg-pink-100 text-xl text-pink-700">{initials}</AvatarFallback>
-    </Avatar>
-  );
-}
-
 export default function ProfilePage() {
   const t = useTranslations("clientPage.profile");
+  const { update } = useSession();
   const { data: profile, isPending } = useProfile();
   const updateProfile = useUpdateProfile();
   const [passwordOpen, setPasswordOpen] = useState(false);
@@ -78,7 +63,23 @@ export default function ProfilePage() {
 
       {/* Avatar + basic info */}
       <div className="flex items-center gap-4">
-        <UserAvatar name={profile.name} image={profile.image} />
+        <ImageUpload
+          currentImageUrl={profile.image}
+          name={profile.name}
+          entityType="user-profile"
+          onUpload={(key) => {
+            updateProfile.mutate(
+              { image: key },
+              {
+                onSuccess: (data) => {
+                  toast.success(t("profileUpdated"));
+                  update({ image: data.image });
+                },
+                onError: () => toast.error(t("profileUpdateError")),
+              }
+            );
+          }}
+        />
         <div className={cn("flex gap-2", isMobile ? "flex-col" : "flex-row items-end gap-6")}>
           <div>
             <h3 className="text-lg font-semibold">{profile.name}</h3>

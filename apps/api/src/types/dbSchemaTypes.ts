@@ -49,6 +49,7 @@ export type Master = {
   id: number;
   name: string;
   description?: string | null;
+  image?: string | null;
 };
 
 export type WorkingHours = {

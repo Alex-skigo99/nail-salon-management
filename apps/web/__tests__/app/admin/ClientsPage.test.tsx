@@ -10,8 +10,7 @@ jest.mock("@/hooks/useMasters", () => ({
   useMasters: () => ({ data: [], isLoading: false }),
 }));
 jest.mock("@/components/modals/userDataModal/UserDataModal", () => ({
-  UserDataModal: ({ open, userId, onEdit }: any) =>
-    open ? <div data-testid="user-data-modal">Modal for {userId}</div> : null,
+  UserDataModal: ({ open, userId }: any) => (open ? <div data-testid="user-data-modal">Modal for {userId}</div> : null),
 }));
 jest.mock("@/components/modals/userCreateUpdateDialog/UserCreateUpdateDialog", () => ({
   UserCreateUpdateDialog: ({ open, userId }: any) =>
@@ -102,8 +101,8 @@ describe("ClientsPage", () => {
     mockUseUsers.mockReturnValue({ data: paginatedMockUsers, isLoading: false, error: null } as any);
     render(<ClientsPage />);
 
-    expect(screen.getByText("Alice")).toBeInTheDocument();
-    expect(screen.getByText("Bob")).toBeInTheDocument();
+    expect(screen.getAllByText("Alice").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Bob").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("alice@test.com")).toBeInTheDocument();
   });
 
@@ -137,7 +136,10 @@ describe("ClientsPage", () => {
     mockUseUsers.mockReturnValue({ data: paginatedMockUsers, isLoading: false, error: null } as any);
     render(<ClientsPage />);
 
-    const aliceRow = screen.getByText("Alice").closest("tr");
+    const aliceRow = screen
+      .getAllByText("Alice")
+      .find((el) => el.closest("tr"))
+      ?.closest("tr");
     if (aliceRow) await user.click(aliceRow);
 
     await waitFor(() => {

@@ -3,6 +3,7 @@ import jwt, { type SignOptions } from "jsonwebtoken";
 import { knex } from "../lib/db";
 import { DB_TABLES } from "../constants/dbTables";
 import type { User } from "../types/dbSchemaTypes";
+import { resolveImageUrl, isS3Key, deleteObject } from "./s3Service";
 
 const JWT_SECRET = process.env.JWT_SECRET || "change-me-in-production";
 const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN || "7d") as SignOptions["expiresIn"];
@@ -57,7 +58,11 @@ export async function findUserByEmail(email: string): Promise<User | undefined> 
 }
 
 export async function findUserById(id: string): Promise<SafeUser | undefined> {
-  return knex(DB_TABLES.USERS).select(SAFE_COLUMNS).where({ id }).first();
+  const user = await knex(DB_TABLES.USERS).select(SAFE_COLUMNS).where({ id }).first();
+  if (user) {
+    user.image = await resolveImageUrl(user.image);
+  }
+  return user;
 }
 
 export async function findUserByGoogleId(googleId: string): Promise<User | undefined> {
@@ -118,6 +123,7 @@ export async function login(email: string, password: string): Promise<{ user: Sa
   const token = generateToken(user);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password: _pw, ...safeUser } = user;
+  safeUser.image = await resolveImageUrl(safeUser.image);
   return { user: safeUser, token };
 }
 
@@ -175,6 +181,7 @@ export async function findOrCreateGoogleUser(profile: GoogleProfile): Promise<{ 
   const token = generateToken(user!);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password: _pw, ...safeUser } = user!;
+  safeUser.image = await resolveImageUrl(safeUser.image);
   return { user: safeUser, token };
 }
 
@@ -186,6 +193,7 @@ export interface UpdateMeInput {
   name?: string;
   email?: string;
   phone?: string;
+  image?: string | null;
   oldPassword?: string;
   newPassword?: string;
 }
@@ -200,6 +208,13 @@ export async function updateMe(userId: string, input: UpdateMeInput): Promise<Sa
 
   if (input.name !== undefined) updates.name = input.name.trim();
   if (input.phone !== undefined) updates.phone = input.phone.trim();
+
+  if (input.image !== undefined) {
+    if (isS3Key(user.image)) {
+      await deleteObject(user.image!).catch(() => {});
+    }
+    updates.image = input.image;
+  }
 
   if (input.email !== undefined) {
     const normalizedEmail = input.email.toLowerCase().trim();
@@ -229,7 +244,9 @@ export async function updateMe(userId: string, input: UpdateMeInput): Promise<Sa
 
   const [updated] = await knex(DB_TABLES.USERS).where({ id: userId }).update(updates).returning(SAFE_COLUMNS);
 
-  return updated as SafeUser;
+  const result = updated as SafeUser;
+  result.image = await resolveImageUrl(result.image);
+  return result;
 }
 
 // ─────────────────────────────────────────────

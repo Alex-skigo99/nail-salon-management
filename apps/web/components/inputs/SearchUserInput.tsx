@@ -7,8 +7,8 @@ import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover"
 import { useUsers } from "@/hooks/useUsers";
 import type { User } from "@/types/userTypes";
 import { cn } from "@/lib/utils";
-import { UserIcon, XIcon } from "lucide-react";
-import Image from "next/image";
+import { XIcon } from "lucide-react";
+import { EntityAvatar } from "../elements/EntityAvatar";
 
 type SearchUserInputProps = {
   value: string | null;
@@ -19,28 +19,6 @@ type SearchUserInputProps = {
   className?: string;
   wrapperClassName?: string;
 };
-
-function UserAvatar({ user }: { user: User }) {
-  if (user.image) {
-    return (
-      <Image
-        src={user.image}
-        alt={user.name}
-        className="shrink-0 rounded-full object-cover"
-        width={20}
-        height={20}
-        onError={(e) => {
-          (e.currentTarget as HTMLImageElement).style.display = "none";
-        }}
-      />
-    );
-  }
-  return (
-    <span className="bg-muted text-muted-foreground flex size-5 shrink-0 items-center justify-center rounded-full">
-      <UserIcon className="size-3" />
-    </span>
-  );
-}
 
 function formatUserLabel(user: User): string {
   const phone = user.phone ? ` - ${user.phone}` : "";
@@ -193,7 +171,7 @@ export default function SearchUserInput({
                   value === user.id && "bg-accent/50 font-medium"
                 )}
               >
-                <UserAvatar user={user} />
+                <EntityAvatar src={user.image} alt={user.name} size="sm" />
                 <span className="truncate">{formatUserLabel(user)}</span>
               </button>
             ))}

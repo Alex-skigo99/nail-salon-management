@@ -8,6 +8,10 @@ jest.mock("@/hooks/useUsers");
 jest.mock("@/components/modals/historyUserApptsModal/HistoryUserApptsModal", () => ({
   HistoryUserApptsModal: ({ open }: { open: boolean }) => (open ? <div>Appointment History</div> : null),
 }));
+jest.mock("@/components/modals/userCreateUpdateDialog/UserCreateUpdateDialog", () => ({
+  UserCreateUpdateDialog: ({ open, userId }: { open: boolean; userId: string | null }) =>
+    open ? <div data-testid="edit-dialog">Edit {userId}</div> : null,
+}));
 
 const mockUseUser = useUser as jest.MockedFunction<typeof useUser>;
 
@@ -34,42 +38,41 @@ describe("UserDataModal", () => {
 
   it("shows spinner when loading", () => {
     mockUseUser.mockReturnValue({ data: undefined, isLoading: true } as any);
-    const { container } = render(<UserDataModal open={true} onOpenChange={jest.fn()} userId="u1" onEdit={jest.fn()} />);
+    const { container } = render(<UserDataModal open={true} onOpenChange={jest.fn()} userId="u1" />);
 
     expect(container.querySelector("[data-slot='spinner']") || screen.queryByText("User Details")).toBeTruthy();
   });
 
   it("shows user not found when no data", () => {
     mockUseUser.mockReturnValue({ data: undefined, isLoading: false } as any);
-    render(<UserDataModal open={true} onOpenChange={jest.fn()} userId="u1" onEdit={jest.fn()} />);
+    render(<UserDataModal open={true} onOpenChange={jest.fn()} userId="u1" />);
 
     expect(screen.getByText("User not found")).toBeInTheDocument();
   });
 
   it("renders user details", () => {
     mockUseUser.mockReturnValue({ data: mockUser, isLoading: false } as any);
-    render(<UserDataModal open={true} onOpenChange={jest.fn()} userId="u1" onEdit={jest.fn()} />);
+    render(<UserDataModal open={true} onOpenChange={jest.fn()} userId="u1" />);
 
-    expect(screen.getByText("Alice")).toBeInTheDocument();
+    expect(screen.getAllByText("Alice").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("alice@test.com")).toBeInTheDocument();
     expect(screen.getByText("+123")).toBeInTheDocument();
     expect(screen.getByText("Master A")).toBeInTheDocument();
     expect(screen.getByText("Yes")).toBeInTheDocument();
   });
 
-  it("calls onEdit when Edit button clicked", async () => {
+  it("opens edit dialog when Edit button clicked", async () => {
     const user = userEvent.setup();
-    const onEdit = jest.fn();
     mockUseUser.mockReturnValue({ data: mockUser, isLoading: false } as any);
-    render(<UserDataModal open={true} onOpenChange={jest.fn()} userId="u1" onEdit={onEdit} />);
+    render(<UserDataModal open={true} onOpenChange={jest.fn()} userId="u1" />);
 
     await user.click(screen.getByText("Edit"));
-    expect(onEdit).toHaveBeenCalled();
+    expect(screen.getByTestId("edit-dialog")).toHaveTextContent("Edit u1");
   });
 
   it("does not render when open is false", () => {
     mockUseUser.mockReturnValue({ data: mockUser, isLoading: false } as any);
-    render(<UserDataModal open={false} onOpenChange={jest.fn()} userId="u1" onEdit={jest.fn()} />);
+    render(<UserDataModal open={false} onOpenChange={jest.fn()} userId="u1" />);
 
     expect(screen.queryByText("User Details")).not.toBeInTheDocument();
   });
@@ -77,7 +80,7 @@ describe("UserDataModal", () => {
   it("opens history modal when appointments field is clicked", async () => {
     const user = userEvent.setup();
     mockUseUser.mockReturnValue({ data: mockUser, isLoading: false } as any);
-    render(<UserDataModal open={true} onOpenChange={jest.fn()} userId="u1" onEdit={jest.fn()} />);
+    render(<UserDataModal open={true} onOpenChange={jest.fn()} userId="u1" />);
 
     await user.click(screen.getByText("3"));
     expect(screen.getByText("Appointment History")).toBeInTheDocument();

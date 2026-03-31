@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ─── Mock knex ────────────────────────────────────────────────────────────────
@@ -10,7 +11,17 @@ const { mockKnex, chain } = vi.hoisted(() => {
     update: vi.fn(),
     delete: vi.fn().mockResolvedValue(0),
     returning: vi.fn().mockResolvedValue([]),
+    first: vi.fn().mockResolvedValue(null),
   };
+
+  // select returns a thenable chain: resolves like a promise but also supports .first()
+  chain.select.mockImplementation(() => {
+    const thenableChain = {
+      ...chain,
+      then: (resolve: (v: unknown) => void) => resolve((chain.select as any)._resolveValue ?? []),
+    };
+    return thenableChain;
+  });
 
   for (const key of ["where", "insert", "update"]) {
     chain[key].mockReturnValue(chain);
@@ -21,6 +32,11 @@ const { mockKnex, chain } = vi.hoisted(() => {
 });
 
 vi.mock("../../lib/db", () => ({ knex: mockKnex }));
+vi.mock("../../services/s3Service", () => ({
+  resolveImageUrl: vi.fn(async (v: string | null) => v),
+  isS3Key: vi.fn(() => false),
+  deleteObject: vi.fn(async () => {}),
+}));
 
 // ─── Imports ──────────────────────────────────────────────────────────────────
 
@@ -32,6 +48,7 @@ const mockMaster = {
   id: 1,
   name: "Jane Doe",
   description: "Senior nail technician",
+  image: null,
 };
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -40,14 +57,14 @@ describe("getAllMasters", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("returns all masters", async () => {
-    chain.select.mockResolvedValue([mockMaster]);
+    (chain.select as any)._resolveValue = [mockMaster];
     const result = await getAllMasters();
     expect(result).toEqual([mockMaster]);
     expect(mockKnex).toHaveBeenCalledWith("masters");
   });
 
   it("returns empty array when no masters exist", async () => {
-    chain.select.mockResolvedValue([]);
+    (chain.select as any)._resolveValue = [];
     expect(await getAllMasters()).toEqual([]);
   });
 });
@@ -68,6 +85,7 @@ describe("updateMaster", () => {
 
   it("updates and returns the master", async () => {
     const updated = { ...mockMaster, name: "Jane Smith" };
+    chain.first.mockResolvedValue(null); // no existing image
     chain.returning.mockResolvedValue([updated]);
     const result = await updateMaster(1, { name: "Jane Smith" });
     expect(result).toEqual(updated);

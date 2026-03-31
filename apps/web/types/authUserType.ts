@@ -14,6 +14,7 @@ export type UpdateMeInput = {
   name?: string;
   email?: string;
   phone?: string;
+  image?: string | null;
   oldPassword?: string;
   newPassword?: string;
 };

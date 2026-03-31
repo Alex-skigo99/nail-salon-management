@@ -9,6 +9,7 @@ import {
   SlotStatus,
   Master,
 } from "../types/dbSchemaTypes";
+import { resolveImageUrl } from "./s3Service";
 import { SETTINGS_KEYS } from "../constants/settings";
 import type { IWithPagination } from "knex-paginate";
 import type {
@@ -522,7 +523,9 @@ export async function getSuggestionsByMaster(
   nowTime: string,
   masterId?: number
 ): Promise<MasterSuggestions[]> {
-  const mastersQuery = knex(DB_TABLES.MASTERS).select<Master[]>("id", "name", "description").orderBy("id", "asc");
+  const mastersQuery = knex(DB_TABLES.MASTERS)
+    .select<Master[]>("id", "name", "description", "image")
+    .orderBy("id", "asc");
 
   if (masterId) {
     mastersQuery.where({ id: masterId });
@@ -536,9 +539,12 @@ export async function getSuggestionsByMaster(
 
   const result = await Promise.all(
     masters.map(async (master) => {
-      const slots = await getHomeSuggestions(master.id, nowDate, nowTime);
+      const [slots, image] = await Promise.all([
+        getHomeSuggestions(master.id, nowDate, nowTime),
+        resolveImageUrl(master.image ?? null),
+      ]);
       return {
-        master,
+        master: { ...master, image },
         slots,
       };
     })

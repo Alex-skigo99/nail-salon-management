@@ -8,6 +8,7 @@ import type { Master } from "@/types/masterTypes";
 import type { ViewMode, DisplayMode } from "@/types/appointmentTypes";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { EntityAvatar } from "@/components/elements/EntityAvatar";
 
 type CalendarHeaderProps = {
   masters: Master[] | undefined;
@@ -59,7 +60,10 @@ export function CalendarHeader({
               <SelectContent>
                 {masters?.map((m) => (
                   <SelectItem key={m.id} value={m.id.toString()}>
-                    {m.name}
+                    <span className="flex items-center gap-2">
+                      <EntityAvatar src={m.image} alt={m.name} size="xs" />
+                      {m.name}
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>

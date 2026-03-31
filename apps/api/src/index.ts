@@ -1,10 +1,13 @@
 import dotenv from "dotenv";
-import express from "express";
-import app from "./app";
 
 if (process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
+
+// dotenv.config() must run BEFORE these imports so that env vars
+// (e.g. AWS_ENDPOINT_URL) are available when modules initialise.
+import express from "express";
+import app from "./app";
 
 // DEV ONLY: serve swagger UI if openapi.json exists and swagger-ui-express is installed
 if (process.env.NODE_ENV !== "production") {

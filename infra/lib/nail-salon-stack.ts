@@ -3,6 +3,7 @@ import { Construct } from "constructs";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigatewayv2";
 import * as integrations from "aws-cdk-lib/aws-apigatewayv2-integrations";
+import * as s3 from "aws-cdk-lib/aws-s3";
 
 export class NailSalonStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -33,6 +34,26 @@ export class NailSalonStack extends cdk.Stack {
       console.log(`Admin user will be created with email: ${ADMIN_EMAIL}`);
     }
 
+    // ── S3 bucket for image uploads ──
+    const imagesBucket = new s3.Bucket(this, "ImagesBucket", {
+      bucketName: `nail-salon-images-${node_env}`,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      cors: [
+        {
+          allowedMethods: [s3.HttpMethods.PUT, s3.HttpMethods.GET],
+          allowedOrigins: [frontendUrl],
+          allowedHeaders: ["Content-Type", "x-amz-content-type"],
+          maxAge: 3600,
+        },
+      ],
+      lifecycleRules: [
+        {
+          abortIncompleteMultipartUploadAfter: cdk.Duration.days(1),
+        },
+      ],
+    });
+
     const lambdaCommonProps = {
       runtime: lambda.Runtime.NODEJS_24_X,
       code: lambda.Code.fromAsset("../apps/api/dist"),
@@ -43,6 +64,7 @@ export class NailSalonStack extends cdk.Stack {
         ADMIN_EMAIL: ADMIN_EMAIL,
         ADMIN_PASSWORD: ADMIN_PASSWORD,
         ADMIN_NAME: ADMIN_NAME,
+        S3_BUCKET_NAME: imagesBucket.bucketName,
       },
     };
 
@@ -52,6 +74,8 @@ export class NailSalonStack extends cdk.Stack {
       memorySize: 512,
       timeout: cdk.Duration.seconds(15),
     });
+
+    imagesBucket.grantReadWrite(apiLambda);
 
     const migrationLambda = new lambda.Function(this, "MigrationLambda", {
       ...lambdaCommonProps,

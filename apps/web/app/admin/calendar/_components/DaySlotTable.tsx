@@ -7,8 +7,7 @@ import { cn } from "@/lib/utils";
 import { DAY_NAMES } from "@/const/days";
 import { formatTimeToHHMM } from "@/utils/formatTime";
 import { StatusBadge } from "./StatusBadge";
-import { TruncatedText } from "../../../../components/elements/TruncatedText";
-import { AvatarPopup } from "./AvatarPopup";
+import { TruncatedText } from "@/components/elements/TruncatedText";
 import type { DaySlots, Slot, SlotStatus } from "@/types/appointmentTypes";
 import { isPastDate, parseLocalDate, formatShortDate, isSameDay, getCreatedAtString } from "@/utils/dateUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -95,7 +94,6 @@ export function DaySlotTable({ daySlots, onSlotClick, defaultOpen = true }: DayS
                   <th className="w-15 px-3 py-2 text-left font-medium">Dur.</th>
                   <th className={cn("px-3 py-2 text-left font-medium", isMobile && "hidden")}>Services</th>
                   <th className="px-3 py-2 text-left font-medium">Client</th>
-                  <th className="px-3 py-2 text-left font-medium">Avatar</th>
                   <th className="px-3 py-2 text-left font-medium">Name</th>
                   <th className={cn("px-3 py-2 text-left font-medium", !isMobile && "hidden md:table-cell")}>Phone</th>
                   <th className="hidden px-3 py-2 text-left font-medium lg:table-cell">Comments</th>
@@ -140,11 +138,6 @@ export function DaySlotTable({ daySlots, onSlotClick, defaultOpen = true }: DayS
                               )
                             ) : null}
                           </td>
-                          <td className="px-3 py-1.5">
-                            {appointmentData?.user_data?.image ? (
-                              <AvatarPopup src={appointmentData.user_data.image} alt={appointmentData.user_data.name} />
-                            ) : null}
-                          </td>
                           <td className={cn("px-3 py-1.5", isMobile && "text-xs")}>
                             {appointmentData?.user_id ? (
                               <button
@@ -183,12 +176,7 @@ export function DaySlotTable({ daySlots, onSlotClick, defaultOpen = true }: DayS
           </div>
         )}
       </CollapsibleContent>
-      <UserDataModal
-        open={userModalOpen}
-        onOpenChange={setUserModalOpen}
-        userId={selectedUserId}
-        onEdit={() => setUserModalOpen(false)}
-      />
+      <UserDataModal open={userModalOpen} onOpenChange={setUserModalOpen} userId={selectedUserId} />
     </Collapsible>
   );
 }
