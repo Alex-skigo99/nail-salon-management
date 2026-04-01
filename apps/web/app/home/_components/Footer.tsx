@@ -1,8 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Sparkles, Phone, Mail, MapPin, Clock, Instagram, Facebook } from "lucide-react";
+import { Sparkles, Phone, Mail, MapPin, Clock } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import InstagramIconLink from "@/components/icons/InstagramIconLink";
+import FacebookIconLink from "@/components/icons/FacebookIconLink";
 
 type Props = { t: ReturnType<typeof useTranslations>; isMobile: boolean };
 
@@ -51,24 +53,8 @@ export default function Footer({ t, isMobile }: Props) {
           <div>
             <h3 className="mb-4 font-semibold text-white">{t("footerFollowUs")}</h3>
             <div className="flex gap-3">
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex size-10 items-center justify-center rounded-xl bg-gray-800 transition-colors hover:bg-pink-500"
-                aria-label="Instagram"
-              >
-                <Instagram className="size-5" />
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex size-10 items-center justify-center rounded-xl bg-gray-800 transition-colors hover:bg-pink-500"
-                aria-label="Facebook"
-              >
-                <Facebook className="size-5" />
-              </a>
+              <InstagramIconLink />
+              <FacebookIconLink />
             </div>
           </div>
         </div>
