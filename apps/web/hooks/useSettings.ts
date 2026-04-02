@@ -3,7 +3,7 @@ import apiClient from "@/lib/api-client";
 import { CACHE_TIME } from "@/const/cacheTime";
 import { queryKeys } from "./queryKeys";
 import { apiRoutes } from "@/const/apiRouts";
-import { SETTING_LABELS } from "@/const/setting_labels";
+import { SETTING_LABELS, SETTING_KEYS } from "@/const/setting_labels";
 
 export type Setting = {
   id: number;
@@ -15,6 +15,7 @@ export type Setting = {
 };
 
 const SETTINGS_QUERY_KEY = [queryKeys.settings];
+const SETTING_QUERY_KEY = (key: string) => [queryKeys.settings, key];
 
 export function useSettings() {
   return useQuery({
@@ -35,7 +36,7 @@ export function useSettings() {
 
 export function useSetting(key: string) {
   return useQuery({
-    queryKey: [queryKeys.settings, key],
+    queryKey: SETTING_QUERY_KEY(key),
     queryFn: async () => {
       const res = await apiClient.get<Setting>(apiRoutes.settings, { params: { key } });
       const setting = res.data;
@@ -63,8 +64,15 @@ export function useUpdateSetting() {
         type: SETTING_LABELS[res.data.key]?.type ?? "text",
       };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: SETTINGS_QUERY_KEY });
+    onSuccess: (_, { key }) => {
+      queryClient.invalidateQueries({ queryKey: SETTING_QUERY_KEY(key) });
+      if (key === SETTING_KEYS.BOOKING_PERIOD || key === SETTING_KEYS.SLOT_DURATION) {
+        queryClient.invalidateQueries({ queryKey: [queryKeys.emptySlots] });
+        queryClient.invalidateQueries({ queryKey: [queryKeys.appointmentSuggestions] });
+      }
+      if (key === SETTING_KEYS.SLOT_DURATION) {
+        queryClient.invalidateQueries({ queryKey: [queryKeys.slots] });
+      }
     },
   });
 }
