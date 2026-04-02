@@ -104,7 +104,8 @@
     "calendar": "Calendar",
     "masters": "Masters",
     "services": "Services",
-    "clients": "Clients"
+    "clients": "Clients",
+    "settings": "Settings"
   },
   "dialogs": {
     "infoUserDialog": {

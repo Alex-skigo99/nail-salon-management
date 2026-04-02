@@ -168,6 +168,7 @@ describe("GET /appointment/master/:masterId/empty_slots", () => {
 
   it("returns 200 for public route with valid params", async () => {
     (appointmentService.getSlotsMap as Mock).mockResolvedValue([]);
+    (appointmentService.getSettingValue as Mock).mockResolvedValue(30);
 
     const res = await request(app)
       .get("/appointment/master/1/empty_slots")
@@ -189,6 +190,7 @@ describe("POST /appointment", () => {
 
   it("returns 201 and created appointment (public route)", async () => {
     (appointmentService.createAppointment as Mock).mockResolvedValue(mockAppointment);
+    (appointmentService.getSettingValue as Mock).mockResolvedValue(30);
 
     const res = await request(app).post("/appointment").send(createBody);
 
@@ -210,6 +212,7 @@ describe("POST /appointment", () => {
 
   it("returns 409 when slot is unavailable", async () => {
     (appointmentService.createAppointment as Mock).mockRejectedValue(new Error("SLOT_UNAVAILABLE"));
+    (appointmentService.getSettingValue as Mock).mockResolvedValue(30);
 
     const res = await request(app).post("/appointment").send(createBody);
 

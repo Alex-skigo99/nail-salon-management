@@ -1254,6 +1254,117 @@
         }
       }
     },
+    "/settings": {
+      "get": {
+        "summary": "Get settings (all or by key)",
+        "tags": [
+          "Settings"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "description": "Setting key to retrieve. If omitted, returns all settings."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Setting(s)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Setting"
+                      }
+                    },
+                    {
+                      "$ref": "#/components/schemas/Setting"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Setting not found (when key is specified)"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/settings/{key}": {
+      "patch": {
+        "summary": "Update a setting value (ADMIN only)",
+        "tags": [
+          "Settings"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "The setting key to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "value"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "example": "30"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated setting",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Setting"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "404": {
+            "description": "Setting not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
     "/upload/presigned-url": {
       "post": {
         "summary": "Get a presigned S3 URL for image upload",
@@ -2136,6 +2247,36 @@
           }
         ],
         "nullable": true
+      },
+      "Setting": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "key": {
+            "type": "string",
+            "example": "slot_duration"
+          },
+          "value": {
+            "type": "string",
+            "example": "30"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Duration of a single time slot in minutes"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "PresignedUrlRequest": {
         "type": "object",
