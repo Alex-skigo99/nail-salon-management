@@ -66,6 +66,7 @@ export function useUpdateSetting() {
     },
     onSuccess: (_, { key }) => {
       queryClient.invalidateQueries({ queryKey: SETTING_QUERY_KEY(key) });
+      queryClient.invalidateQueries({ queryKey: SETTINGS_QUERY_KEY });
       if (key === SETTING_KEYS.BOOKING_PERIOD || key === SETTING_KEYS.SLOT_DURATION) {
         queryClient.invalidateQueries({ queryKey: [queryKeys.emptySlots] });
         queryClient.invalidateQueries({ queryKey: [queryKeys.appointmentSuggestions] });
