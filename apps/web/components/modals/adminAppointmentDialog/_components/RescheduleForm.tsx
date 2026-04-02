@@ -17,18 +17,8 @@ import { useMasters } from "@/hooks/useMasters";
 import type { Appointment } from "@/types/appointmentTypes";
 import { formatTimeToHHMM } from "@/utils/formatTime";
 import { formatDateForInput } from "@/utils/dateUtils";
-
-const gap = 30;
-
-const rescheduleSchema = z.object({
-  masterId: z.number().int().positive(),
-  rescheduleDate: z.string().min(1, "Date is required"),
-  rescheduleTime: z.string().min(1, "Time is required"),
-  rescheduleDuration: z.number().min(gap).multipleOf(gap),
-  services: z.array(z.string()),
-});
-
-type RescheduleFormData = z.input<typeof rescheduleSchema>;
+import { useSetting } from "@/hooks/useSettings";
+import { SETTING_KEYS } from "@/const/setting_labels";
 
 const INPUT_COUNT_FOR_SERVICES = { manicure: 1, pedicure: 1, other: 1 } as const;
 
@@ -48,9 +38,21 @@ export function RescheduleForm({ apt, onSuccess, onBack }: RescheduleFormProps) 
   const { data: services = [] } = useServices();
   const { data: masters = [] } = useMasters();
   const rescheduleMutation = useRescheduleAppointment();
+  const { data: slotDurationSetting } = useSetting(SETTING_KEYS.SLOT_DURATION);
+  const gap = slotDurationSetting ? Number(slotDurationSetting.value) : 30;
 
   const [servicesSelected, setServicesSelected] = useState<ServicesSelectionState>(createInitialServicesSelected);
   const [servicesDuration, setServicesDuration] = useState(0);
+
+  const rescheduleSchema = z.object({
+    masterId: z.number().int().positive(),
+    rescheduleDate: z.string().min(1, "Date is required"),
+    rescheduleTime: z.string().min(1, "Time is required"),
+    rescheduleDuration: z.number().min(gap).multipleOf(gap),
+    services: z.array(z.string()),
+  });
+
+  type RescheduleFormData = z.input<typeof rescheduleSchema>;
 
   const servicesByCategory = useMemo(
     () => ({

@@ -9,4 +9,5 @@ export const queryKeys = {
   users: "users",
   userAppointments: "user_appointments",
   userProfile: "user_profile",
+  settings: "settings",
 };

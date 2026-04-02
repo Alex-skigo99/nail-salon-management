@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Request, Response } from "express";
 import { z } from "zod";
 import * as appointmentService from "../services/appointmentService";
+import { SETTINGS_KEYS } from "../constants/settings";
 import type { SlotStatus } from "../types/appointmentTypes";
 
 // ─────────────────────────────────────────────
@@ -201,6 +204,23 @@ export const create = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ error: parsed.error.flatten() });
       return;
     }
+
+    // Non-admin users cannot book beyond booking_period
+    const user = (req as any).user;
+    if (!user || user.role !== "ADMIN") {
+      const bookingPeriod = await appointmentService.getSettingValue(SETTINGS_KEYS.BOOKING_PERIOD, 30);
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const maxDate = new Date(today);
+      maxDate.setUTCDate(maxDate.getUTCDate() + bookingPeriod);
+      const maxDateStr = maxDate.toISOString().split("T")[0];
+
+      if (parsed.data.date > maxDateStr) {
+        res.status(409).json({ error: "Cannot book appointments beyond the allowed booking period" });
+        return;
+      }
+    }
+
     const appt = await appointmentService.createAppointment(parsed.data);
     res.status(201).json(appt);
   } catch (err: unknown) {
@@ -528,8 +548,24 @@ export const getEmptySlots = async (req: Request, res: Response): Promise<void> 
       res.status(400).json({ error: "Query params 'from' and 'to' (YYYY-MM-DD) are required" });
       return;
     }
+
+    // Enforce booking_period limit
+    const bookingPeriod = await appointmentService.getSettingValue(SETTINGS_KEYS.BOOKING_PERIOD, 30);
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    const maxDate = new Date(today);
+    maxDate.setUTCDate(maxDate.getUTCDate() + bookingPeriod);
+    const maxDateStr = maxDate.toISOString().split("T")[0];
+
+    if (from > maxDateStr) {
+      res.json([]);
+      return;
+    }
+
+    const clampedTo = to > maxDateStr ? maxDateStr : to;
+
     const slotStatusFilter: SlotStatus = "empty";
-    const emptySlots = await appointmentService.getSlotsMap(masterId, from, to, slotStatusFilter);
+    const emptySlots = await appointmentService.getSlotsMap(masterId, from, clampedTo, slotStatusFilter);
     res.json(emptySlots);
   } catch (err) {
     console.error("Error fetching slots map:", err);

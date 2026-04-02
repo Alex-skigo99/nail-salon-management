@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-type FieldType = "text" | "email" | "tel";
+type FieldType = "text" | "email" | "tel" | "number";
 
 type EditableMultiInputFieldProps = {
   label: string;
@@ -16,6 +16,7 @@ type EditableMultiInputFieldProps = {
   errorMessage?: string;
   disabled?: boolean;
   placeholder?: string;
+  inputClassName?: string;
 };
 
 export default function EditableMultiInputField({
@@ -26,6 +27,7 @@ export default function EditableMultiInputField({
   errorMessage,
   disabled = false,
   placeholder,
+  inputClassName,
 }: EditableMultiInputFieldProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
@@ -93,7 +95,9 @@ export default function EditableMultiInputField({
         </div>
       ) : (
         <div className="flex items-center justify-between gap-2">
-          <span className={cn("text-sm", !value && "text-gray-400 italic")}>{value || placeholder}</span>
+          <span className={cn("text-sm", !value && "text-gray-400 italic", inputClassName)}>
+            {value || placeholder}
+          </span>
           {!disabled && (
             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setEditing(true)}>
               <Pencil className="h-3.5 w-3.5" />

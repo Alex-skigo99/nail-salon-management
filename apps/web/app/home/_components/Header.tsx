@@ -8,6 +8,7 @@ import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { changeLocaleAction } from "@/utils/changeLocaleAction";
 import { UserMenu } from "@/components/UserMenu";
 import SalonTitle from "@/components/elements/SalonTitle";
+import InstagramIconLink from "@/components/icons/InstagramIconLink";
 
 type SimpleT = (key: string) => string;
 type Props = { t: ReturnType<typeof useTranslations> | SimpleT; isMobile: boolean };
@@ -36,6 +37,10 @@ export default function Header({ t, isMobile }: Props) {
 
         {!isMobile && (
           <nav className="flex items-center gap-6">
+            <InstagramIconLink
+              className="size-8 rounded-md bg-white/80 backdrop-blur-md hover:bg-pink-300"
+              iconClassName="text-pink-600"
+            />
             {navLinks.map((link) => (
               <a
                 key={link.href}
@@ -64,13 +69,19 @@ export default function Header({ t, isMobile }: Props) {
         )}
 
         {isMobile && (
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 text-gray-600 transition-colors hover:text-pink-600"
-            aria-label="Toggle menu"
-          >
-            {menuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
-          </button>
+          <>
+            <InstagramIconLink
+              className="size-7 rounded-md bg-pink-100 backdrop-blur-md hover:bg-pink-300"
+              iconClassName="text-pink-600"
+            />
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="p-2 text-gray-600 transition-colors hover:text-pink-600"
+              aria-label="Toggle menu"
+            >
+              {menuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+            </button>
+          </>
         )}
       </div>
 
@@ -86,10 +97,10 @@ export default function Header({ t, isMobile }: Props) {
               {link.label}
             </a>
           ))}
-          <div className="pt-1">
+          <div className="flex items-center gap-3 pt-1">
             <LocaleSwitcher
               handleLocaleChange={handleLocaleChange}
-              wrapperClassName="px-0 py-1"
+              wrapperClassName="px-0 py-1 flex-1"
               triggerClassName="w-full text-sm cursor-pointer hover:bg-gray-100"
             />
           </div>

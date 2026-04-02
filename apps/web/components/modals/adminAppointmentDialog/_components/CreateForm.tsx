@@ -18,35 +18,8 @@ import { useServices } from "@/hooks/useServices";
 import { APPOINTMENT_STATUSES } from "@/types/appointmentTypes";
 import type { Slot } from "@/types/appointmentTypes";
 import { formatTimeToHHMM } from "@/utils/formatTime";
-
-const gap = 30;
-
-const createSchema = z
-  .object({
-    userId: z.uuid().nullable().optional(),
-    userName: z.string().optional(),
-    phone: phoneSchemaOptional,
-    services: z.array(z.string()),
-    comments: z.string().optional(),
-    status: z.enum(APPOINTMENT_STATUSES),
-    duration: z.number().min(gap).multipleOf(gap),
-  })
-  .refine((data) => !!data.userId || (data.userName?.trim() ?? "").length > 0, {
-    message: "Client name is required when no user is selected",
-    path: ["userName"],
-  });
-
-type CreateFormData = z.input<typeof createSchema>;
-
-const initSchemaValues: CreateFormData = {
-  userId: null,
-  userName: "",
-  phone: "",
-  services: [],
-  comments: "",
-  status: "new",
-  duration: gap,
-};
+import { useSetting } from "@/hooks/useSettings";
+import { SETTING_KEYS } from "@/const/setting_labels";
 
 const INPUT_COUNT_FOR_SERVICES = { manicure: 1, pedicure: 1, other: 1 } as const;
 
@@ -66,10 +39,39 @@ type CreateFormProps = {
 export function CreateForm({ slot, date, masterId, onSuccess }: CreateFormProps) {
   const { data: services = [] } = useServices();
   const createMutation = useCreateAppointment();
+  const { data: slotDurationSetting } = useSetting(SETTING_KEYS.SLOT_DURATION);
+  const gap = slotDurationSetting ? Number(slotDurationSetting.value) : 30;
 
   const [servicesSelected, setServicesSelected] = useState<ServicesSelectionState>(createInitialServicesSelected);
   const [servicesDuration, setServicesDuration] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
+
+  const createSchema = z
+    .object({
+      userId: z.uuid().nullable().optional(),
+      userName: z.string().optional(),
+      phone: phoneSchemaOptional,
+      services: z.array(z.string()),
+      comments: z.string().optional(),
+      status: z.enum(APPOINTMENT_STATUSES),
+      duration: z.number().min(gap).multipleOf(gap),
+    })
+    .refine((data) => !!data.userId || (data.userName?.trim() ?? "").length > 0, {
+      message: "Client name is required when no user is selected",
+      path: ["userName"],
+    });
+
+  type CreateFormData = z.input<typeof createSchema>;
+
+  const initSchemaValues: CreateFormData = {
+    userId: null,
+    userName: "",
+    phone: "",
+    services: [],
+    comments: "",
+    status: "new",
+    duration: gap,
+  };
 
   const servicesByCategory = useMemo(
     () => ({

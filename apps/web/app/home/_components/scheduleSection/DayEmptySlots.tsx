@@ -10,6 +10,7 @@ import { useMasterEmptySlots } from "@/hooks/useAppointments";
 import DaySlotsCard from "./DaySlotsCard";
 import { formatDateLabel } from "./formatDateLabel";
 import { shiftDate, todayStr, compareTimes, isSameDay } from "@/utils/dateUtils";
+import { useSetting } from "@/hooks/useSettings";
 
 type Props = {
   master: MasterSuggestion["master"];
@@ -19,6 +20,10 @@ type Props = {
 };
 
 export default function DayEmptySlots({ master, isMobile, t, onBook }: Props) {
+  const { data: bookingPeriodSetting } = useSetting("booking_period");
+  const bookingPeriod = bookingPeriodSetting ? Number(bookingPeriodSetting.value) : 30;
+  const maxDate = shiftDate(todayStr(), bookingPeriod);
+
   const [selectedDate, setSelectedDate] = useState(todayStr);
 
   const { data: daySlots = [], isLoading, isError } = useMasterEmptySlots(master.id, selectedDate);
@@ -38,15 +43,25 @@ export default function DayEmptySlots({ master, isMobile, t, onBook }: Props) {
     if (newDate < todayStr()) return;
     setSelectedDate(newDate);
   };
-  const handleNextDay = () => setSelectedDate((d) => shiftDate(d, 1));
+  const handleNextDay = () => {
+    const newDate = shiftDate(selectedDate, 1);
+    if (newDate > maxDate) return;
+    setSelectedDate(newDate);
+  };
 
   const prevDisabled = selectedDate <= todayStr();
+  const nextDisabled = selectedDate >= maxDate;
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.value) return;
     // Prevent selecting dates in the past
     if (e.target.value < todayStr()) {
       setSelectedDate(todayStr());
+      return;
+    }
+    // Prevent selecting dates beyond booking period
+    if (e.target.value > maxDate) {
+      setSelectedDate(maxDate);
       return;
     }
 
@@ -79,6 +94,7 @@ export default function DayEmptySlots({ master, isMobile, t, onBook }: Props) {
             value={selectedDate}
             onChange={handleDateChange}
             min={todayStr()}
+            max={maxDate}
             className="rounded-lg border border-pink-100 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm ring-pink-300 transition-all outline-none focus:border-pink-300 focus:ring-1"
             aria-label={t("scheduleSelectDate")}
           />
@@ -88,6 +104,7 @@ export default function DayEmptySlots({ master, isMobile, t, onBook }: Props) {
             size="icon"
             className="size-8 border-pink-100 hover:border-pink-300 hover:bg-pink-50"
             onClick={handleNextDay}
+            disabled={nextDisabled}
             aria-label={t("scheduleNextDay")}
           >
             <ChevronRight className="size-4 text-pink-500" />
