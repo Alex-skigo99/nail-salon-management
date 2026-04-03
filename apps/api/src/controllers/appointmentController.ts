@@ -5,6 +5,8 @@ import { z } from "zod";
 import * as appointmentService from "../services/appointmentService";
 import { SETTINGS_KEYS } from "../constants/settings";
 import type { SlotStatus } from "../types/appointmentTypes";
+import { EMAIL_NOTIFICATIONS } from "../constants/emailNotifications";
+import { notifyMasterAppointment } from "../services/appointmentNotificationService";
 
 // ─────────────────────────────────────────────
 // Validation schemas
@@ -222,6 +224,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
     }
 
     const appt = await appointmentService.createAppointment(parsed.data);
+    notifyMasterAppointment(appt, EMAIL_NOTIFICATIONS.NEW_APPOINTMENT).catch(() => {});
     res.status(201).json(appt);
   } catch (err: unknown) {
     if ((err as { message?: string })?.message === "SLOT_UNAVAILABLE") {
@@ -281,6 +284,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
       res.status(404).json({ error: "Appointment not found" });
       return;
     }
+    notifyMasterAppointment(appt, EMAIL_NOTIFICATIONS.UPDATE_APPOINTMENT).catch(() => {});
     res.json(appt);
   } catch (err) {
     console.error("Error updating appointment:", err);
@@ -334,6 +338,7 @@ export const reschedule = async (req: Request, res: Response): Promise<void> => 
       return;
     }
     const appt = await appointmentService.rescheduleAppointment(id, parsed.data);
+    notifyMasterAppointment(appt, EMAIL_NOTIFICATIONS.RESCHEDULE_APPOINTMENT).catch(() => {});
     res.json(appt);
   } catch (err: unknown) {
     if ((err as { message?: string })?.message === "APPOINTMENT_NOT_FOUND") {
@@ -377,11 +382,17 @@ export const remove = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ error: "Invalid id" });
       return;
     }
+    const existing = await appointmentService.getAppointmentById(id);
+    if (!existing) {
+      res.status(404).json({ error: "Appointment not found" });
+      return;
+    }
     const deleted = await appointmentService.deleteAppointment(id);
     if (!deleted) {
       res.status(404).json({ error: "Appointment not found" });
       return;
     }
+    notifyMasterAppointment(existing, EMAIL_NOTIFICATIONS.DELETE_APPOINTMENT).catch(() => {});
     res.status(204).send();
   } catch (err) {
     console.error("Error deleting appointment:", err);
@@ -816,6 +827,7 @@ export const updateComment = async (req: Request, res: Response): Promise<void> 
       res.status(404).json({ error: "Appointment not found" });
       return;
     }
+    notifyMasterAppointment(appt, EMAIL_NOTIFICATIONS.USER_COMMENT).catch(() => {});
     res.json(appt);
   } catch (err) {
     console.error("Error updating appointment comment:", err);

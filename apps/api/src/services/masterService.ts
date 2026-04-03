@@ -1,6 +1,6 @@
 import { knex } from "../lib/db";
 import { DB_TABLES } from "../constants/dbTables";
-import { Master } from "../types/dbSchemaTypes";
+import { Master, MasterCreate, MasterUpdate } from "../types/dbSchemaTypes";
 import { resolveImageUrl, isS3Key, deleteObject } from "./s3Service";
 
 async function enrichMasterImage(master: Master): Promise<Master> {
@@ -8,21 +8,21 @@ async function enrichMasterImage(master: Master): Promise<Master> {
 }
 
 export const getAllMasters = async (): Promise<Master[]> => {
-  const masters = await knex(DB_TABLES.MASTERS).select("*");
+  const masters = await knex(DB_TABLES.MASTERS).select("*").orderBy("sorting", "asc").orderBy("name", "asc");
   return Promise.all(masters.map(enrichMasterImage));
 };
 
-export const createMaster = async (
-  data: Pick<Master, "name"> & Partial<Pick<Master, "description" | "image">>
-): Promise<Master> => {
+export const getMasterById = async (id: number): Promise<Master | null> => {
+  const master = await knex(DB_TABLES.MASTERS).where({ id }).first();
+  return master ?? null;
+};
+
+export const createMaster = async (data: MasterCreate): Promise<Master> => {
   const [master] = await knex(DB_TABLES.MASTERS).insert(data).returning("*");
   return enrichMasterImage(master);
 };
 
-export const updateMaster = async (
-  id: number,
-  data: Partial<Pick<Master, "name" | "description" | "image">>
-): Promise<Master | null> => {
+export const updateMaster = async (id: number, data: MasterUpdate): Promise<Master | null> => {
   // Clean up old S3 image if being replaced
   if (data.image !== undefined) {
     const existing = await knex(DB_TABLES.MASTERS).where({ id }).select("image").first();

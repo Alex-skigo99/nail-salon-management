@@ -12,10 +12,19 @@ const { mockKnex, chain } = vi.hoisted(() => {
     delete: vi.fn().mockResolvedValue(0),
     returning: vi.fn().mockResolvedValue([]),
     first: vi.fn().mockResolvedValue(null),
+    orderBy: vi.fn(),
   };
 
   // select returns a thenable chain: resolves like a promise but also supports .first()
   chain.select.mockImplementation(() => {
+    const thenableChain = {
+      ...chain,
+      then: (resolve: (v: unknown) => void) => resolve((chain.select as any)._resolveValue ?? []),
+    };
+    return thenableChain;
+  });
+
+  chain.orderBy.mockImplementation(() => {
     const thenableChain = {
       ...chain,
       then: (resolve: (v: unknown) => void) => resolve((chain.select as any)._resolveValue ?? []),
@@ -49,6 +58,14 @@ const mockMaster = {
   name: "Jane Doe",
   description: "Senior nail technician",
   image: null,
+  is_booking_available: true,
+  sorting: 100,
+  email: null,
+  is_new_appt_email_notification: false,
+  is_del_appt_email_notification: false,
+  is_update_appt_email_notification: false,
+  is_user_comment_appt_email_notification: false,
+  is_reschedule_appt_email_notification: false,
 };
 
 // ─── Tests ────────────────────────────────────────────────────────────────────

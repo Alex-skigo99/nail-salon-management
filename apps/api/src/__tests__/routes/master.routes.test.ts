@@ -5,6 +5,7 @@ import request from "supertest";
 
 vi.mock("../../lib/db", () => ({ knex: vi.fn() }));
 vi.mock("../../services/masterService");
+vi.mock("../../services/appointmentNotificationService");
 
 // ─── Imports ──────────────────────────────────────────────────────────────────
 
@@ -18,6 +19,14 @@ const mockMaster = {
   id: 1,
   name: "Jane Doe",
   description: "Senior nail technician",
+  is_booking_available: true,
+  sorting: 100,
+  email: null,
+  is_new_appt_email_notification: false,
+  is_del_appt_email_notification: false,
+  is_update_appt_email_notification: false,
+  is_user_comment_appt_email_notification: false,
+  is_reschedule_appt_email_notification: false,
 };
 
 function adminToken() {
@@ -90,6 +99,30 @@ describe("POST /master", () => {
 
     expect(res.status).toBe(201);
     expect(res.body.name).toBe(mockMaster.name);
+  });
+
+  it("returns 201 with new fields when ADMIN", async () => {
+    const masterWithFields = {
+      ...mockMaster,
+      is_booking_available: false,
+      sorting: 50,
+      email: "jane@example.com",
+      is_new_appt_email_notification: true,
+    };
+    (masterService.createMaster as Mock).mockResolvedValue(masterWithFields);
+
+    const res = await request(app).post("/master").set("Authorization", `Bearer ${adminToken()}`).send({
+      name: "Jane Doe",
+      is_booking_available: false,
+      sorting: 50,
+      email: "jane@example.com",
+      is_new_appt_email_notification: true,
+    });
+
+    expect(res.status).toBe(201);
+    expect(res.body.is_booking_available).toBe(false);
+    expect(res.body.sorting).toBe(50);
+    expect(res.body.email).toBe("jane@example.com");
   });
 
   it("returns 400 on missing required fields", async () => {

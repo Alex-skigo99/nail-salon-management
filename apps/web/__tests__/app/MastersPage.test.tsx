@@ -29,9 +29,42 @@ jest.mock(
 const mockUseMasters = useMasters as jest.MockedFunction<typeof useMasters>;
 
 const mockMasters = [
-  { id: 1, name: "Sarah", email: "sarah@example.com" },
-  { id: 2, name: "Emma", email: "emma@example.com" },
-  { id: 3, name: "Lisa", email: "lisa@example.com" },
+  {
+    id: 1,
+    name: "Sarah",
+    email: "sarah@example.com",
+    is_booking_available: true,
+    sorting: 100,
+    is_new_appt_email_notification: false,
+    is_del_appt_email_notification: false,
+    is_update_appt_email_notification: false,
+    is_user_comment_appt_email_notification: false,
+    is_reschedule_appt_email_notification: false,
+  },
+  {
+    id: 2,
+    name: "Emma",
+    email: "emma@example.com",
+    is_booking_available: true,
+    sorting: 100,
+    is_new_appt_email_notification: false,
+    is_del_appt_email_notification: false,
+    is_update_appt_email_notification: false,
+    is_user_comment_appt_email_notification: false,
+    is_reschedule_appt_email_notification: false,
+  },
+  {
+    id: 3,
+    name: "Lisa",
+    email: "lisa@example.com",
+    is_booking_available: true,
+    sorting: 100,
+    is_new_appt_email_notification: false,
+    is_del_appt_email_notification: false,
+    is_update_appt_email_notification: false,
+    is_user_comment_appt_email_notification: false,
+    is_reschedule_appt_email_notification: false,
+  },
 ];
 
 describe("MastersPage", () => {

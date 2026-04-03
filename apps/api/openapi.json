@@ -2135,6 +2135,39 @@
             "type": "string",
             "nullable": true,
             "description": "Presigned URL or null"
+          },
+          "is_booking_available": {
+            "type": "boolean",
+            "example": true
+          },
+          "sorting": {
+            "type": "integer",
+            "example": 100
+          },
+          "email": {
+            "type": "string",
+            "nullable": true,
+            "example": "jane@example.com"
+          },
+          "is_new_appt_email_notification": {
+            "type": "boolean",
+            "example": false
+          },
+          "is_del_appt_email_notification": {
+            "type": "boolean",
+            "example": false
+          },
+          "is_update_appt_email_notification": {
+            "type": "boolean",
+            "example": false
+          },
+          "is_user_comment_appt_email_notification": {
+            "type": "boolean",
+            "example": false
+          },
+          "is_reschedule_appt_email_notification": {
+            "type": "boolean",
+            "example": false
           }
         }
       },
@@ -2156,6 +2189,31 @@
             "type": "string",
             "nullable": true,
             "description": "S3 key returned from upload endpoint"
+          },
+          "is_booking_available": {
+            "type": "boolean"
+          },
+          "sorting": {
+            "type": "integer"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_new_appt_email_notification": {
+            "type": "boolean"
+          },
+          "is_del_appt_email_notification": {
+            "type": "boolean"
+          },
+          "is_update_appt_email_notification": {
+            "type": "boolean"
+          },
+          "is_user_comment_appt_email_notification": {
+            "type": "boolean"
+          },
+          "is_reschedule_appt_email_notification": {
+            "type": "boolean"
           }
         }
       },
@@ -2174,6 +2232,31 @@
             "type": "string",
             "nullable": true,
             "description": "S3 key returned from upload endpoint"
+          },
+          "is_booking_available": {
+            "type": "boolean"
+          },
+          "sorting": {
+            "type": "integer"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "is_new_appt_email_notification": {
+            "type": "boolean"
+          },
+          "is_del_appt_email_notification": {
+            "type": "boolean"
+          },
+          "is_update_appt_email_notification": {
+            "type": "boolean"
+          },
+          "is_user_comment_appt_email_notification": {
+            "type": "boolean"
+          },
+          "is_reschedule_appt_email_notification": {
+            "type": "boolean"
           }
         }
       },

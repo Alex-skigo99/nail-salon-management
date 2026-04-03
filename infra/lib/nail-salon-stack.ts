@@ -4,6 +4,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigatewayv2";
 import * as integrations from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 export class NailSalonStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -65,6 +66,7 @@ export class NailSalonStack extends cdk.Stack {
         ADMIN_PASSWORD: ADMIN_PASSWORD,
         ADMIN_NAME: ADMIN_NAME,
         S3_BUCKET_NAME: imagesBucket.bucketName,
+        SES_FROM_EMAIL: process.env.SES_FROM_EMAIL || "noreply@example.com",
       },
     };
 
@@ -76,6 +78,15 @@ export class NailSalonStack extends cdk.Stack {
     });
 
     imagesBucket.grantReadWrite(apiLambda);
+
+    // ── SES permissions for sending emails ──
+    apiLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["ses:SendEmail", "ses:SendRawEmail"],
+        resources: ["*"],
+      })
+    );
 
     const migrationLambda = new lambda.Function(this, "MigrationLambda", {
       ...lambdaCommonProps,
