@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Mail, CalendarOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent } from "@/components/ui/card";
 import { ImageUpload } from "@/components/ImageUpload";
 import type { Master } from "@/types/masterTypes";
@@ -11,6 +12,7 @@ import { useUpdateMaster } from "@/hooks/useMasters";
 import { MasterForm } from "./MasterForm";
 import { DeleteMasterDialog } from "./DeleteMasterDialog";
 import { WorkingHoursSection } from "./WorkingHoursSection";
+import { NotificationBadge } from "../../../../components/elements/NotificationBadge";
 
 type Props = {
   master: Master;
@@ -42,6 +44,12 @@ export function MasterCard({ master }: Props) {
                 />
                 <div className="min-w-0">
                   <CardTitle className="truncate font-semibold">{master.name}</CardTitle>
+                  {!master.is_booking_available && (
+                    <Badge variant="destructive" className="mt-1 gap-1">
+                      <CalendarOff className="h-3 w-3" />
+                      Booking disabled
+                    </Badge>
+                  )}
                 </div>
               </div>
               <CardAction>
@@ -71,6 +79,32 @@ export function MasterCard({ master }: Props) {
               <CardDescription className="mt-0.5 line-clamp-2 text-sm">{master.description}</CardDescription>
             ) : (
               <CardDescription className="mt-0.5 text-sm italic">No description</CardDescription>
+            )}
+            {master.email && (
+              <div className="mt-2 flex flex-col gap-2">
+                <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                  <Mail className="h-3 w-3" />
+                  <span className="truncate">{master.email}</span>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <div className="text-sm font-semibold">Email Notifications:</div>
+                  <div className="bg-muted flex flex-wrap gap-2 rounded-xl border p-2">
+                    {[
+                      { label: "New Appt", value: master.is_new_appt_email_notification },
+                      { label: "Delete", value: master.is_del_appt_email_notification },
+                      { label: "Update", value: master.is_update_appt_email_notification },
+                      { label: "User comment", value: master.is_user_comment_appt_email_notification },
+                      { label: "Reschedule", value: master.is_reschedule_appt_email_notification },
+                    ].map((notification) => (
+                      <NotificationBadge
+                        key={notification.label}
+                        label={notification.label}
+                        isActive={notification.value}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </CardHeader>

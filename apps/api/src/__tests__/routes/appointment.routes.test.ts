@@ -5,6 +5,10 @@ import request from "supertest";
 
 vi.mock("../../lib/db", () => ({ knex: vi.fn() }));
 vi.mock("../../services/appointmentService");
+vi.mock("../../services/masterService");
+vi.mock("../../services/appointmentNotificationService", () => ({
+  notifyMasterAppointment: vi.fn().mockResolvedValue(undefined),
+}));
 
 // ─── Imports ──────────────────────────────────────────────────────────────────
 
@@ -325,6 +329,7 @@ describe("DELETE /appointment/:id", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("returns 204 when appointment deleted (public route)", async () => {
+    (appointmentService.getAppointmentById as Mock).mockResolvedValue(mockAppointment);
     (appointmentService.deleteAppointment as Mock).mockResolvedValue(true);
 
     const res = await request(app).delete("/appointment/1");
@@ -333,7 +338,7 @@ describe("DELETE /appointment/:id", () => {
   });
 
   it("returns 404 when appointment does not exist", async () => {
-    (appointmentService.deleteAppointment as Mock).mockResolvedValue(false);
+    (appointmentService.getAppointmentById as Mock).mockResolvedValue(null);
 
     const res = await request(app).delete("/appointment/999");
 

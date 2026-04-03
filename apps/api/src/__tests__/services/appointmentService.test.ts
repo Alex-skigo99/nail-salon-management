@@ -40,6 +40,7 @@ import {
   updateAppointment,
   rescheduleAppointment,
   deleteAppointment,
+  getAppointmentById,
   getAppointmentsForMaster,
 } from "../../services/appointmentService";
 
@@ -199,6 +200,27 @@ describe("rescheduleAppointment", () => {
       .mockResolvedValueOnce(undefined); // no working hours for target day
 
     await expect(rescheduleAppointment(1, { date: "2026-04-15", time: "08:00" })).rejects.toThrow("SLOT_UNAVAILABLE");
+  });
+});
+
+// ─── getAppointmentById ───────────────────────────────────────────────────────
+
+describe("getAppointmentById", () => {
+  it("returns appointment when found", async () => {
+    chain.first.mockResolvedValue(mockAppointment);
+
+    const result = await getAppointmentById(1);
+
+    expect(result).toEqual(mockAppointment);
+    expect(chain.where).toHaveBeenCalledWith({ id: 1 });
+  });
+
+  it("returns null when not found", async () => {
+    chain.first.mockResolvedValue(undefined);
+
+    const result = await getAppointmentById(999);
+
+    expect(result).toBeNull();
   });
 });
 

@@ -233,6 +233,11 @@ export async function rescheduleAppointment(id: number, data: RescheduleInput): 
   return appt;
 }
 
+export async function getAppointmentById(id: number): Promise<Appointment | null> {
+  const appt = await knex(DB_TABLES.APPOINTMENTS).where({ id }).first();
+  return appt ?? null;
+}
+
 export async function deleteAppointment(id: number): Promise<boolean> {
   const deleted = await knex(DB_TABLES.APPOINTMENTS).where({ id }).delete();
   return deleted > 0;
@@ -525,7 +530,9 @@ export async function getSuggestionsByMaster(
 ): Promise<MasterSuggestions[]> {
   const mastersQuery = knex(DB_TABLES.MASTERS)
     .select<Master[]>("id", "name", "description", "image")
-    .orderBy("id", "asc");
+    .where({ is_booking_available: true })
+    .orderBy("sorting", "asc")
+    .orderBy("name", "asc");
 
   if (masterId) {
     mastersQuery.where({ id: masterId });

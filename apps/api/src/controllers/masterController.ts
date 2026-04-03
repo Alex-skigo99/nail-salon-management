@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import * as masterService from "../services/masterService";
+import { MasterCreate, MasterUpdate } from "../types/dbSchemaTypes";
 
 /**
  * @openapi
@@ -113,6 +114,31 @@ import * as masterService from "../services/masterService";
  *           type: string
  *           nullable: true
  *           description: Presigned URL or null
+ *         is_booking_available:
+ *           type: boolean
+ *           example: true
+ *         sorting:
+ *           type: integer
+ *           example: 100
+ *         email:
+ *           type: string
+ *           nullable: true
+ *           example: "jane@example.com"
+ *         is_new_appt_email_notification:
+ *           type: boolean
+ *           example: false
+ *         is_del_appt_email_notification:
+ *           type: boolean
+ *           example: false
+ *         is_update_appt_email_notification:
+ *           type: boolean
+ *           example: false
+ *         is_user_comment_appt_email_notification:
+ *           type: boolean
+ *           example: false
+ *         is_reschedule_appt_email_notification:
+ *           type: boolean
+ *           example: false
  *     MasterCreate:
  *       type: object
  *       required:
@@ -128,6 +154,23 @@ import * as masterService from "../services/masterService";
  *           type: string
  *           nullable: true
  *           description: S3 key returned from upload endpoint
+ *         is_booking_available:
+ *           type: boolean
+ *         sorting:
+ *           type: integer
+ *         email:
+ *           type: string
+ *           nullable: true
+ *         is_new_appt_email_notification:
+ *           type: boolean
+ *         is_del_appt_email_notification:
+ *           type: boolean
+ *         is_update_appt_email_notification:
+ *           type: boolean
+ *         is_user_comment_appt_email_notification:
+ *           type: boolean
+ *         is_reschedule_appt_email_notification:
+ *           type: boolean
  *     MasterUpdate:
  *       type: object
  *       properties:
@@ -141,19 +184,49 @@ import * as masterService from "../services/masterService";
  *           type: string
  *           nullable: true
  *           description: S3 key returned from upload endpoint
+ *         is_booking_available:
+ *           type: boolean
+ *         sorting:
+ *           type: integer
+ *         email:
+ *           type: string
+ *           nullable: true
+ *         is_new_appt_email_notification:
+ *           type: boolean
+ *         is_del_appt_email_notification:
+ *           type: boolean
+ *         is_update_appt_email_notification:
+ *           type: boolean
+ *         is_user_comment_appt_email_notification:
+ *           type: boolean
+ *         is_reschedule_appt_email_notification:
+ *           type: boolean
  */
 
-const CreateMasterSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().optional(),
-  image: z.string().nullable().optional(),
-});
-
-const UpdateMasterSchema = z.object({
-  name: z.string().min(1).optional(),
+const OptionalMasterSchema = z.object({
   description: z.string().nullable().optional(),
   image: z.string().nullable().optional(),
+  is_booking_available: z.boolean().optional(),
+  sorting: z.number().int().optional(),
+  email: z.email().nullable().optional(),
+  is_new_appt_email_notification: z.boolean().optional(),
+  is_del_appt_email_notification: z.boolean().optional(),
+  is_update_appt_email_notification: z.boolean().optional(),
+  is_user_comment_appt_email_notification: z.boolean().optional(),
+  is_reschedule_appt_email_notification: z.boolean().optional(),
 });
+
+const CreateMasterSchema = z
+  .object({
+    name: z.string().min(1),
+  })
+  .merge(OptionalMasterSchema);
+
+const UpdateMasterSchema = z
+  .object({
+    name: z.string().min(1).optional(),
+  })
+  .merge(OptionalMasterSchema);
 
 export const getAll = async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -172,7 +245,7 @@ export const create = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ error: parsed.error.flatten() });
       return;
     }
-    const master = await masterService.createMaster(parsed.data);
+    const master = await masterService.createMaster(parsed.data as MasterCreate);
     res.status(201).json(master);
   } catch (err) {
     console.error("Error creating master:", err);
@@ -192,7 +265,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ error: parsed.error.flatten() });
       return;
     }
-    const master = await masterService.updateMaster(id, parsed.data);
+    const master = await masterService.updateMaster(id, parsed.data as MasterUpdate);
     if (!master) {
       res.status(404).json({ error: "Master not found" });
       return;

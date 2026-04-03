@@ -155,3 +155,8 @@ export const deleteUser = async (id: string): Promise<boolean> => {
   }
   return deleted > 0;
 };
+
+export const getUserNameById = async (id: string): Promise<string | null> => {
+  const user = await knex(DB_TABLES.USERS).where({ id }).select("name").first();
+  return user ? user.name : null;
+};
