@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/hooks/useUsers";
 import { Pencil } from "lucide-react";
 import { getCreatedAtString, getAppointmentDateString } from "@/utils/dateUtils";
+import { openWhatsApp } from "@/utils/whatsAppUtils";
 import { Field } from "@/components/elements/Field";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { HistoryUserApptsModal } from "@/components/modals/historyUserApptsModal/HistoryUserApptsModal";
@@ -65,7 +66,12 @@ export function UserDataModal({ open, onOpenChange, userId }: UserDataModalProps
             </div>
 
             <div className="divide-y">
-              <Field label="Phone" value={user.phone} />
+              <Field
+                label="Phone"
+                value={user.phone}
+                title="Click to open WhatsApp"
+                onClick={user.phone ? () => openWhatsApp(user.phone as string, "") : undefined}
+              />
               <Field
                 label="Role"
                 value={

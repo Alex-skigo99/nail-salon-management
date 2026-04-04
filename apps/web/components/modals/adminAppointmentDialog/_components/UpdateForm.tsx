@@ -5,6 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
@@ -14,7 +15,9 @@ import SearchUserInput from "@/components/inputs/SearchUserInput";
 import { PhoneFormInput, phoneSchemaOptional } from "@/components/inputs/PhoneFormInput";
 import { useUpdateAppointment } from "@/hooks/useAppointments";
 import { APPOINTMENT_STATUSES } from "@/types/appointmentTypes";
-import type { Appointment } from "@/types/appointmentTypes";
+import type { AppointmentRetrieve } from "@/types/appointmentTypes";
+import { buildSetApptStatusMessage, openWhatsApp } from "@/utils/whatsAppUtils";
+import { formatTimeToHHMM } from "@/utils/formatTime";
 import { CalendarClock, Trash2 } from "lucide-react";
 
 const updateSchema = z.object({
@@ -28,13 +31,22 @@ const updateSchema = z.object({
 type UpdateFormData = z.input<typeof updateSchema>;
 
 type UpdateFormProps = {
-  apt: Appointment;
+  apt: AppointmentRetrieve;
   onSuccess: () => void;
   onReschedule: () => void;
   onDelete: () => void;
+  whatsAppMessageFlag: boolean;
+  setWhatsAppMessageFlag: (flag: boolean) => void;
 };
 
-export function UpdateForm({ apt, onSuccess, onReschedule, onDelete }: UpdateFormProps) {
+export function UpdateForm({
+  apt,
+  onSuccess,
+  onReschedule,
+  onDelete,
+  whatsAppMessageFlag,
+  setWhatsAppMessageFlag,
+}: UpdateFormProps) {
   const updateMutation = useUpdateAppointment();
   const [userId, setUserId] = useState<string | null>(apt.user_id ?? null);
 
@@ -85,6 +97,15 @@ export function UpdateForm({ apt, onSuccess, onReschedule, onDelete }: UpdateFor
         },
       });
       toast.success("Appointment updated");
+      if (whatsAppMessageFlag) {
+        const phone = apt.user_data?.phone ?? apt.guest_phone ?? null;
+        if (phone) {
+          openWhatsApp(
+            phone,
+            buildSetApptStatusMessage({ date: apt.date, time: formatTimeToHHMM(apt.time), status: data.status })
+          );
+        }
+      }
       onSuccess();
     } catch {
       toast.error("Failed to update appointment. Please try again.");
@@ -191,6 +212,17 @@ export function UpdateForm({ apt, onSuccess, onReschedule, onDelete }: UpdateFor
           </p>
         </div>
       )}
+
+      <div className="flex items-center gap-2">
+        <Checkbox
+          id="update-wa-checkbox"
+          checked={whatsAppMessageFlag}
+          onCheckedChange={(checked) => setWhatsAppMessageFlag(!!checked)}
+        />
+        <Label htmlFor="update-wa-checkbox" className="cursor-pointer font-normal">
+          Send WhatsApp message to the client
+        </Label>
+      </div>
 
       {/* Footer actions */}
       <div className="flex items-center gap-2 pt-1">

@@ -5,6 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
@@ -14,9 +15,10 @@ import SelectInput from "@/components/inputs/SelectInput";
 import { useRescheduleAppointment } from "@/hooks/useAppointments";
 import { useServices } from "@/hooks/useServices";
 import { useMasters } from "@/hooks/useMasters";
-import type { Appointment } from "@/types/appointmentTypes";
+import type { AppointmentRetrieve } from "@/types/appointmentTypes";
 import { formatTimeToHHMM } from "@/utils/formatTime";
 import { formatDateForInput } from "@/utils/dateUtils";
+import { buildRescheduleApptMessage, openWhatsApp } from "@/utils/whatsAppUtils";
 import { useSetting } from "@/hooks/useSettings";
 import { SETTING_KEYS } from "@/const/setting_labels";
 
@@ -29,12 +31,20 @@ const createInitialServicesSelected = (): ServicesSelectionState => ({
 });
 
 type RescheduleFormProps = {
-  apt: Appointment;
+  apt: AppointmentRetrieve;
   onSuccess: () => void;
   onBack: () => void;
+  whatsAppMessageFlag: boolean;
+  setWhatsAppMessageFlag: (flag: boolean) => void;
 };
 
-export function RescheduleForm({ apt, onSuccess, onBack }: RescheduleFormProps) {
+export function RescheduleForm({
+  apt,
+  onSuccess,
+  onBack,
+  whatsAppMessageFlag,
+  setWhatsAppMessageFlag,
+}: RescheduleFormProps) {
   const { data: services = [] } = useServices();
   const { data: masters = [] } = useMasters();
   const rescheduleMutation = useRescheduleAppointment();
@@ -137,6 +147,20 @@ export function RescheduleForm({ apt, onSuccess, onBack }: RescheduleFormProps) 
         },
       });
       toast.success("Appointment rescheduled");
+      if (whatsAppMessageFlag) {
+        const phone = apt.user_data?.phone ?? apt.guest_phone ?? null;
+        if (phone) {
+          openWhatsApp(
+            phone,
+            buildRescheduleApptMessage({
+              oldDate: apt.date,
+              oldTime: formatTimeToHHMM(apt.time),
+              newDate: data.rescheduleDate,
+              newTime: data.rescheduleTime,
+            })
+          );
+        }
+      }
       onSuccess();
     } catch {
       toast.error("Slot unavailable! Please choose another time or master.");
@@ -218,6 +242,17 @@ export function RescheduleForm({ apt, onSuccess, onBack }: RescheduleFormProps) 
         }}
         requiredMessage="Select at least one service"
       />
+
+      <div className="flex items-center gap-2">
+        <Checkbox
+          id="reschedule-wa-checkbox"
+          checked={whatsAppMessageFlag}
+          onCheckedChange={(checked) => setWhatsAppMessageFlag(!!checked)}
+        />
+        <Label htmlFor="reschedule-wa-checkbox" className="cursor-pointer font-normal">
+          Send WhatsApp message to the client
+        </Label>
+      </div>
 
       <div className="flex items-center justify-end gap-2 pt-1">
         <Button type="button" variant="outline" onClick={onBack}>

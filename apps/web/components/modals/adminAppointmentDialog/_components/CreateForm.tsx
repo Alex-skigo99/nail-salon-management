@@ -5,6 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
@@ -15,11 +16,13 @@ import SearchUserInput from "@/components/inputs/SearchUserInput";
 import { PhoneFormInput, phoneSchemaOptional } from "@/components/inputs/PhoneFormInput";
 import { useCreateAppointment } from "@/hooks/useAppointments";
 import { useServices } from "@/hooks/useServices";
+import { useUsers } from "@/hooks/useUsers";
 import { APPOINTMENT_STATUSES } from "@/types/appointmentTypes";
 import type { Slot } from "@/types/appointmentTypes";
 import { formatTimeToHHMM } from "@/utils/formatTime";
 import { useSetting } from "@/hooks/useSettings";
 import { SETTING_KEYS } from "@/const/setting_labels";
+import { buildCreateApptMessage, openWhatsApp } from "@/utils/whatsAppUtils";
 
 const INPUT_COUNT_FOR_SERVICES = { manicure: 1, pedicure: 1, other: 1 } as const;
 
@@ -34,10 +37,21 @@ type CreateFormProps = {
   date: string;
   masterId: number;
   onSuccess: () => void;
+  whatsAppMessageFlag: boolean;
+  setWhatsAppMessageFlag: (flag: boolean) => void;
 };
 
-export function CreateForm({ slot, date, masterId, onSuccess }: CreateFormProps) {
+export function CreateForm({
+  slot,
+  date,
+  masterId,
+  onSuccess,
+  whatsAppMessageFlag,
+  setWhatsAppMessageFlag,
+}: CreateFormProps) {
   const { data: services = [] } = useServices();
+  const { data: usersResponse } = useUsers();
+  const users = usersResponse?.data ?? [];
   const createMutation = useCreateAppointment();
   const { data: slotDurationSetting } = useSetting(SETTING_KEYS.SLOT_DURATION);
   const gap = slotDurationSetting ? Number(slotDurationSetting.value) : 30;
@@ -156,6 +170,20 @@ export function CreateForm({ slot, date, masterId, onSuccess }: CreateFormProps)
         status: data.status,
       });
       toast.success("Appointment created");
+      if (whatsAppMessageFlag) {
+        const phone = userId ? (users.find((u) => u.id === userId)?.phone ?? null) : data.phone || null;
+        if (phone) {
+          openWhatsApp(
+            phone,
+            buildCreateApptMessage({
+              date,
+              time: slot ? formatTimeToHHMM(slot.start_time) : "10:00",
+              duration: data.duration,
+              services: servicesDisplay || null,
+            })
+          );
+        }
+      }
       onSuccess();
     } catch {
       toast.error("Failed to create appointment. Please try again.");
@@ -288,6 +316,17 @@ export function CreateForm({ slot, date, masterId, onSuccess }: CreateFormProps)
             )}
           />
         </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Checkbox
+          id="create-wa-checkbox"
+          checked={whatsAppMessageFlag}
+          onCheckedChange={(checked) => setWhatsAppMessageFlag(!!checked)}
+        />
+        <Label htmlFor="create-wa-checkbox" className="cursor-pointer font-normal">
+          Send WhatsApp message to the client
+        </Label>
       </div>
 
       <Button type="submit" disabled={createMutation.isPending || isSubmitting} className="mt-1">
