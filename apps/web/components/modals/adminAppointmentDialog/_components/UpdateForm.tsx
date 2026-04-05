@@ -14,19 +14,25 @@ import SelectInput from "@/components/inputs/SelectInput";
 import SearchUserInput from "@/components/inputs/SearchUserInput";
 import { PhoneFormInput, phoneSchemaOptional } from "@/components/inputs/PhoneFormInput";
 import { useUpdateAppointment } from "@/hooks/useAppointments";
+import { useUsers } from "@/hooks/useUsers";
 import { APPOINTMENT_STATUSES } from "@/types/appointmentTypes";
 import type { AppointmentRetrieve } from "@/types/appointmentTypes";
 import { buildSetApptStatusMessage, openWhatsApp } from "@/utils/whatsAppUtils";
 import { formatTimeToHHMM } from "@/utils/formatTime";
 import { CalendarClock, Trash2 } from "lucide-react";
 
-const updateSchema = z.object({
-  userId: z.uuid().nullable().optional(),
-  userName: z.string().optional(),
-  phone: phoneSchemaOptional,
-  comments: z.string().optional(),
-  status: z.enum(APPOINTMENT_STATUSES),
-});
+const updateSchema = z
+  .object({
+    userId: z.uuid().nullable().optional(),
+    userName: z.string().optional(),
+    phone: phoneSchemaOptional,
+    comments: z.string().optional(),
+    status: z.enum(APPOINTMENT_STATUSES),
+  })
+  .refine((data) => !!data.userId || (data.userName?.trim() ?? "").length > 0, {
+    message: "Guest name is required when no client is selected",
+    path: ["userName"],
+  });
 
 type UpdateFormData = z.input<typeof updateSchema>;
 
@@ -48,7 +54,10 @@ export function UpdateForm({
   setWhatsAppMessageFlag,
 }: UpdateFormProps) {
   const updateMutation = useUpdateAppointment();
+  const { data: usersResponse } = useUsers();
+  const users = usersResponse?.data ?? [];
   const [userId, setUserId] = useState<string | null>(apt.user_id ?? null);
+  const selectedUser = users.find((u) => u.id === userId) ?? null;
 
   const {
     control,
@@ -70,6 +79,7 @@ export function UpdateForm({
   // Sync if apt changes
   useEffect(() => {
     const newUserId = apt.user_id ?? null;
+    setUserId(newUserId);
     reset({
       userId: newUserId,
       userName: apt.guest_name ?? "",
@@ -98,7 +108,8 @@ export function UpdateForm({
       });
       toast.success("Appointment updated");
       if (whatsAppMessageFlag) {
-        const phone = apt.user_data?.phone ?? apt.guest_phone ?? null;
+        const phone = userId ? (selectedUser?.phone ?? null) : data.phone || null;
+        const lang = userId ? (selectedUser?.language ?? "en") : "en";
         if (phone) {
           openWhatsApp(
             phone,
@@ -106,7 +117,7 @@ export function UpdateForm({
               date: apt.date,
               time: formatTimeToHHMM(apt.time),
               status: data.status,
-              lang: apt.user_data?.language || "en",
+              lang,
             })
           );
         }

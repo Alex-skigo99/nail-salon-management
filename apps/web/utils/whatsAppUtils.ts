@@ -1,5 +1,7 @@
 import { getAppointmentDateString } from "./dateUtils";
 import type { Language } from "@/types/userTypes";
+import type { AppointmentStatus } from "@/types/appointmentTypes";
+import { STATUS_TRANSLATIONS } from "@/const/translations";
 
 function sanitizePhone(phone: string): string {
   // Remove all non-digits
@@ -42,18 +44,18 @@ export function buildCreateApptMessage(data: {
 export function buildSetApptStatusMessage(data: {
   date: string;
   time: string;
-  status: string;
+  status: AppointmentStatus;
   lang: Language;
 }): string {
   const apptDateStr = getAppointmentDateString(data.date);
 
   switch (data.lang) {
     case "ru":
-      return `Здравствуйте! Статус вашей записи на ${apptDateStr} в ${data.time} изменён на: ${data.status}.`;
+      return `Здравствуйте! Статус вашей записи на ${apptDateStr} в ${data.time} изменён на: ${STATUS_TRANSLATIONS[data.status][data.lang]}.`;
     case "he":
-      return `שלום! סטטוס התור שלך ב-${apptDateStr} בשעה ${data.time} עודכן ל: ${data.status}.`;
+      return `שלום! סטטוס התור שלך ב-${apptDateStr} בשעה ${data.time} עודכן ל: ${STATUS_TRANSLATIONS[data.status][data.lang]}.`;
     default:
-      return `Hi! Your appointment on ${apptDateStr} at ${data.time} status has been updated to: ${data.status}.`;
+      return `Hi! Your appointment on ${apptDateStr} at ${data.time} status has been updated to: ${STATUS_TRANSLATIONS[data.status][data.lang]}.`;
   }
 }
 

@@ -99,7 +99,7 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
             {view === "reschedule"
               ? "Move this appointment to a new date/time."
               : view === "delete"
-                ? "This action cannot be undone."
+                ? "Remove this appointment."
                 : description}
           </DialogDescription>
         </DialogHeader>

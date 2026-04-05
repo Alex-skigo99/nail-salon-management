@@ -21,6 +21,8 @@ import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { HistoryUserApptsModal } from "@/components/modals/historyUserApptsModal/HistoryUserApptsModal";
 import { AvatarPopup } from "@/components/elements/AvatarPopup";
 import { UserCreateUpdateDialog } from "@/components/modals/userCreateUpdateDialog/UserCreateUpdateDialog";
+import { PhoneCallLink } from "@/components/elements/PhoneCallLink";
+import { WhatsAppButton } from "@/components/elements/WhatsAppButton";
 import { LANGUAGE_MAP } from "@/const/languageOptions";
 
 type UserDataModalProps = {
@@ -67,12 +69,17 @@ export function UserDataModal({ open, onOpenChange, userId }: UserDataModalProps
             </div>
 
             <div className="divide-y">
-              <Field
-                label="Phone"
-                value={user.phone}
-                title="Click to open WhatsApp"
-                onClick={user.phone ? () => openWhatsApp(user.phone as string, "") : undefined}
-              />
+              <div className="flex items-center justify-between border-b px-0 py-3">
+                <div>
+                  <p className="text-muted-foreground text-sm font-medium">Phone</p>
+                  {user.phone ? (
+                    <PhoneCallLink phone={user.phone} />
+                  ) : (
+                    <p className="text-muted-foreground text-sm">—</p>
+                  )}
+                </div>
+                {user.phone && <WhatsAppButton phone={user.phone} className="ml-2" />}
+              </div>
               <Field
                 label="Role"
                 value={
