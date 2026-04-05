@@ -18,6 +18,7 @@ export type User = {
   image: string | null;
   master_id: number | null;
   email_subscribed: boolean;
+  language: string;
   created_at: string;
 };
 

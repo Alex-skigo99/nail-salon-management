@@ -157,6 +157,7 @@ export function RescheduleForm({
               oldTime: formatTimeToHHMM(apt.time),
               newDate: data.rescheduleDate,
               newTime: data.rescheduleTime,
+              lang: apt.user_data?.language || "en",
             })
           );
         }

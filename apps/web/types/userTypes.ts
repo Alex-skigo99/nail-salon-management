@@ -6,6 +6,10 @@ export const UserRoleSchema = z.enum(["ADMIN", "USER"]);
 
 export type UserRole = z.infer<typeof UserRoleSchema>;
 
+export const LanguageSchema = z.enum(["en", "ru", "he"]);
+
+export type Language = z.infer<typeof LanguageSchema>;
+
 export const UserSchema = z.object({
   id: z.uuid(),
   name: z.string(),
@@ -17,6 +21,7 @@ export const UserSchema = z.object({
   google_id: z.string().nullable().optional(),
   master_id: z.number().nullable().optional(),
   email_subscribed: z.boolean().optional(),
+  language: LanguageSchema.optional(),
   created_at: z.string(),
 });
 
@@ -28,11 +33,12 @@ export type UserListItem = Omit<User, "google_id"> & {
   is_google_auth: boolean;
 };
 
-export type UserRetrieve = Omit<User, "google_id"> & {
+export type UserRetrieve = Omit<User, "google_id" | "language"> & {
   master_data: Master | null;
   is_google_auth: boolean;
   appts_count: number;
   last_appts: string | null;
+  language: Language;
 };
 
 export type CreateUserInput = {
@@ -44,6 +50,7 @@ export type CreateUserInput = {
   image?: string | null;
   master_id?: number | null;
   email_subscribed?: boolean;
+  language?: string;
 };
 
 export type UpdateUserInput = {
@@ -55,6 +62,7 @@ export type UpdateUserInput = {
   master_id?: number | null;
   email_subscribed?: boolean;
   password?: string | null;
+  language?: string;
 };
 
 export type PaginatedUsers = {

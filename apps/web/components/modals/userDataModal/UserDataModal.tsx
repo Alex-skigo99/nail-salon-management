@@ -21,6 +21,7 @@ import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { HistoryUserApptsModal } from "@/components/modals/historyUserApptsModal/HistoryUserApptsModal";
 import { AvatarPopup } from "@/components/elements/AvatarPopup";
 import { UserCreateUpdateDialog } from "@/components/modals/userCreateUpdateDialog/UserCreateUpdateDialog";
+import { LANGUAGE_MAP } from "@/const/languageOptions";
 
 type UserDataModalProps = {
   open: boolean;
@@ -92,6 +93,7 @@ export function UserDataModal({ open, onOpenChange, userId }: UserDataModalProps
                 value={user.last_appts ? getAppointmentDateString(user.last_appts) : null}
               />
               <Field label="Email Subscribed" value={user.email_subscribed ? "Yes" : "No"} />
+              <Field label="Language" value={LANGUAGE_MAP[user.language]} />
               <Field label="Last Login" value={user.last_login ? getCreatedAtString(user.last_login) : null} />
               <Field label="Created" value={getCreatedAtString(user.created_at)} />
             </div>

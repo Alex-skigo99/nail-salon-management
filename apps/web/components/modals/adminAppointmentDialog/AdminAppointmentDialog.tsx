@@ -27,7 +27,7 @@ type View = "main" | "reschedule" | "delete";
 type AdminAppointmentDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  slot: Slot | null;
+  slot: Slot;
   date: string;
   masterId: number;
 };
@@ -61,7 +61,14 @@ export function AdminAppointmentDialog({ open, onOpenChange, slot, date, masterI
       await deleteMutation.mutateAsync(apt.id);
       toast.success("Appointment deleted");
       if (whatsAppMessageFlag && phone) {
-        openWhatsApp(phone, buildDeleteApptMessage({ date: apt.date, time: formatTimeToHHMM(apt.time) }));
+        openWhatsApp(
+          phone,
+          buildDeleteApptMessage({
+            date: apt.date,
+            time: formatTimeToHHMM(apt.time),
+            lang: apt.user_data?.language || "en",
+          })
+        );
       }
       handleClose();
     } catch {

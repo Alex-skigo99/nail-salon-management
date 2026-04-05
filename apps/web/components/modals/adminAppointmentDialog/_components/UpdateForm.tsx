@@ -102,7 +102,12 @@ export function UpdateForm({
         if (phone) {
           openWhatsApp(
             phone,
-            buildSetApptStatusMessage({ date: apt.date, time: formatTimeToHHMM(apt.time), status: data.status })
+            buildSetApptStatusMessage({
+              date: apt.date,
+              time: formatTimeToHHMM(apt.time),
+              status: data.status,
+              lang: apt.user_data?.language || "en",
+            })
           );
         }
       }

@@ -16,6 +16,7 @@ const SAFE_COLUMNS: (keyof User)[] = [
   "image",
   "master_id",
   "email_subscribed",
+  "language",
   "created_at",
 ];
 
@@ -124,7 +125,7 @@ export const getUserById = async (id: string): Promise<UserRetrieve | null> => {
 
 export const createUser = async (
   data: Pick<User, "name" | "email" | "role"> &
-    Partial<Pick<User, "phone" | "image" | "master_id" | "email_subscribed" | "password">>
+    Partial<Pick<User, "phone" | "image" | "master_id" | "email_subscribed" | "password" | "language">>
 ): Promise<SafeUser> => {
   const [user] = await knex(DB_TABLES.USERS).insert(data).returning(SAFE_COLUMNS);
   return user;
@@ -133,7 +134,10 @@ export const createUser = async (
 export const updateUser = async (
   id: string,
   data: Partial<
-    Pick<User, "name" | "email" | "phone" | "role" | "image" | "master_id" | "email_subscribed" | "password">
+    Pick<
+      User,
+      "name" | "email" | "phone" | "role" | "image" | "master_id" | "email_subscribed" | "password" | "language"
+    >
   >
 ): Promise<SafeUser | null> => {
   // Clean up old S3 image if being replaced

@@ -34,6 +34,9 @@ import { useUser, useCreateUser, useUpdateUser, useDeleteUser } from "@/hooks/us
 import { useMasters } from "@/hooks/useMasters";
 import { Trash2 } from "lucide-react";
 import { ChangePasswordSection } from "./_components/ChangePasswordSection";
+import { LANGUAGE_OPTIONS } from "@/const/languageOptions";
+import type { Language } from "@/types/userTypes";
+import { LanguageSchema } from "@/types/userTypes";
 
 const createSchema = z
   .object({
@@ -43,6 +46,7 @@ const createSchema = z
     role: z.enum(["ADMIN", "USER"]),
     master_id: z.string().optional(),
     email_subscribed: z.boolean(),
+    language: LanguageSchema,
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string().min(1, "Please confirm password"),
   })
@@ -58,6 +62,7 @@ const updateSchema = z.object({
   role: z.enum(["ADMIN", "USER"]),
   master_id: z.string().optional(),
   email_subscribed: z.boolean(),
+  language: LanguageSchema,
 });
 
 type CreateFormValues = z.input<typeof createSchema>;
@@ -103,6 +108,7 @@ export function UserCreateUpdateDialog({ open, onOpenChange, userId }: UserCreat
       role: "USER",
       master_id: NONE,
       email_subscribed: false,
+      language: "en" as Language,
       ...(isEditMode ? {} : { password: "", confirmPassword: "" }),
     },
   });
@@ -116,6 +122,7 @@ export function UserCreateUpdateDialog({ open, onOpenChange, userId }: UserCreat
         role: user.role,
         master_id: user.master_data?.id ? String(user.master_data.id) : NONE,
         email_subscribed: user.email_subscribed ?? false,
+        language: user.language,
       });
       setNewPassword(null);
     } else if (!isEditMode && open) {
@@ -126,6 +133,7 @@ export function UserCreateUpdateDialog({ open, onOpenChange, userId }: UserCreat
         role: "USER",
         master_id: NONE,
         email_subscribed: false,
+        language: "en" as Language,
         password: "",
         confirmPassword: "",
       });
@@ -147,6 +155,7 @@ export function UserCreateUpdateDialog({ open, onOpenChange, userId }: UserCreat
             role: data.role,
             master_id: masterId,
             email_subscribed: data.email_subscribed,
+            language: data.language,
             password: newPassword,
           },
         });
@@ -161,6 +170,7 @@ export function UserCreateUpdateDialog({ open, onOpenChange, userId }: UserCreat
           role: createData.role,
           master_id: masterId,
           email_subscribed: createData.email_subscribed,
+          language: createData.language,
         });
         toast.success("User created");
       }
@@ -261,6 +271,17 @@ export function UserCreateUpdateDialog({ open, onOpenChange, userId }: UserCreat
                 <Label htmlFor="email-subscribed" className="cursor-pointer text-sm">
                   Email subscribed
                 </Label>
+              </div>
+
+              <div className="grid gap-1.5">
+                <Label>Language</Label>
+                <SelectInput
+                  value={watch("language")}
+                  onValueChange={(val) => setValue("language", val as Language)}
+                  options={LANGUAGE_OPTIONS}
+                  placeholder="Select language"
+                  triggerClassName="w-full cursor-pointer"
+                />
               </div>
 
               {!isEditMode && (

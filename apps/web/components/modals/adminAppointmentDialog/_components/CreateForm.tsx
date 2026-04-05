@@ -33,7 +33,7 @@ const createInitialServicesSelected = (): ServicesSelectionState => ({
 });
 
 type CreateFormProps = {
-  slot: Slot | null;
+  slot: Slot;
   date: string;
   masterId: number;
   onSuccess: () => void;
@@ -160,7 +160,7 @@ export function CreateForm({
       await createMutation.mutateAsync({
         master_id: masterId,
         date,
-        time: slot ? formatTimeToHHMM(slot.start_time) : "10:00",
+        time: formatTimeToHHMM(slot.start_time),
         duration_minutes: data.duration,
         user_id: userId ?? null,
         guest_name: userId ? null : data.userName || null,
@@ -177,9 +177,10 @@ export function CreateForm({
             phone,
             buildCreateApptMessage({
               date,
-              time: slot ? formatTimeToHHMM(slot.start_time) : "10:00",
+              time: formatTimeToHHMM(slot.start_time),
               duration: data.duration,
-              services: servicesDisplay || null,
+              services: servicesDisplay || "",
+              lang: users.find((u) => u.id === userId)?.language || "en",
             })
           );
         }
