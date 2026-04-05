@@ -1,4 +1,4 @@
-import { Sparkles, Menu, X } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 interface SalonTitleProps {
   salonName: string;

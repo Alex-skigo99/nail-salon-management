@@ -3,11 +3,11 @@
 import { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
+import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useUsers } from "@/hooks/useUsers";
 import type { User } from "@/types/userTypes";
 import { cn } from "@/lib/utils";
-import { XIcon } from "lucide-react";
+import { XIcon, ChevronDownIcon } from "lucide-react";
 import { EntityAvatar } from "../elements/EntityAvatar";
 
 type SearchUserInputProps = {
@@ -29,7 +29,7 @@ export default function SearchUserInput({
   value,
   onChange,
   label = "Existing Client",
-  placeholder = "Search by name or phone...",
+  placeholder = "Select a client...",
   id = "search-user",
   className,
   wrapperClassName = "grid gap-1.5",
@@ -37,14 +37,13 @@ export default function SearchUserInput({
   const { data: usersResponse } = useUsers();
   const users = usersResponse?.data ?? [];
   const [open, setOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const wasJustSelected = useRef(false);
+  const [search, setSearch] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const selectedUser = value ? (users.find((u) => u.id === value) ?? null) : null;
-  const [search, setSearch] = useState(() => (selectedUser ? formatUserLabel(selectedUser) : ""));
 
   const filteredUsers =
-    search.trim() === "" || (selectedUser && search === formatUserLabel(selectedUser))
+    search.trim() === ""
       ? users
       : users.filter((u) => {
           const q = search.toLowerCase();
@@ -52,71 +51,51 @@ export default function SearchUserInput({
         });
 
   const handleSelect = (user: User | null) => {
-    wasJustSelected.current = true;
     onChange(user ? user.id : null);
-    setSearch(user ? formatUserLabel(user) : "");
     setOpen(false);
-    inputRef.current?.blur();
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setSearch(val);
-    if (val === "") {
-      onChange(null);
-    }
-    if (!open) setOpen(true);
-  };
-
-  const handleInputFocus = () => {
-    if (!wasJustSelected.current) {
-      setOpen(true);
-    }
-    wasJustSelected.current = false;
-  };
-
-  const handleClear = () => {
-    onChange(null);
     setSearch("");
+  };
+
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange(null);
     setOpen(false);
-    inputRef.current?.focus();
+    setSearch("");
+  };
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) setSearch("");
   };
 
   return (
     <div className={wrapperClassName}>
       {label && <Label htmlFor={id}>{label}</Label>}
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverAnchor asChild>
           <div className="relative">
-            <Input
-              id={id}
-              ref={inputRef}
-              value={search}
-              onChange={handleInputChange}
-              onFocus={handleInputFocus}
-              onBlur={() => {
-                // Delay so click on item registers first
-                setTimeout(() => {
-                  setOpen(false);
-                  // Don't reset if we just selected something (value will sync via effect)
-                  if (wasJustSelected.current) {
-                    wasJustSelected.current = false;
-                    return;
-                  }
-                  // Reset to selected user label if not empty
-                  if (!search.trim()) {
-                    onChange(null);
-                  } else if (selectedUser) {
-                    setSearch(formatUserLabel(selectedUser));
-                  } else {
-                    setSearch("");
-                  }
-                }, 150);
-              }}
-              placeholder={placeholder}
-              className={cn("pr-8", className)}
-              autoComplete="off"
-            />
+            <PopoverTrigger asChild>
+              <button
+                id={id}
+                type="button"
+                className={cn(
+                  "border-input bg-background ring-offset-background flex h-9 w-full items-center gap-2 rounded-md border px-3 text-sm",
+                  "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                  value !== null ? "pr-8" : "pr-3",
+                  className
+                )}
+              >
+                {selectedUser ? (
+                  <>
+                    <EntityAvatar src={selectedUser.image} alt={selectedUser.name} size="sm" />
+                    <span className="flex-1 truncate text-left">{formatUserLabel(selectedUser)}</span>
+                  </>
+                ) : (
+                  <span className="text-muted-foreground flex-1 text-left">{placeholder}</span>
+                )}
+                {value === null && <ChevronDownIcon className="ml-auto size-4 shrink-0 opacity-50" />}
+              </button>
+            </PopoverTrigger>
             {value !== null && (
               <button
                 type="button"
@@ -131,10 +110,23 @@ export default function SearchUserInput({
         </PopoverAnchor>
         <PopoverContent
           className="w-[--radix-popover-trigger-width] p-1"
-          onOpenAutoFocus={(e) => e.preventDefault()}
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+            searchInputRef.current?.focus();
+          }}
           align="start"
           sideOffset={4}
         >
+          <div className="p-1 pb-0">
+            <Input
+              ref={searchInputRef}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name or phone..."
+              className="mb-1 h-8"
+              autoComplete="off"
+            />
+          </div>
           <div className="max-h-56 overflow-y-auto">
             {/* None option */}
             <button

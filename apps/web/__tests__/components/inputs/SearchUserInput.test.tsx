@@ -45,11 +45,13 @@ describe("SearchUserInput", () => {
     jest.clearAllMocks();
   });
 
-  it("renders label and input", () => {
+  it("renders label and input", async () => {
+    const user = userEvent.setup();
     const handleChange = jest.fn();
     render(<SearchUserInput value={null} onChange={handleChange} label="Select User" />);
 
     expect(screen.getByText("Select User")).toBeInTheDocument();
+    await user.click(screen.getByRole("button")); // open popover
     expect(screen.getByPlaceholderText("Search by name or phone...")).toBeInTheDocument();
   });
 
@@ -58,6 +60,7 @@ describe("SearchUserInput", () => {
     const handleChange = jest.fn();
     render(<SearchUserInput value={null} onChange={handleChange} />);
 
+    await user.click(screen.getByRole("button")); // open popover
     const input = screen.getByPlaceholderText("Search by name or phone...");
     await user.type(input, "John");
 
@@ -69,6 +72,7 @@ describe("SearchUserInput", () => {
     const handleChange = jest.fn();
     render(<SearchUserInput value={null} onChange={handleChange} />);
 
+    await user.click(screen.getByRole("button")); // open popover
     const input = screen.getByPlaceholderText("Search by name or phone...");
     await user.type(input, "John");
     await waitFor(() => {
@@ -81,6 +85,7 @@ describe("SearchUserInput", () => {
     const handleChange = jest.fn();
     render(<SearchUserInput value={null} onChange={handleChange} />);
 
+    await user.click(screen.getByRole("button")); // open popover
     const input = screen.getByPlaceholderText("Search by name or phone...");
     await user.type(input, "+972-50");
 
@@ -94,8 +99,7 @@ describe("SearchUserInput", () => {
     const handleChange = jest.fn();
     render(<SearchUserInput value={null} onChange={handleChange} />);
 
-    const input = screen.getByPlaceholderText("Search by name or phone...");
-    await user.click(input);
+    await user.click(screen.getByRole("button")); // open popover
     await waitFor(() => {
       expect(screen.getByText("John Doe - +972-50-1234567")).toBeInTheDocument();
     });
@@ -111,19 +115,18 @@ describe("SearchUserInput", () => {
     const handleChange = jest.fn();
     const { rerender } = render(<SearchUserInput value={null} onChange={handleChange} />);
 
-    const input = screen.getByPlaceholderText("Search by name or phone...");
-    await user.click(input);
+    await user.click(screen.getByRole("button")); // open popover
     await waitFor(() => {
       expect(screen.getByText("John Doe - +972-50-1234567")).toBeInTheDocument();
     });
 
-    const userOption = screen.getByText("John Doe - +972-50-1234567");
-    await user.click(userOption);
+    await user.click(screen.getByText("John Doe - +972-50-1234567"));
 
     rerender(<SearchUserInput value="1" onChange={handleChange} />);
 
-    const clearButton = screen.getByRole("button");
-    expect(clearButton).toBeInTheDocument();
+    const buttons = screen.getAllByRole("button");
+    expect(buttons).toHaveLength(2); // trigger button + clear button
+    expect(buttons[1]).toBeInTheDocument();
   });
 
   it("clears selection when clear button is clicked", async () => {
@@ -131,7 +134,8 @@ describe("SearchUserInput", () => {
     const handleChange = jest.fn();
     render(<SearchUserInput value="1" onChange={handleChange} />);
 
-    const clearButton = screen.getByRole("button");
+    const buttons = screen.getAllByRole("button");
+    const clearButton = buttons[buttons.length - 1]; // last button is the clear (X) button
     await user.click(clearButton);
 
     expect(handleChange).toHaveBeenCalledWith(null);
@@ -142,26 +146,25 @@ describe("SearchUserInput", () => {
     const handleChange = jest.fn();
     const { rerender } = render(<SearchUserInput value={null} onChange={handleChange} />);
 
-    // First select a user
-    const input = screen.getByPlaceholderText("Search by name or phone...");
-    await user.click(input);
+    await user.click(screen.getByRole("button")); // open popover
     await waitFor(() => {
       expect(screen.getByText("John Doe - +972-50-1234567")).toBeInTheDocument();
     });
 
-    const userOption = screen.getByText("John Doe - +972-50-1234567");
-    await user.click(userOption);
+    await user.click(screen.getByText("John Doe - +972-50-1234567"));
 
     rerender(<SearchUserInput value="1" onChange={handleChange} />);
 
-    expect(input).toHaveValue("John Doe - +972-50-1234567");
+    // Selected user name is displayed in the trigger button
+    expect(screen.getByText("John Doe - +972-50-1234567")).toBeInTheDocument();
   });
 
   it("uses custom placeholder text", () => {
     const handleChange = jest.fn();
     render(<SearchUserInput value={null} onChange={handleChange} placeholder="Type user name..." />);
 
-    expect(screen.getByPlaceholderText("Type user name...")).toBeInTheDocument();
+    // placeholder prop renders as button text, not as an input placeholder attribute
+    expect(screen.getByText("Type user name...")).toBeInTheDocument();
   });
 
   it("uses custom label text", () => {
@@ -176,9 +179,8 @@ describe("SearchUserInput", () => {
     const handleChange = jest.fn();
     render(<SearchUserInput value={null} onChange={handleChange} />);
 
-    const input = screen.getByPlaceholderText("Search by name or phone...");
-    await user.type(input, "John");
-    await user.clear(input);
+    await user.click(screen.getByRole("button")); // open popover
+    await user.click(screen.getByText("None (Guest)")); // select none option
 
     expect(handleChange).toHaveBeenCalledWith(null);
   });

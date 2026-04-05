@@ -5,6 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
@@ -13,30 +14,50 @@ import SelectInput from "@/components/inputs/SelectInput";
 import SearchUserInput from "@/components/inputs/SearchUserInput";
 import { PhoneFormInput, phoneSchemaOptional } from "@/components/inputs/PhoneFormInput";
 import { useUpdateAppointment } from "@/hooks/useAppointments";
+import { useUsers } from "@/hooks/useUsers";
 import { APPOINTMENT_STATUSES } from "@/types/appointmentTypes";
-import type { Appointment } from "@/types/appointmentTypes";
+import type { AppointmentRetrieve } from "@/types/appointmentTypes";
+import { buildSetApptStatusMessage, openWhatsApp } from "@/utils/whatsAppUtils";
+import { formatTimeToHHMM } from "@/utils/formatTime";
 import { CalendarClock, Trash2 } from "lucide-react";
 
-const updateSchema = z.object({
-  userId: z.uuid().nullable().optional(),
-  userName: z.string().optional(),
-  phone: phoneSchemaOptional,
-  comments: z.string().optional(),
-  status: z.enum(APPOINTMENT_STATUSES),
-});
+const updateSchema = z
+  .object({
+    userId: z.uuid().nullable().optional(),
+    userName: z.string().optional(),
+    phone: phoneSchemaOptional,
+    comments: z.string().optional(),
+    status: z.enum(APPOINTMENT_STATUSES),
+  })
+  .refine((data) => !!data.userId || (data.userName?.trim() ?? "").length > 0, {
+    message: "Guest name is required when no client is selected",
+    path: ["userName"],
+  });
 
 type UpdateFormData = z.input<typeof updateSchema>;
 
 type UpdateFormProps = {
-  apt: Appointment;
+  apt: AppointmentRetrieve;
   onSuccess: () => void;
   onReschedule: () => void;
   onDelete: () => void;
+  whatsAppMessageFlag: boolean;
+  setWhatsAppMessageFlag: (flag: boolean) => void;
 };
 
-export function UpdateForm({ apt, onSuccess, onReschedule, onDelete }: UpdateFormProps) {
+export function UpdateForm({
+  apt,
+  onSuccess,
+  onReschedule,
+  onDelete,
+  whatsAppMessageFlag,
+  setWhatsAppMessageFlag,
+}: UpdateFormProps) {
   const updateMutation = useUpdateAppointment();
+  const { data: usersResponse } = useUsers();
+  const users = usersResponse?.data ?? [];
   const [userId, setUserId] = useState<string | null>(apt.user_id ?? null);
+  const selectedUser = users.find((u) => u.id === userId) ?? null;
 
   const {
     control,
@@ -58,6 +79,8 @@ export function UpdateForm({ apt, onSuccess, onReschedule, onDelete }: UpdateFor
   // Sync if apt changes
   useEffect(() => {
     const newUserId = apt.user_id ?? null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setUserId(newUserId);
     reset({
       userId: newUserId,
       userName: apt.guest_name ?? "",
@@ -85,6 +108,21 @@ export function UpdateForm({ apt, onSuccess, onReschedule, onDelete }: UpdateFor
         },
       });
       toast.success("Appointment updated");
+      if (whatsAppMessageFlag) {
+        const phone = userId ? (selectedUser?.phone ?? null) : data.phone || null;
+        const lang = userId ? (selectedUser?.language ?? "en") : "en";
+        if (phone) {
+          openWhatsApp(
+            phone,
+            buildSetApptStatusMessage({
+              date: apt.date,
+              time: formatTimeToHHMM(apt.time),
+              status: data.status,
+              lang,
+            })
+          );
+        }
+      }
       onSuccess();
     } catch {
       toast.error("Failed to update appointment. Please try again.");
@@ -191,6 +229,17 @@ export function UpdateForm({ apt, onSuccess, onReschedule, onDelete }: UpdateFor
           </p>
         </div>
       )}
+
+      <div className="flex items-center gap-2">
+        <Checkbox
+          id="update-wa-checkbox"
+          checked={whatsAppMessageFlag}
+          onCheckedChange={(checked) => setWhatsAppMessageFlag(!!checked)}
+        />
+        <Label htmlFor="update-wa-checkbox" className="cursor-pointer font-normal">
+          Send WhatsApp message to the client
+        </Label>
+      </div>
 
       {/* Footer actions */}
       <div className="flex items-center gap-2 pt-1">

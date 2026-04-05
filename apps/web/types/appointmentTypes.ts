@@ -1,5 +1,6 @@
 import { Master } from "./masterTypes";
 import { Pagination } from "@/types/paginationTypes";
+import type { Language } from "./userTypes";
 
 export type AppointmentStatus = "new" | "confirmed" | "reserved" | "pending" | "rejected";
 
@@ -11,6 +12,7 @@ export type UserData = {
   email: string;
   phone: string | null;
   image: string | null;
+  language: Language;
 };
 
 export type Appointment = {

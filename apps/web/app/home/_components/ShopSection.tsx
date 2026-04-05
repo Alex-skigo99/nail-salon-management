@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +10,7 @@ type ShopSectionProps = {
 };
 
 export default function ShopSection({ t, isMobile }: ShopSectionProps) {
-  const router = useRouter();
+  // const router = useRouter();
 
   return (
     <section id="shop" className="bg-blue-50 py-20 sm:py-28">

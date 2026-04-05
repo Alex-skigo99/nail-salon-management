@@ -15,11 +15,15 @@ import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/hooks/useUsers";
 import { Pencil } from "lucide-react";
 import { getCreatedAtString, getAppointmentDateString } from "@/utils/dateUtils";
+import { openWhatsApp } from "@/utils/whatsAppUtils";
 import { Field } from "@/components/elements/Field";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { HistoryUserApptsModal } from "@/components/modals/historyUserApptsModal/HistoryUserApptsModal";
 import { AvatarPopup } from "@/components/elements/AvatarPopup";
 import { UserCreateUpdateDialog } from "@/components/modals/userCreateUpdateDialog/UserCreateUpdateDialog";
+import { PhoneCallLink } from "@/components/elements/PhoneCallLink";
+import { WhatsAppButton } from "@/components/elements/WhatsAppButton";
+import { LANGUAGE_MAP } from "@/const/languageOptions";
 
 type UserDataModalProps = {
   open: boolean;
@@ -65,7 +69,17 @@ export function UserDataModal({ open, onOpenChange, userId }: UserDataModalProps
             </div>
 
             <div className="divide-y">
-              <Field label="Phone" value={user.phone} />
+              <div className="flex items-center justify-between border-b px-0 py-3">
+                <div>
+                  <p className="text-muted-foreground text-sm font-medium">Phone</p>
+                  {user.phone ? (
+                    <PhoneCallLink phone={user.phone} />
+                  ) : (
+                    <p className="text-muted-foreground text-sm">—</p>
+                  )}
+                </div>
+                {user.phone && <WhatsAppButton phone={user.phone} className="ml-2" />}
+              </div>
               <Field
                 label="Role"
                 value={
@@ -86,6 +100,7 @@ export function UserDataModal({ open, onOpenChange, userId }: UserDataModalProps
                 value={user.last_appts ? getAppointmentDateString(user.last_appts) : null}
               />
               <Field label="Email Subscribed" value={user.email_subscribed ? "Yes" : "No"} />
+              <Field label="Language" value={LANGUAGE_MAP[user.language]} />
               <Field label="Last Login" value={user.last_login ? getCreatedAtString(user.last_login) : null} />
               <Field label="Created" value={getCreatedAtString(user.created_at)} />
             </div>

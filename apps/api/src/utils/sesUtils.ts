@@ -2,6 +2,8 @@ import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { promises as fs } from "fs";
 import path from "path";
 
+const SES_UNAVAILABLE = process.env.SES_UNAVAILABLE === "true";
+
 const ses = new SESClient({
   ...(process.env.AWS_ENDPOINT_URL
     ? {
@@ -50,6 +52,13 @@ ${htmlBody}`;
 export async function sendEmail({ to, subject, htmlBody }: SendEmailParams): Promise<void> {
   if (DEV_MODE) {
     await saveEmailToFile({ to, subject, htmlBody });
+    return;
+  }
+
+  if (SES_UNAVAILABLE) {
+    console.log(
+      `[SES_UNAVAILABLE] Email not sent (SES not configured)\nTo: ${to}\nSubject: ${subject}\n---\n${htmlBody}`
+    );
     return;
   }
 

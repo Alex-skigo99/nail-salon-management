@@ -58,9 +58,9 @@ export function WeekView({ days, isLoading, masterId, isCurrentWeek = true }: We
       </div>
 
       <AdminAppointmentDialog
-        open={modalOpen}
+        open={modalOpen && selectedSlot !== null}
         onOpenChange={setModalOpen}
-        slot={selectedSlot}
+        slot={selectedSlot as Slot}
         date={selectedDate}
         masterId={masterId}
       />

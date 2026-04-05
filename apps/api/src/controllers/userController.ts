@@ -244,6 +244,9 @@ import { hashPassword } from "../services/authService";
  *           nullable: true
  *         email_subscribed:
  *           type: boolean
+ *         language:
+ *           type: string
+ *           example: "en"
  *         created_at:
  *           type: string
  *           format: date-time
@@ -313,6 +316,9 @@ import { hashPassword } from "../services/authService";
  *           nullable: true
  *         email_subscribed:
  *           type: boolean
+ *         language:
+ *           type: string
+ *           example: "en"
  *     UserUpdate:
  *       type: object
  *       properties:
@@ -340,6 +346,9 @@ import { hashPassword } from "../services/authService";
  *           type: string
  *           nullable: true
  *           minLength: 8
+ *         language:
+ *           type: string
+ *           example: "en"
  */
 
 const CreateUserSchema = z.object({
@@ -351,6 +360,7 @@ const CreateUserSchema = z.object({
   image: z.string().nullable().optional(),
   master_id: z.number().int().positive().nullable().optional(),
   email_subscribed: z.boolean().optional(),
+  language: z.string().optional(),
 });
 
 const UpdateUserSchema = z.object({
@@ -362,6 +372,7 @@ const UpdateUserSchema = z.object({
   master_id: z.number().int().positive().nullable().optional(),
   email_subscribed: z.boolean().optional(),
   password: z.string().min(8).nullable().optional(),
+  language: z.string().optional(),
 });
 
 const GetAllUsersQuerySchema = z.object({

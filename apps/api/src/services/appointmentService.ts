@@ -31,7 +31,8 @@ const userDataSelect = `CASE WHEN u.id IS NULL THEN NULL
                 'name', u.name,
                 'email', u.email,
                 'phone', u.phone,
-                'image', u.image
+                'image', u.image,
+                'language', u.language
               )
          END AS user_data`;
 

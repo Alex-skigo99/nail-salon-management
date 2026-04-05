@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, BarChart3, Calendar, Table2 } from "lucide-react";
+import { CalendarDays, BarChart3, Calendar, Table2, RefreshCw } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -9,6 +9,9 @@ import type { ViewMode, DisplayMode } from "@/types/appointmentTypes";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { EntityAvatar } from "@/components/elements/EntityAvatar";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/hooks/queryKeys";
+import { toast } from "sonner";
 
 type CalendarHeaderProps = {
   masters: Master[] | undefined;
@@ -32,6 +35,7 @@ export function CalendarHeader({
   onDisplayModeChange,
 }: CalendarHeaderProps) {
   const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
 
   return (
     <div className={cn("border-b-0 px-3 py-3 md:px-6 md:py-4", !isMobile && "h-21")}>
@@ -54,7 +58,7 @@ export function CalendarHeader({
             <Spinner className="h-5 w-5" />
           ) : (
             <Select value={selectedMasterId?.toString() ?? ""} onValueChange={(v) => onMasterChange(Number(v))}>
-              <SelectTrigger className="w-45">
+              <SelectTrigger className={cn(isMobile ? "w-full" : "w-45")}>
                 <SelectValue placeholder="Select master" />
               </SelectTrigger>
               <SelectContent>
@@ -71,7 +75,7 @@ export function CalendarHeader({
           )}
 
           {/* View mode toggle */}
-          <div className="flex rounded-lg border">
+          <div className="flex rounded-2xl border">
             <Button
               variant={viewMode === "week" ? "default" : "ghost"}
               size="sm"
@@ -79,7 +83,7 @@ export function CalendarHeader({
               className="rounded-r-none"
             >
               <Calendar className="mr-1 h-4 w-4" />
-              <span className="hidden sm:inline">Week</span>
+              {!isMobile && <span className="hidden sm:inline">Week</span>}
             </Button>
             <Button
               variant={viewMode === "month" ? "default" : "ghost"}
@@ -88,12 +92,12 @@ export function CalendarHeader({
               className="rounded-l-none"
             >
               <Table2 className="mr-1 h-4 w-4" />
-              <span className="hidden sm:inline">Month</span>
+              {!isMobile && <span className="hidden sm:inline">Month</span>}
             </Button>
           </div>
 
           {/* Display mode toggle */}
-          <div className="flex rounded-lg border">
+          <div className="flex rounded-2xl border">
             <Button
               variant={displayMode === "table" ? "default" : "ghost"}
               size="sm"
@@ -101,7 +105,7 @@ export function CalendarHeader({
               className="rounded-r-none"
             >
               <Table2 className="mr-1 h-4 w-4" />
-              <span className="hidden sm:inline">Table</span>
+              {!isMobile && <span className="hidden sm:inline">Table</span>}
             </Button>
             <Button
               variant={displayMode === "graph" ? "default" : "ghost"}
@@ -112,9 +116,24 @@ export function CalendarHeader({
               title="Coming soon"
             >
               <BarChart3 className="mr-1 h-4 w-4" />
-              <span className="hidden sm:inline">Graph</span>
+              {!isMobile && <span className="hidden sm:inline">Graph</span>}
             </Button>
           </div>
+
+          {/* Refresh button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              queryClient.invalidateQueries({ queryKey: [queryKeys.slots] });
+              toast.success("Slots refreshed", { duration: 1000, icon: <RefreshCw className="h-4 w-4" /> });
+            }}
+            title="Refresh slots"
+            className="hover:cursor-pointer hover:shadow-md"
+          >
+            <RefreshCw className="mr-1 h-4 w-4" />
+            {!isMobile && <span className="hidden sm:inline">Refresh</span>}
+          </Button>
         </div>
       </div>
     </div>

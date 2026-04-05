@@ -49,7 +49,18 @@ export async function comparePassword(plainText: string, hash: string): Promise<
 // ─────────────────────────────────────────────
 
 /** Columns safe to return to the client (no password). */
-const SAFE_COLUMNS = ["id", "name", "email", "phone", "role", "image", "google_id", "last_login", "created_at"];
+const SAFE_COLUMNS = [
+  "id",
+  "name",
+  "email",
+  "phone",
+  "role",
+  "image",
+  "google_id",
+  "last_login",
+  "language",
+  "created_at",
+];
 
 export type SafeUser = Omit<User, "password">;
 

@@ -34,6 +34,7 @@ const mockUser = {
   image: null,
   master_id: 1,
   email_subscribed: false,
+  language: "en" as const,
   created_at: "2026-01-15T10:00:00Z",
   master_data: { id: 1, name: "Master A" },
 };
