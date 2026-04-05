@@ -79,6 +79,7 @@ export function UpdateForm({
   // Sync if apt changes
   useEffect(() => {
     const newUserId = apt.user_id ?? null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     setUserId(newUserId);
     reset({
       userId: newUserId,
