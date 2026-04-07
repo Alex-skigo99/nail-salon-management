@@ -81,7 +81,10 @@
       "title": "Shop Our Products",
       "description": "Discover our exclusive line of nail care products, available for purchase in-store.",
       "buttonText": "Shop Now",
-      "comingSoon": "Shop items coming soon! Visit us in-store to browse our products."
+      "comingSoon": "Shop items coming soon! Visit us in-store to browse our products.",
+      "noImage": "No image",
+      "outOfStock": "Out of stock",
+      "noProducts": "Products coming soon! Visit us in-store to browse our collection."
     },
     "mapTitle": "Visit Our Salon",
     "mapSubtitle": "Conveniently located in the heart of the city.",

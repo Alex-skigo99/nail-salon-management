@@ -5,6 +5,7 @@ const Tables = {
   WORKING_HOURS: "working_hours",
   APPOINTMENTS: "appointments",
   SETTINGS: "settings",
+  PRODUCTS: "products",
 };
 
 module.exports = {

@@ -14,7 +14,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { LayoutDashboard, Users, Contact, Menu, Scissors, HomeIcon, Settings } from "lucide-react";
+import { LayoutDashboard, Users, Contact, Menu, Scissors, HomeIcon, Settings, Package } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isRTLLocale } from "@/lib/rtl";
@@ -90,6 +90,11 @@ export function AppSidebar() {
       label: t("clients"),
       href: "/admin/clients",
       icon: Contact,
+    },
+    {
+      label: "Products",
+      href: "/admin/products",
+      icon: Package,
     },
     {
       label: t("settings"),

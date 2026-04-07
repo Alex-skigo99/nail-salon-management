@@ -44,7 +44,7 @@ const ALLOWED_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp"] as const
  *       properties:
  *         entityType:
  *           type: string
- *           enum: [user-profile, master-photo]
+ *           enum: [user-profile, master-photo, product-photo]
  *         entityId:
  *           type: integer
  *           description: Required for master-photo
@@ -64,15 +64,19 @@ const ALLOWED_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp"] as const
 
 const PresignedUrlSchema = z
   .object({
-    entityType: z.enum(["user-profile", "master-photo"]),
-    entityId: z.number().int().positive().optional(),
+    entityType: z.enum(["user-profile", "master-photo", "product-photo"]),
+    entityId: z.number().int().positive().or(z.uuidv4()),
     contentType: z.enum(ALLOWED_CONTENT_TYPES),
     fileName: z.string().min(1).max(255),
   })
-  .refine((data) => data.entityType !== "master-photo" || data.entityId !== undefined, {
-    message: "entityId is required for master-photo",
-    path: ["entityId"],
-  });
+  .refine(
+    (data) =>
+      (data.entityType !== "master-photo" && data.entityType !== "product-photo") || data.entityId !== undefined,
+    {
+      message: "entityId is required for master-photo and product-photo",
+      path: ["entityId"],
+    }
+  );
 
 export async function getPresignedUrl(req: Request, res: Response): Promise<void> {
   try {
@@ -87,12 +91,17 @@ export async function getPresignedUrl(req: Request, res: Response): Promise<void
     const user = (req as any).user!;
 
     // Permission checks
-    if (entityType === "master-photo" && user.role !== "ADMIN") {
+    if ((entityType === "master-photo" || entityType === "product-photo") && user.role !== "ADMIN") {
       res.status(403).json({ error: "Admin access required" });
       return;
     }
 
-    const entity = entityType === "user-profile" ? "users" : "masters";
+    const entityMap: Record<string, string> = {
+      "user-profile": "users",
+      "master-photo": "masters",
+      "product-photo": "products",
+    };
+    const entity = entityMap[entityType];
     const id = entityType === "user-profile" ? user.userId : entityId!;
 
     const key = s3Service.buildObjectKey(entity, id, fileName);

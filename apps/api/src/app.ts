@@ -11,6 +11,7 @@ import authRouter from "./routes/auth";
 import userRouter from "./routes/user";
 import uploadRouter from "./routes/upload";
 import settingsRouter from "./routes/settings";
+import productRouter from "./routes/product";
 
 const app: Express = express();
 
@@ -37,5 +38,6 @@ app.use("/appointment", appointmentRouter);
 app.use("/user", userRouter);
 app.use("/upload", uploadRouter);
 app.use("/settings", settingsRouter);
+app.use("/product", productRouter);
 
 export default app;

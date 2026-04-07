@@ -12,7 +12,7 @@ type Props = {
   currentImageUrl?: string | null;
   name?: string;
   entityType: EntityType;
-  entityId?: number;
+  entityId?: number | string;
   onUpload: (key: string) => void;
   className?: string;
   size?: "sm" | "md" | "lg";
