@@ -92,7 +92,7 @@ export function AppSidebar() {
       icon: Contact,
     },
     {
-      label: "Products",
+      label: t("products"),
       href: "/admin/products",
       icon: Package,
     },

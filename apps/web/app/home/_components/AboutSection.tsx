@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Gem, Sparkles, Armchair, ShieldCheck } from "lucide-react";
+import { HOME_MAKET } from "@/const/homeMaket";
+import { cn } from "@/lib/utils";
 
 type SimpleT = (key: string) => string;
 type Props = { t: ReturnType<typeof useTranslations> | SimpleT; isMobile: boolean };
@@ -34,7 +36,7 @@ export default function AboutSection({ t, isMobile }: Props) {
   ];
 
   return (
-    <section className="bg-white py-20 sm:py-28">
+    <section className={cn("bg-white", HOME_MAKET.section_py)}>
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mb-14 text-center">
           <h2

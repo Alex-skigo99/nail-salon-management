@@ -3215,20 +3215,11 @@
           }
         }
       },
-      "ProductType": {
-        "type": "string",
-        "enum": [
-          "nail_care",
-          "tools",
-          "accessories",
-          "other"
-        ]
-      },
       "Product": {
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer"
+            "type": "string"
           },
           "title": {
             "type": "string"
@@ -3247,7 +3238,7 @@
             "example": "24.99"
           },
           "type": {
-            "$ref": "#/components/schemas/ProductType"
+            "type": "string"
           },
           "quantity": {
             "type": "integer"
@@ -3261,6 +3252,9 @@
           },
           "is_home_display": {
             "type": "boolean"
+          },
+          "home_sorting": {
+            "type": "integer"
           },
           "comment": {
             "type": "string",
@@ -3280,7 +3274,7 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "integer"
+            "type": "string"
           },
           "title": {
             "type": "string"
@@ -3297,7 +3291,7 @@
             "nullable": true
           },
           "type": {
-            "$ref": "#/components/schemas/ProductType"
+            "type": "string"
           },
           "image": {
             "type": "string",
@@ -3309,13 +3303,8 @@
           "is_home_display": {
             "type": "boolean"
           },
-          "created_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time"
+          "home_sorting": {
+            "type": "integer"
           }
         }
       },
@@ -3342,7 +3331,7 @@
             "nullable": true
           },
           "type": {
-            "$ref": "#/components/schemas/ProductType"
+            "type": "string"
           },
           "quantity": {
             "type": "integer"
@@ -3356,6 +3345,9 @@
           },
           "is_home_display": {
             "type": "boolean"
+          },
+          "home_sorting": {
+            "type": "integer"
           },
           "comment": {
             "type": "string",
@@ -3381,7 +3373,7 @@
             "nullable": true
           },
           "type": {
-            "$ref": "#/components/schemas/ProductType"
+            "type": "string"
           },
           "quantity": {
             "type": "integer"
@@ -3395,6 +3387,9 @@
           },
           "is_home_display": {
             "type": "boolean"
+          },
+          "home_sorting": {
+            "type": "integer"
           },
           "comment": {
             "type": "string",

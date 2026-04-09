@@ -11,6 +11,8 @@ import {
   CarouselNext,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import { HOME_MAKET } from "@/const/homeMaket";
+import { cn } from "@/lib/utils";
 
 const images = [
   "/gallery-1.png",
@@ -39,7 +41,7 @@ export default function GallerySection({ isMobile }: { isMobile: boolean }) {
   }, [api]);
 
   return (
-    <section className="bg-linear-to-r from-pink-50 via-white to-rose-50 py-2">
+    <section className={cn("bg-linear-to-r from-pink-50 via-white to-rose-50", HOME_MAKET.section_py)}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <Carousel
           opts={{

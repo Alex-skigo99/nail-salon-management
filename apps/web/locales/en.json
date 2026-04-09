@@ -108,7 +108,8 @@
     "masters": "Masters",
     "services": "Services",
     "clients": "Clients",
-    "settings": "Settings"
+    "settings": "Settings",
+    "products": "Products"
   },
   "dialogs": {
     "infoUserDialog": {

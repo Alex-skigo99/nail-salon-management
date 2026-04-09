@@ -9,7 +9,7 @@ import AboutSection from "./_components/AboutSection";
 import GallerySection from "./_components/GallerySection";
 import PricesSection from "./_components/PricesSection";
 import ScheduleSection from "./_components/ScheduleSection";
-import ShopSection from "./_components/ShopSection";
+import ShopSection from "./_components/shopSection/ShopSection";
 import MapSection from "./_components/MapSection";
 import Footer from "./_components/Footer";
 

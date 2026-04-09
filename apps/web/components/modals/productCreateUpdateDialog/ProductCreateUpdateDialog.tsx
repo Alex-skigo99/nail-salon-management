@@ -21,25 +21,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import { Checkbox } from "@/components/ui/checkbox";
 import SelectInput from "@/components/inputs/SelectInput";
-import { ImageUpload } from "@/components/ImageUpload";
+import { ImagePreview } from "@/components/elements/ImagePreview";
 import { useProduct, useCreateProduct, useUpdateProduct, useDeleteProduct } from "@/hooks/useProducts";
 import { Trash2 } from "lucide-react";
 import type { ProductType } from "@/types/productTypes";
+import { PRODUCT_TYPE_OPTIONS } from "@/const/productTypeOptions";
 import { CURRENCY_SYMBOL } from "@/const/currency";
+import { fetchPresignedUrl, uploadFileToS3 } from "@/utils/s3Utils";
 
-const PRODUCT_TYPES: { value: ProductType; label: string }[] = [
-  { value: "nail_care", label: "Nail Care" },
-  { value: "tools", label: "Tools" },
-  { value: "accessories", label: "Accessories" },
-  { value: "other", label: "Other" },
-];
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const productSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   price: z.string().min(1, `Price is required (${CURRENCY_SYMBOL})`),
   discount: z.string().optional(),
-  type: z.enum(["nail_care", "tools", "accessories", "other"] as const),
+  type: z.enum(PRODUCT_TYPE_OPTIONS.map((option) => option.value) as [ProductType, ...ProductType[]]),
   quantity: z.number().int().min(0, "Quantity must be 0 or more"),
   is_available: z.boolean(),
   is_home_display: z.boolean(),
@@ -63,8 +61,9 @@ export function ProductCreateUpdateDialog({ open, onOpenChange, productId }: Pro
   const deleteMutation = useDeleteProduct();
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [imageKey, setImageKey] = useState<string | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const {
     register,
@@ -103,8 +102,8 @@ export function ProductCreateUpdateDialog({ open, onOpenChange, productId }: Pro
         home_sorting: product.home_sorting ?? 100,
         comment: product.comment ?? "",
       });
-      setImageKey(null);
-      setImageUrl(product.image);
+      setSelectedFile(null);
+      setCurrentImageUrl(product.image);
     } else if (!isEditMode && open) {
       reset({
         title: "",
@@ -118,26 +117,61 @@ export function ProductCreateUpdateDialog({ open, onOpenChange, productId }: Pro
         home_sorting: 100,
         comment: "",
       });
-      setImageKey(null);
-      setImageUrl(null);
+      setSelectedFile(null);
+      setCurrentImageUrl(null);
     }
   }, [isEditMode, product, open, reset]);
 
   const onSubmit = async (data: FormValues) => {
+    if (selectedFile) {
+      if (!ALLOWED_MIME_TYPES.includes(selectedFile.type)) {
+        toast.error("Only JPEG, PNG and WebP images are allowed");
+        return;
+      }
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        toast.error("Image must be smaller than 5 MB");
+        return;
+      }
+    }
+
     try {
       const payload = {
         ...data,
         description: data.description || null,
         discount: data.discount || null,
         comment: data.comment || null,
-        ...(imageKey !== null ? { image: imageKey } : {}),
       };
 
       if (isEditMode && productId) {
-        await updateMutation.mutateAsync({ id: productId, data: payload });
+        if (selectedFile) {
+          setIsUploadingImage(true);
+          try {
+            // Update product data and get presigned URL in parallel
+            const [, presigned] = await Promise.all([
+              updateMutation.mutateAsync({ id: productId, data: payload }),
+              fetchPresignedUrl(productId, selectedFile),
+            ]);
+            await uploadFileToS3(presigned.uploadUrl, selectedFile);
+            await updateMutation.mutateAsync({ id: productId, data: { image: presigned.key } });
+          } finally {
+            setIsUploadingImage(false);
+          }
+        } else {
+          await updateMutation.mutateAsync({ id: productId, data: payload });
+        }
         toast.success("Product updated");
       } else {
-        await createMutation.mutateAsync(payload);
+        const created = await createMutation.mutateAsync(payload);
+        if (selectedFile) {
+          setIsUploadingImage(true);
+          try {
+            const presigned = await fetchPresignedUrl(created.id, selectedFile);
+            await uploadFileToS3(presigned.uploadUrl, selectedFile);
+            await updateMutation.mutateAsync({ id: created.id, data: { image: presigned.key } });
+          } finally {
+            setIsUploadingImage(false);
+          }
+        }
         toast.success("Product created");
       }
       onOpenChange(false);
@@ -158,17 +192,12 @@ export function ProductCreateUpdateDialog({ open, onOpenChange, productId }: Pro
     }
   };
 
-  const handleImageUpload = (key: string) => {
-    setImageKey(key);
-    setImageUrl(null);
-  };
-
-  const isPending = createMutation.isPending || updateMutation.isPending;
+  const isPending = createMutation.isPending || updateMutation.isPending || isUploadingImage;
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-h-[90vh] max-w-md overflow-y-auto">
+        <DialogContent className="max-h-[90vh] w-full max-w-lg overflow-y-auto sm:max-w-4xl">
           <DialogHeader>
             <DialogTitle>{isEditMode ? "Edit Product" : "Add Product"}</DialogTitle>
             <DialogDescription>
@@ -181,104 +210,108 @@ export function ProductCreateUpdateDialog({ open, onOpenChange, productId }: Pro
               <Spinner className="h-6 w-6" />
             </div>
           ) : (
-            <form onSubmit={handleSubmit(onSubmit)} className="grid gap-3 py-2">
-              <div className="flex justify-center">
-                <ImageUpload
-                  currentImageUrl={imageKey ? undefined : imageUrl}
-                  name={watch("title") || "Product"}
-                  entityType="product-photo"
-                  entityId={productId ?? ""}
-                  onUpload={handleImageUpload}
-                  size="lg"
-                />
-              </div>
-
-              <div className="grid gap-1.5">
-                <Label htmlFor="product-title">Title</Label>
-                <Input id="product-title" {...register("title")} />
-                {errors.title && <p className="text-xs text-red-600">{errors.title.message}</p>}
-              </div>
-
-              <div className="grid gap-1.5">
-                <Label htmlFor="product-description">Description</Label>
-                <Textarea id="product-description" rows={3} {...register("description")} />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="grid gap-1.5">
-                  <Label htmlFor="product-price">Price ({CURRENCY_SYMBOL})</Label>
-                  <Input id="product-price" type="number" step="0.01" min="0" {...register("price")} />
-                  {errors.price && <p className="text-xs text-red-600">{errors.price.message}</p>}
-                </div>
-                <div className="grid gap-1.5">
-                  <Label htmlFor="product-discount">Discount ({CURRENCY_SYMBOL})</Label>
-                  <Input id="product-discount" type="number" step="0.01" min="0" {...register("discount")} />
-                </div>
-              </div>
-
-              <div className="grid gap-1.5">
-                <Label>Type</Label>
-                <SelectInput
-                  value={watch("type")}
-                  onValueChange={(val) => setValue("type", val as ProductType)}
-                  options={PRODUCT_TYPES}
-                  placeholder="Select type"
-                  triggerClassName="w-full cursor-pointer"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="grid gap-1.5">
-                  <Label htmlFor="product-quantity">Quantity</Label>
-                  <Input
-                    id="product-quantity"
-                    type="number"
-                    min="0"
-                    {...register("quantity", { valueAsNumber: true })}
+            <form onSubmit={handleSubmit(onSubmit)} className="py-2">
+              <div className="flex flex-col gap-4 sm:flex-row sm:gap-12">
+                {/* Image column */}
+                <div className="mx-auto w-full shrink-0 sm:mx-0 sm:w-96">
+                  <ImagePreview
+                    file={selectedFile}
+                    currentImageUrl={currentImageUrl}
+                    name={watch("title") || "Product"}
+                    onFileSelect={setSelectedFile}
                   />
-                  {errors.quantity && <p className="text-xs text-red-600">{errors.quantity.message}</p>}
                 </div>
-                <div className="grid gap-1.5">
-                  <Label htmlFor="product-home-sorting">Home Sort Order</Label>
-                  <Input
-                    id="product-home-sorting"
-                    type="number"
-                    min="0"
-                    {...register("home_sorting", { valueAsNumber: true })}
-                  />
-                  {errors.home_sorting && <p className="text-xs text-red-600">{errors.home_sorting.message}</p>}
+
+                {/* Fields column */}
+                <div className="flex flex-1 flex-col gap-3">
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="product-title">Title</Label>
+                    <Input id="product-title" {...register("title")} />
+                    {errors.title && <p className="text-xs text-red-600">{errors.title.message}</p>}
+                  </div>
+
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="product-description">Description</Label>
+                    <Textarea id="product-description" rows={3} {...register("description")} />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="product-price">Price ({CURRENCY_SYMBOL})</Label>
+                      <Input id="product-price" type="number" step="0.01" min="0" {...register("price")} />
+                      {errors.price && <p className="text-xs text-red-600">{errors.price.message}</p>}
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="product-discount">Discount ({CURRENCY_SYMBOL})</Label>
+                      <Input id="product-discount" type="number" step="0.01" min="0" {...register("discount")} />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-1.5">
+                    <Label>Type</Label>
+                    <SelectInput
+                      value={watch("type")}
+                      onValueChange={(val) => setValue("type", val as ProductType)}
+                      options={PRODUCT_TYPE_OPTIONS}
+                      placeholder="Select type"
+                      triggerClassName="w-full cursor-pointer"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="product-quantity">Quantity</Label>
+                      <Input
+                        id="product-quantity"
+                        type="number"
+                        min="0"
+                        {...register("quantity", { valueAsNumber: true })}
+                      />
+                      {errors.quantity && <p className="text-xs text-red-600">{errors.quantity.message}</p>}
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="product-home-sorting">Home Sort Order</Label>
+                      <Input
+                        id="product-home-sorting"
+                        type="number"
+                        min="0"
+                        {...register("home_sorting", { valueAsNumber: true })}
+                      />
+                      {errors.home_sorting && <p className="text-xs text-red-600">{errors.home_sorting.message}</p>}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="product-available"
+                        checked={watch("is_available")}
+                        onCheckedChange={(checked) => setValue("is_available", !!checked)}
+                      />
+                      <Label htmlFor="product-available" className="cursor-pointer text-sm">
+                        Available
+                      </Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="product-home-display"
+                        checked={watch("is_home_display")}
+                        onCheckedChange={(checked) => setValue("is_home_display", !!checked)}
+                      />
+                      <Label htmlFor="product-home-display" className="cursor-pointer text-sm">
+                        Show on Home
+                      </Label>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="product-comment">Admin Comment</Label>
+                    <Textarea id="product-comment" rows={2} placeholder="Internal notes..." {...register("comment")} />
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="product-available"
-                    checked={watch("is_available")}
-                    onCheckedChange={(checked) => setValue("is_available", !!checked)}
-                  />
-                  <Label htmlFor="product-available" className="cursor-pointer text-sm">
-                    Available
-                  </Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="product-home-display"
-                    checked={watch("is_home_display")}
-                    onCheckedChange={(checked) => setValue("is_home_display", !!checked)}
-                  />
-                  <Label htmlFor="product-home-display" className="cursor-pointer text-sm">
-                    Show on Home
-                  </Label>
-                </div>
-              </div>
-
-              <div className="grid gap-1.5">
-                <Label htmlFor="product-comment">Admin Comment</Label>
-                <Textarea id="product-comment" rows={2} placeholder="Internal notes..." {...register("comment")} />
-              </div>
-
-              <DialogFooter className="mt-2 flex flex-col gap-2 sm:flex-row">
+              <DialogFooter className="mt-4 flex flex-col gap-2 sm:flex-row">
                 {isEditMode && (
                   <Button
                     type="button"

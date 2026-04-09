@@ -9,7 +9,7 @@ import { useProfile, useUpdateProfile } from "@/hooks/useProfile";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ImageUpload } from "@/components/ImageUpload";
+import { ImageUpload } from "@/components/elements/ImageUpload";
 import EditableMultiInputField from "@/components/inputs/EditableMultiInputField";
 import ChangePasswordDialog from "@/components/modals/ChangePasswordDialog";
 import { AxiosError } from "axios";

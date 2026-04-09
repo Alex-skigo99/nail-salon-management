@@ -20,16 +20,16 @@ export function ProductDetailModal({ open, onOpenChange, product, t }: ProductDe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{product.title}</DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
           {product.image ? (
-            <img src={product.image} alt={product.title} className="h-56 w-full rounded-lg object-cover" />
+            <img src={product.image} alt={product.title} className="aspect-square w-full rounded-lg object-cover" />
           ) : (
-            <div className="bg-muted flex h-56 w-full items-center justify-center rounded-lg text-gray-400">
+            <div className="bg-muted flex aspect-square w-full items-center justify-center rounded-lg text-gray-400">
               {t("shopSection.noImage")}
             </div>
           )}

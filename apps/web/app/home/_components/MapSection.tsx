@@ -2,12 +2,14 @@
 
 import { useTranslations } from "next-intl";
 import { MapPin } from "lucide-react";
+import { HOME_MAKET } from "@/const/homeMaket";
+import { cn } from "@/lib/utils";
 
 type Props = { t: ReturnType<typeof useTranslations>; isMobile: boolean };
 
 export default function MapSection({ t, isMobile }: Props) {
   return (
-    <section id="map" className="bg-linear-to-b from-pink-50/50 to-white py-20 sm:py-28">
+    <section id="map" className={cn("bg-linear-to-b from-pink-50/50 to-white", HOME_MAKET.section_py)}>
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
         <div className="mb-14 text-center">
           <h2

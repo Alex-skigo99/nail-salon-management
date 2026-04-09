@@ -107,7 +107,8 @@
     "masters": "מאסטרים",
     "services": "שירותים",
     "clients": "לקוחות",
-    "settings": "הגדרות"
+    "settings": "הגדרות",
+    "products": "מוצרים"
   },
   "dialogs": {
     "infoUserDialog": {

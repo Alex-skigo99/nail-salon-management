@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent } from "@/components/ui/card";
-import { ImageUpload } from "@/components/ImageUpload";
+import { ImageUpload } from "@/components/elements/ImageUpload";
 import type { Master } from "@/types/masterTypes";
 import { useUpdateMaster } from "@/hooks/useMasters";
 import { MasterForm } from "./MasterForm";
 import { DeleteMasterDialog } from "./DeleteMasterDialog";
 import { WorkingHoursSection } from "./WorkingHoursSection";
-import { NotificationBadge } from "../../../../components/elements/NotificationBadge";
+import { NotificationBadge } from "@/components/elements/NotificationBadge";
 
 type Props = {
   master: Master;
