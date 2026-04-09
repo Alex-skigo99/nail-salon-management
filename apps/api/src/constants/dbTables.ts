@@ -5,4 +5,5 @@ export const DB_TABLES = {
   WORKING_HOURS: "working_hours",
   APPOINTMENTS: "appointments",
   SETTINGS: "settings",
+  PRODUCTS: "products",
 };

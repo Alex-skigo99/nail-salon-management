@@ -267,3 +267,162 @@ export type DaySlots = {
  *           items:
  *             $ref: '#/components/schemas/Slot'
  */
+
+// ─── Products ─────────────────────────────────────────────────────────────────
+
+export type Product = {
+  id: string;
+  title: string;
+  description: string | null;
+  price: string;
+  discount: string | null;
+  type: string | null;
+  quantity: number;
+  image: string | null;
+  is_available: boolean;
+  is_home_display: boolean;
+  home_sorting: number;
+  comment: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ProductCreate = Omit<Product, "id" | "created_at" | "updated_at">;
+
+export type ProductUpdate = Partial<ProductCreate>;
+
+/** Product returned from public /product/home (no comment field) */
+export type ProductHome = Omit<Product, "comment" | "quantity">;
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     Product:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         title:
+ *           type: string
+ *         description:
+ *           type: string
+ *           nullable: true
+ *         price:
+ *           type: string
+ *           example: "29.99"
+ *         discount:
+ *           type: string
+ *           nullable: true
+ *           example: "24.99"
+ *         type:
+ *           type: string
+ *         quantity:
+ *           type: integer
+ *         image:
+ *           type: string
+ *           nullable: true
+ *         is_available:
+ *           type: boolean
+ *         is_home_display:
+ *           type: boolean
+ *         home_sorting:
+ *           type: integer
+ *         comment:
+ *           type: string
+ *           nullable: true
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ *         updated_at:
+ *           type: string
+ *           format: date-time
+ *     ProductHome:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         title:
+ *           type: string
+ *         description:
+ *           type: string
+ *           nullable: true
+ *         price:
+ *           type: string
+ *         discount:
+ *           type: string
+ *           nullable: true
+ *         type:
+ *           type: string
+ *         image:
+ *           type: string
+ *           nullable: true
+ *         is_available:
+ *           type: boolean
+ *         is_home_display:
+ *           type: boolean
+ *         home_sorting:
+ *           type: integer
+ *     ProductCreate:
+ *       type: object
+ *       required:
+ *         - title
+ *         - price
+ *         - type
+ *       properties:
+ *         title:
+ *           type: string
+ *         description:
+ *           type: string
+ *           nullable: true
+ *         price:
+ *           type: string
+ *         discount:
+ *           type: string
+ *           nullable: true
+ *         type:
+ *           type: string
+ *         quantity:
+ *           type: integer
+ *         image:
+ *           type: string
+ *           nullable: true
+ *         is_available:
+ *           type: boolean
+ *         is_home_display:
+ *           type: boolean
+ *         home_sorting:
+ *           type: integer
+ *         comment:
+ *           type: string
+ *           nullable: true
+ *     ProductUpdate:
+ *       type: object
+ *       properties:
+ *         title:
+ *           type: string
+ *         description:
+ *           type: string
+ *           nullable: true
+ *         price:
+ *           type: string
+ *         discount:
+ *           type: string
+ *           nullable: true
+ *         type:
+ *           type: string
+ *         quantity:
+ *           type: integer
+ *         image:
+ *           type: string
+ *           nullable: true
+ *         is_available:
+ *           type: boolean
+ *         is_home_display:
+ *           type: boolean
+ *         home_sorting:
+ *           type: integer
+ *         comment:
+ *           type: string
+ *           nullable: true
+ */

@@ -6,6 +6,7 @@ export const apiRoutes = {
   appointment: "/appointment",
   user: "/user",
   settings: "/settings",
+  product: "/product",
   upload: {
     presignedUrl: "/upload/presigned-url",
   },

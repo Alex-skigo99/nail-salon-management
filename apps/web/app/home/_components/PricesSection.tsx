@@ -6,6 +6,8 @@ import { Sparkles } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import type { Service, ServiceCategory } from "@/types/serviceTypes";
 import { CURRENCY_SYMBOL } from "@/const/currency";
+import { HOME_MAKET } from "@/const/homeMaket";
+import { cn } from "@/lib/utils";
 
 type Props = { t: ReturnType<typeof useTranslations>; isMobile: boolean };
 
@@ -37,7 +39,7 @@ export default function PricesSection({ t, isMobile }: Props) {
   }));
 
   return (
-    <section id="prices" className="bg-linear-to-b from-white to-pink-50/50 py-20 sm:py-28">
+    <section id="prices" className={cn("bg-linear-to-b from-white to-pink-50/50", HOME_MAKET.section_py)}>
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
         <div className="mb-14 text-center">
           <h2

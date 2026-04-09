@@ -5,7 +5,7 @@ import { apiRoutes } from "@/const/apiRouts";
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-export type EntityType = "user-profile" | "master-photo";
+export type EntityType = "user-profile" | "master-photo" | "product-photo";
 
 interface PresignedUrlResponse {
   uploadUrl: string;
@@ -16,7 +16,7 @@ export function useImageUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const upload = async (file: File, entityType: EntityType, entityId?: number): Promise<string> => {
+  const upload = async (file: File, entityType: EntityType, entityId?: number | string): Promise<string> => {
     setError(null);
 
     if (!ALLOWED_TYPES.includes(file.type)) {

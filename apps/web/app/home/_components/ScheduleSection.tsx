@@ -11,6 +11,8 @@ import { useTranslations } from "next-intl";
 import HotSlots from "./scheduleSection/HotSlots";
 import DayEmptySlots from "./scheduleSection/DayEmptySlots";
 import { EntityAvatar } from "@/components/elements/EntityAvatar";
+import { HOME_MAKET } from "@/const/homeMaket";
+import { cn } from "@/lib/utils";
 
 type Props = { isMobile: boolean; t: ReturnType<typeof useTranslations> };
 
@@ -57,7 +59,7 @@ export default function ScheduleSection({ isMobile, t }: Props) {
   };
 
   return (
-    <section id="schedule" className="bg-white py-20 sm:py-28">
+    <section id="schedule" className={cn("bg-white", HOME_MAKET.section_py)}>
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
         <div className="mb-14 text-center">
           <h2
