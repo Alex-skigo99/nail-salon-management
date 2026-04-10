@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import SelectInput from "@/components/inputs/SelectInput";
@@ -59,13 +59,22 @@ export function AppointmentSearchFilterSection({ params, onChange, masters }: Ap
     ...masters.map((m) => ({ value: String(m.id), label: m.name })),
   ];
 
-  const activeFilterCount = [
-    params.sort && params.sort !== SORT_DEFAULT,
-    params.status,
-    params.master_id,
-    params.from,
-    params.to,
-  ].filter(Boolean).length;
+  const hasStatusFilter = params.status && params.status !== ALL;
+  const hasMasterFilter = params.master_id !== undefined;
+  const hasDateFilter = params.from || params.to;
+  const hasSortFilter = params.sort && params.sort !== SORT_DEFAULT;
+
+  const activeFilterCount = [hasSortFilter, hasStatusFilter, hasMasterFilter, hasDateFilter].filter(Boolean).length;
+
+  const getStatusLabel = (status?: string) => {
+    if (!status || status === ALL) return null;
+    return STATUS_OPTIONS.find((o) => o.value === status)?.label;
+  };
+
+  const getMasterLabel = (masterId?: number) => {
+    if (!masterId) return null;
+    return masters.find((m) => m.id === masterId)?.name;
+  };
 
   const filtersContent = (
     <>
@@ -75,16 +84,22 @@ export function AppointmentSearchFilterSection({ params, onChange, masters }: Ap
         onValueChange={(val) => onChange({ ...params, sort: val === SORT_DEFAULT ? undefined : val })}
         options={SORT_OPTIONS}
         placeholder="Sort by"
-        triggerClassName={cn(isMobile ? "w-full cursor-pointer" : "w-[180px] cursor-pointer")}
+        triggerClassName={cn(
+          isMobile ? "w-full cursor-pointer" : "w-[180px] cursor-pointer",
+          hasSortFilter && "border-primary border-2"
+        )}
       />
 
-      <Label>Filters:</Label>
+      <Label className={cn(hasStatusFilter && "text-primary font-medium")}>Filters:</Label>
       <SelectInput
         value={params.status ?? ALL}
         onValueChange={(val) => onChange({ ...params, status: val === ALL ? undefined : val })}
         options={STATUS_OPTIONS}
         placeholder="Status"
-        triggerClassName={cn(isMobile ? "w-full cursor-pointer" : "w-[150px] cursor-pointer")}
+        triggerClassName={cn(
+          isMobile ? "w-full cursor-pointer" : "w-[150px] cursor-pointer",
+          hasStatusFilter && "border-primary border-2"
+        )}
       />
 
       <SelectInput
@@ -92,15 +107,18 @@ export function AppointmentSearchFilterSection({ params, onChange, masters }: Ap
         onValueChange={(val) => onChange({ ...params, master_id: val === ALL ? undefined : Number(val) })}
         options={masterOptions}
         placeholder="Master"
-        triggerClassName={cn(isMobile ? "w-full cursor-pointer" : "w-[150px] cursor-pointer")}
+        triggerClassName={cn(
+          isMobile ? "w-full cursor-pointer" : "w-[150px] cursor-pointer",
+          hasMasterFilter && "border-primary border-2"
+        )}
       />
 
-      <Label>From:</Label>
+      <Label className={cn(hasDateFilter && "text-primary font-medium")}>From:</Label>
       <Input
         type="date"
         value={params.from ?? ""}
         onChange={(e) => onChange({ ...params, from: e.target.value || undefined })}
-        className={cn(isMobile ? "w-full" : "w-38")}
+        className={cn(isMobile ? "w-full" : "w-38", hasDateFilter && "border-primary border-2")}
       />
 
       <Label>To:</Label>
@@ -108,10 +126,22 @@ export function AppointmentSearchFilterSection({ params, onChange, masters }: Ap
         type="date"
         value={params.to ?? ""}
         onChange={(e) => onChange({ ...params, to: e.target.value || undefined })}
-        className={cn(isMobile ? "w-full" : "w-38")}
+        className={cn(isMobile ? "w-full" : "w-38", hasDateFilter && "border-primary border-2")}
       />
     </>
   );
+
+  const handleClearAll = () => {
+    setSearchInput("");
+    onChange({
+      sort: undefined,
+      search: undefined,
+      status: undefined,
+      master_id: undefined,
+      from: undefined,
+      to: undefined,
+    });
+  };
 
   return (
     <div className={cn("mb-4 flex items-center gap-3", { "mb-2 px-2": isMobile })}>
@@ -124,6 +154,12 @@ export function AppointmentSearchFilterSection({ params, onChange, masters }: Ap
           className="pl-9"
         />
       </div>
+
+      {(activeFilterCount > 0 || searchInput) && !isMobile && (
+        <Button variant="default" size="sm" onClick={handleClearAll} className="shrink-0">
+          Clear
+        </Button>
+      )}
 
       {isMobile ? (
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
@@ -138,8 +174,14 @@ export function AppointmentSearchFilterSection({ params, onChange, masters }: Ap
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-70">
-            <SheetHeader>
+            <SheetHeader className="flex flex-row items-center justify-between">
               <SheetTitle>Sort & Filters</SheetTitle>
+              {(activeFilterCount > 0 || searchInput) && (
+                <Button variant="ghost" size="sm" onClick={handleClearAll}>
+                  <X className="h-4 w-4" />
+                  Clear
+                </Button>
+              )}
             </SheetHeader>
             <div className="flex flex-col gap-3 px-6">{filtersContent}</div>
           </SheetContent>

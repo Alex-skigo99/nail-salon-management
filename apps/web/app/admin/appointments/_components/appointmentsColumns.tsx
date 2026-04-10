@@ -1,24 +1,43 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { ArrowDownAZ, ArrowDownZA, ArrowDown, Funnel } from "lucide-react";
 import type { AppointmentRetrieveFull } from "@/types/appointmentTypes";
 import type { Master } from "@/types/masterTypes";
 import { TruncatedText } from "@/components/elements/TruncatedText";
 import { StatusBadge } from "@/app/admin/calendar/_components/StatusBadge";
 import { formatTimeToHHMM } from "@/utils/formatTime";
 import { getCreatedAtString, formatDateForInput } from "@/utils/dateUtils";
+import { cn } from "@/lib/utils";
 
-export function appointmentsColumns(masters: Master[]): ColumnDef<AppointmentRetrieveFull, unknown>[] {
+export function appointmentsColumns(
+  masters: Master[],
+  sort?: string,
+  activeFilters?: { status?: string; master_id?: number; hasDateFilter?: boolean }
+): ColumnDef<AppointmentRetrieveFull, unknown>[] {
   return [
     {
       accessorKey: "status",
-      header: "Status",
+      header: ({ column }) => (
+        <div className="flex items-center gap-1">
+          <span className={cn(activeFilters?.status && "text-primary font-medium")}>Status</span>
+          {activeFilters?.status && <Funnel className="text-primary h-4 w-4" />}
+        </div>
+      ),
       size: 100,
       cell: ({ row }) => <StatusBadge status={row.original.status} />,
     },
     {
       accessorKey: "date",
-      header: "Date",
+      header: ({ column }) => (
+        <div className="flex items-center gap-1">
+          <span className={cn((sort === "date_desc" || activeFilters?.hasDateFilter) && "text-primary font-medium")}>
+            Date
+          </span>
+          {(sort === "date_desc" || activeFilters?.hasDateFilter) && <Funnel className="text-primary h-4 w-4" />}
+          {sort === "date_desc" && !activeFilters?.hasDateFilter && <ArrowDown className="text-primary h-4 w-4" />}
+        </div>
+      ),
       size: 110,
       cell: ({ row }) => <span className="font-mono text-xs">{formatDateForInput(row.original.date)}</span>,
     },
@@ -53,7 +72,15 @@ export function appointmentsColumns(masters: Master[]): ColumnDef<AppointmentRet
     },
     {
       id: "client_name",
-      header: "Name",
+      header: ({ column }) => (
+        <div className="flex items-center gap-1">
+          <span className={cn((sort === "username_asc" || sort === "username_desc") && "text-primary font-medium")}>
+            Name
+          </span>
+          {sort === "username_asc" && <ArrowDownAZ className="text-primary h-4 w-4" />}
+          {sort === "username_desc" && <ArrowDownZA className="text-primary h-4 w-4" />}
+        </div>
+      ),
       size: 140,
       cell: ({ row }) => <TruncatedText text={row.original.user_data?.name ?? row.original.guest_name} />,
     },
@@ -67,7 +94,12 @@ export function appointmentsColumns(masters: Master[]): ColumnDef<AppointmentRet
     },
     {
       id: "master_name",
-      header: "Master",
+      header: ({ column }) => (
+        <div className="flex items-center gap-1">
+          <span className={cn(activeFilters?.master_id && "text-primary font-medium")}>Master</span>
+          {activeFilters?.master_id && <Funnel className="text-primary h-4 w-4" />}
+        </div>
+      ),
       size: 120,
       cell: ({ row }) => {
         const master = masters.find((m) => m.id === row.original.master_id);
@@ -82,7 +114,12 @@ export function appointmentsColumns(masters: Master[]): ColumnDef<AppointmentRet
     },
     {
       accessorKey: "created_at",
-      header: "Created",
+      header: ({ column }) => (
+        <div className="flex items-center gap-1">
+          <span className={cn(sort === "created_desc" && "text-primary font-medium")}>Created</span>
+          {sort === "created_desc" && <ArrowDown className="text-primary h-4 w-4" />}
+        </div>
+      ),
       size: 130,
       cell: ({ row }) => <TruncatedText text={getCreatedAtString(row.original.created_at)} isTooltipDisabled />,
     },

@@ -328,10 +328,10 @@ export async function getAllAppointments(
       query.orderBy("a.date", "desc").orderBy("a.time", "desc");
       break;
     case "username_asc":
-      query.orderByRaw("COALESCE(u.name, a.guest_name, '') ASC");
+      query.orderByRaw("COALESCE(LOWER(u.name), LOWER(a.guest_name), '') ASC");
       break;
     case "username_desc":
-      query.orderByRaw("COALESCE(u.name, a.guest_name, '') DESC");
+      query.orderByRaw("COALESCE(LOWER(u.name), LOWER(a.guest_name), '') DESC");
       break;
     default:
       query.orderBy("a.created_at", "desc");

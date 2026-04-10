@@ -62,7 +62,15 @@ export default function AppointmentsPage() {
     setDialogOpen(true);
   }, []);
 
-  const columns = useMemo(() => appointmentsColumns(masters), [masters]);
+  const columns = useMemo(
+    () =>
+      appointmentsColumns(masters, filterParams.sort, {
+        status: filterParams.status,
+        master_id: filterParams.master_id,
+        hasDateFilter: !!filterParams.from || !!filterParams.to,
+      }),
+    [masters, filterParams.sort, filterParams.status, filterParams.master_id, filterParams.from, filterParams.to]
+  );
 
   return (
     <div className={cn("flex flex-1 flex-col", { "overflow-hidden": !isMobile })}>
