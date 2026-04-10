@@ -780,7 +780,7 @@ const UpdateCommentSchema = z.object({
 const GetAllAppointmentsQuerySchema = z.object({
   search: z.string().optional(),
   sort: z.enum(["created_desc", "date_desc", "username_asc", "username_desc"]).optional(),
-  status: z.enum(["new", "confirmed", "reserved", "pending", "rejected"]).optional(),
+  status: z.enum(["active", "new", "confirmed", "reserved", "pending", "rejected"]).optional(),
   master_id: z.coerce.number().int().positive().optional(),
   from: z.string().optional(),
   to: z.string().optional(),
@@ -812,8 +812,8 @@ const GetAllAppointmentsQuerySchema = z.object({
  *         name: status
  *         schema:
  *           type: string
- *           enum: [new, confirmed, reserved, pending, rejected]
- *         description: Filter by appointment status
+ *           enum: [active, new, confirmed, reserved, pending, rejected]
+ *         description: Filter by appointment status (active = not reserved/rejected)
  *       - in: query
  *         name: master_id
  *         schema:

@@ -25,6 +25,7 @@ const SORT_DEFAULT = "created_desc";
 
 const STATUS_OPTIONS = [
   { value: ALL, label: "All Statuses" },
+  { value: "active", label: "Active" },
   { value: "new", label: "New" },
   { value: "confirmed", label: "Confirmed" },
   { value: "reserved", label: "Reserved" },
@@ -99,7 +100,7 @@ export function AppointmentSearchFilterSection({ params, onChange, masters }: Ap
         type="date"
         value={params.from ?? ""}
         onChange={(e) => onChange({ ...params, from: e.target.value || undefined })}
-        className={cn(isMobile ? "w-full" : "w-[150px]")}
+        className={cn(isMobile ? "w-full" : "w-38")}
       />
 
       <Label>To:</Label>
@@ -107,7 +108,7 @@ export function AppointmentSearchFilterSection({ params, onChange, masters }: Ap
         type="date"
         value={params.to ?? ""}
         onChange={(e) => onChange({ ...params, to: e.target.value || undefined })}
-        className={cn(isMobile ? "w-full" : "w-[150px]")}
+        className={cn(isMobile ? "w-full" : "w-38")}
       />
     </>
   );

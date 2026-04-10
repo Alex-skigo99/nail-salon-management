@@ -301,7 +301,11 @@ export async function getAllAppointments(
   }
 
   if (params.status) {
-    query.where("a.status", params.status);
+    if (params.status === "active") {
+      query.whereNotIn("a.status", ["reserved", "rejected"]);
+    } else {
+      query.where("a.status", params.status);
+    }
   }
 
   if (params.master_id !== undefined) {

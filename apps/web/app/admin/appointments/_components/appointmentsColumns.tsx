@@ -6,7 +6,7 @@ import type { Master } from "@/types/masterTypes";
 import { TruncatedText } from "@/components/elements/TruncatedText";
 import { StatusBadge } from "@/app/admin/calendar/_components/StatusBadge";
 import { formatTimeToHHMM } from "@/utils/formatTime";
-import { getCreatedAtString } from "@/utils/dateUtils";
+import { getCreatedAtString, formatDateForInput } from "@/utils/dateUtils";
 
 export function appointmentsColumns(masters: Master[]): ColumnDef<AppointmentRetrieveFull, unknown>[] {
   return [
@@ -20,6 +20,7 @@ export function appointmentsColumns(masters: Master[]): ColumnDef<AppointmentRet
       accessorKey: "date",
       header: "Date",
       size: 110,
+      cell: ({ row }) => <span className="font-mono text-xs">{formatDateForInput(row.original.date)}</span>,
     },
     {
       accessorKey: "time",
