@@ -459,3 +459,96 @@ describe("GET /appointment/user/:userId", () => {
     expect(res.status).toBe(400);
   });
 });
+
+// ─── GET /appointment ─────────────────────────────────────────────────────────
+
+describe("GET /appointment", () => {
+  const mockPaginatedAppointments = {
+    data: [
+      {
+        ...mockAppointment,
+        user_data: { id: "uuid-1", name: "Alice", email: "alice@test.com", phone: null, image: null, language: "en" },
+        master_data: { id: 1, name: "Jane Smith", description: null },
+      },
+    ],
+    pagination: {
+      currentPage: 1,
+      perPage: 20,
+      from: 1,
+      to: 1,
+      total: 1,
+      lastPage: 1,
+      prevPage: 0,
+      nextPage: 2,
+    },
+  };
+
+  beforeEach(() => vi.clearAllMocks());
+
+  it("returns 401 when not authenticated", async () => {
+    const res = await request(app).get("/appointment");
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 200 with paginated appointments when ADMIN", async () => {
+    (appointmentService.getAllAppointments as Mock).mockResolvedValue(mockPaginatedAppointments);
+
+    const res = await request(app).get("/appointment").set("Authorization", `Bearer ${adminToken()}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0].user_data).toBeDefined();
+    expect(res.body.data[0].master_data).toBeDefined();
+    expect(res.body.pagination.total).toBe(1);
+  });
+
+  it("passes filter params to service", async () => {
+    (appointmentService.getAllAppointments as Mock).mockResolvedValue(mockPaginatedAppointments);
+
+    const res = await request(app)
+      .get("/appointment")
+      .set("Authorization", `Bearer ${adminToken()}`)
+      .query({
+        search: "Alice",
+        status: "new",
+        master_id: "1",
+        from: "2026-01-01",
+        to: "2026-12-31",
+        sort: "date_desc",
+        page: "2",
+        perPage: "5",
+      });
+
+    expect(res.status).toBe(200);
+    expect(appointmentService.getAllAppointments).toHaveBeenCalledWith(
+      expect.objectContaining({
+        search: "Alice",
+        status: "new",
+        master_id: 1,
+        from: "2026-01-01",
+        to: "2026-12-31",
+        sort: "date_desc",
+        page: 2,
+        perPage: 5,
+      })
+    );
+  });
+
+  it("returns 400 for invalid sort value", async () => {
+    const res = await request(app)
+      .get("/appointment")
+      .set("Authorization", `Bearer ${adminToken()}`)
+      .query({ sort: "invalid_sort" });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 400 for invalid status value", async () => {
+    const res = await request(app)
+      .get("/appointment")
+      .set("Authorization", `Bearer ${adminToken()}`)
+      .query({ status: "invalid_status" });
+
+    expect(res.status).toBe(400);
+  });
+});

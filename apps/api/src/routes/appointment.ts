@@ -6,6 +6,9 @@ const router = express.Router();
 
 // ── Static / parameterless routes first to avoid Express ambiguity ──
 
+// GET /appointment — list all appointments (ADMIN only)
+router.get("/", authenticate, requireRole("ADMIN"), appointmentController.getAll);
+
 // GET /appointment/slots/available?masterId=&date=&time=&duration=
 router.get("/slots/available", appointmentController.checkAvailability);
 

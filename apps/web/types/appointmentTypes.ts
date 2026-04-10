@@ -44,6 +44,16 @@ export type PaginatedAppointmentsOfUser = {
   pagination?: Pagination;
 };
 
+export type AppointmentRetrieveFull = Appointment & {
+  user_data: UserData | null;
+  master_data: { id: number; name: string; description: string | null };
+};
+
+export type PaginatedAppointments = {
+  data: AppointmentRetrieveFull[];
+  pagination?: Pagination;
+};
+
 export type AppointmentCreate = {
   master_id: number;
   user_id?: string | null;

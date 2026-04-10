@@ -14,7 +14,17 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { LayoutDashboard, Users, Contact, Menu, Scissors, HomeIcon, Settings, Package } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  Contact,
+  Menu,
+  Scissors,
+  HomeIcon,
+  Settings,
+  Package,
+  CalendarCheck,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isRTLLocale } from "@/lib/rtl";
@@ -75,6 +85,11 @@ export function AppSidebar() {
       label: t("calendar"),
       href: "/admin/calendar",
       icon: LayoutDashboard,
+    },
+    {
+      label: t("appointments"),
+      href: "/admin/appointments",
+      icon: CalendarCheck,
     },
     {
       label: t("masters"),

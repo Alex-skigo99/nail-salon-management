@@ -3,6 +3,7 @@ export const queryKeys = {
   workingHours: "working_hours",
   services: "services",
   appointments: "appointments",
+  allAppointments: "all_appointments",
   slots: "slots",
   appointmentSuggestions: "appointment_suggestions",
   emptySlots: "empty_slots",
