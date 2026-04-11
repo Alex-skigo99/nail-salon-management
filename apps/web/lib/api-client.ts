@@ -5,6 +5,20 @@ const apiClient: AxiosInstance = axios.create({
   withCredentials: true, // For JWT cookies
 });
 
+// Prevent multiple signout dispatches when concurrent requests all 401
+let isHandlingUnauthorized = false;
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && typeof window !== "undefined" && !isHandlingUnauthorized) {
+      isHandlingUnauthorized = true;
+      window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+    }
+    return Promise.reject(error);
+  }
+);
+
 /**
  * Set the Authorization header for all subsequent API requests.
  * Called when a session is established with an access token.
