@@ -186,3 +186,20 @@ export function compareTimes(timeA: string, timeB: string): number {
   if (hA !== hB) return hA - hB;
   return mA - mB;
 }
+
+/** Return a date from string */
+export function createDateOutOfString(value: string | null | undefined): Date | undefined {
+  if (!value) return undefined;
+  return new Date(value);
+  // const parts = value.replace("Z", "").split(/[-T:.]/);
+  // const date = new Date(
+  //   parseInt(parts[0], 10), // Year
+  //   parseInt(parts[1], 10) - 1, // Month (0-based)
+  //   parseInt(parts[2], 10), // Day
+  //   parseInt(parts[3], 10), // Hour
+  //   parseInt(parts[4], 10), // Minute
+  //   parseInt(parts[5], 10), // Second
+  //   parseInt(parts[6], 10) // Milliseconds
+  // );
+  // return date;
+}

@@ -34,8 +34,8 @@ export function appointmentsColumns(
           <span className={cn((sort === "date_desc" || activeFilters?.hasDateFilter) && "text-primary font-medium")}>
             Date
           </span>
-          {(sort === "date_desc" || activeFilters?.hasDateFilter) && <Funnel className="text-primary h-4 w-4" />}
-          {sort === "date_desc" && !activeFilters?.hasDateFilter && <ArrowDown className="text-primary h-4 w-4" />}
+          {activeFilters?.hasDateFilter && <Funnel className="text-primary h-4 w-4" />}
+          {sort === "date_desc" && <ArrowDown className="text-primary h-4 w-4" />}
         </div>
       ),
       size: 110,
