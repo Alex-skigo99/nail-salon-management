@@ -4,6 +4,7 @@ import {
   Appointment,
   AppointmentRetrieve,
   AppointmentRetrieveOfUser,
+  AppointmentRetrieveFull,
   WorkingHours,
   Slot,
   SlotStatus,
@@ -260,6 +261,83 @@ export async function getAppointmentsForMaster(
     .select("a.*", knex.raw(userDataSelect))
     .orderBy("a.date", "asc")
     .orderBy("a.time", "asc");
+}
+
+// ─────────────────────────────────────────────
+// Query: all appointments with filters/pagination
+// ─────────────────────────────────────────────
+
+export interface GetAllAppointmentsParams {
+  search?: string;
+  sort?: string;
+  status?: string;
+  master_id?: number;
+  from?: string;
+  to?: string;
+  page?: number;
+  perPage?: number;
+}
+
+export async function getAllAppointments(
+  params: GetAllAppointmentsParams = {}
+): Promise<IWithPagination<AppointmentRetrieveFull>> {
+  const { page = 1, perPage = 20 } = params;
+
+  const query = knex({ a: DB_TABLES.APPOINTMENTS })
+    .leftJoin(`${DB_TABLES.USERS} as u`, "a.user_id", "u.id")
+    .join(`${DB_TABLES.MASTERS} as m`, "a.master_id", "m.id")
+    .select("a.*", knex.raw(userDataSelect), knex.raw(masterDataSelect));
+
+  if (params.search) {
+    const term = `%${params.search}%`;
+    query.where(function () {
+      this.whereILike("u.name", term)
+        .orWhereILike("u.email", term)
+        .orWhereILike("u.phone", term)
+        .orWhereILike("a.guest_name", term)
+        .orWhereILike("a.guest_phone", term)
+        .orWhereILike("a.services", term);
+    });
+  }
+
+  if (params.status) {
+    if (params.status === "active") {
+      query.whereNotIn("a.status", ["reserved", "rejected"]);
+    } else {
+      query.where("a.status", params.status);
+    }
+  }
+
+  if (params.master_id !== undefined) {
+    query.where("a.master_id", params.master_id);
+  }
+
+  if (params.from) {
+    query.where("a.date", ">=", params.from);
+  }
+
+  if (params.to) {
+    query.where("a.date", "<=", params.to);
+  }
+
+  switch (params.sort) {
+    case "created_desc":
+      query.orderBy("a.created_at", "desc");
+      break;
+    case "date_desc":
+      query.orderBy("a.date", "desc").orderBy("a.time", "desc");
+      break;
+    case "username_asc":
+      query.orderByRaw("COALESCE(LOWER(u.name), LOWER(a.guest_name), '') ASC");
+      break;
+    case "username_desc":
+      query.orderByRaw("COALESCE(LOWER(u.name), LOWER(a.guest_name), '') DESC");
+      break;
+    default:
+      query.orderBy("a.created_at", "desc");
+  }
+
+  return query.paginate({ currentPage: page, perPage, isLengthAware: true });
 }
 
 // ─────────────────────────────────────────────

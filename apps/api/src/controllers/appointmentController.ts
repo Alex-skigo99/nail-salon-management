@@ -773,6 +773,131 @@ const UpdateCommentSchema = z.object({
   comments: z.string().nullable(),
 });
 
+// ─────────────────────────────────────────────
+// GET /appointment — list all appointments
+// ─────────────────────────────────────────────
+
+const GetAllAppointmentsQuerySchema = z.object({
+  search: z.string().optional(),
+  sort: z.enum(["created_desc", "date_desc", "username_asc", "username_desc"]).optional(),
+  status: z.enum(["active", "new", "confirmed", "reserved", "pending", "rejected"]).optional(),
+  master_id: z.coerce.number().int().positive().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  page: z.coerce.number().int().positive().optional(),
+  perPage: z.coerce.number().int().positive().optional(),
+});
+
+/**
+ * @openapi
+ * /appointment:
+ *   get:
+ *     summary: Retrieve a paginated list of all appointments (ADMIN only)
+ *     tags: [Appointment]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by name, email, phone, or services
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [created_desc, date_desc, username_asc, username_desc]
+ *         description: Sort order
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [active, new, confirmed, reserved, pending, rejected]
+ *         description: Filter by appointment status (active = not reserved/rejected)
+ *       - in: query
+ *         name: master_id
+ *         schema:
+ *           type: integer
+ *         description: Filter by master ID
+ *       - in: query
+ *         name: from
+ *         schema:
+ *           type: string
+ *           example: "2026-01-01"
+ *         description: Filter appointments from this date (YYYY-MM-DD)
+ *       - in: query
+ *         name: to
+ *         schema:
+ *           type: string
+ *           example: "2026-12-31"
+ *         description: Filter appointments up to this date (YYYY-MM-DD)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: perPage
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Items per page
+ *     responses:
+ *       200:
+ *         description: Paginated list of appointments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/AppointmentRetrieveFull'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: integer
+ *                     perPage:
+ *                       type: integer
+ *                     from:
+ *                       type: integer
+ *                     to:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     lastPage:
+ *                       type: integer
+ *                     prevPage:
+ *                       type: integer
+ *                     nextPage:
+ *                       type: integer
+ *       400:
+ *         description: Invalid parameters
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       500:
+ *         description: Internal server error
+ */
+export const getAll = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const parsed = GetAllAppointmentsQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.flatten() });
+      return;
+    }
+    const appointments = await appointmentService.getAllAppointments(parsed.data);
+    res.json(appointments);
+  } catch (err) {
+    console.error("Error fetching appointments:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 /**
  * @openapi
  * /appointment/{id}:

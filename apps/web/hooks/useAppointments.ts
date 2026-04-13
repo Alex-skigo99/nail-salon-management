@@ -10,10 +10,48 @@ import type {
   DaySlots,
   MasterSuggestion,
   PaginatedAppointmentsOfUser,
+  PaginatedAppointments,
 } from "@/types/appointmentTypes";
 import { CACHE_TIME } from "@/const/cacheTime";
 
+// ─── Params ───────────────────────────────────────────
+
+export interface UseAllAppointmentsParams {
+  search?: string;
+  sort?: string;
+  status?: string;
+  master_id?: number;
+  from?: string;
+  to?: string;
+  page?: number;
+  perPage?: number;
+}
+
 // ─── Queries ──────────────────────────────────────────
+
+export function useAllAppointments(params: UseAllAppointmentsParams = {}, enabled = true) {
+  return useQuery({
+    queryKey: [queryKeys.allAppointments, params],
+    queryFn: async () => {
+      const searchParams = new URLSearchParams();
+      if (params.search) searchParams.set("search", params.search);
+      if (params.sort) searchParams.set("sort", params.sort);
+      if (params.status) searchParams.set("status", params.status);
+      if (params.master_id) searchParams.set("master_id", String(params.master_id));
+      if (params.from) searchParams.set("from", params.from);
+      if (params.to) searchParams.set("to", params.to);
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.perPage) searchParams.set("perPage", String(params.perPage));
+      const qs = searchParams.toString();
+      const url = qs ? `${apiRoutes.appointment}?${qs}` : apiRoutes.appointment;
+      const res = await apiClient.get<PaginatedAppointments>(url);
+      return res.data;
+    },
+    enabled,
+    staleTime: CACHE_TIME,
+    placeholderData: keepPreviousData,
+  });
+}
 
 export function useMasterEmptySlots(masterId: number | null, date: string) {
   return useQuery({
@@ -87,6 +125,7 @@ export function useCreateAppointment() {
       queryClient.invalidateQueries({ queryKey: [queryKeys.appointments] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.appointmentSuggestions] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.emptySlots] });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.allAppointments] });
     },
   });
 }
@@ -101,6 +140,7 @@ export function useUpdateAppointment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [queryKeys.slots] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.appointments] });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.allAppointments] });
     },
   });
 }
@@ -115,6 +155,7 @@ export function useRescheduleAppointment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [queryKeys.slots] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.appointments] });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.allAppointments] });
     },
   });
 }
@@ -129,6 +170,7 @@ export function useDeleteAppointment() {
       queryClient.invalidateQueries({ queryKey: [queryKeys.slots] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.appointments] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.userAppointments] });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.allAppointments] });
     },
   });
 }
@@ -164,6 +206,7 @@ export function useUpdateAppointmentComment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [queryKeys.userAppointments] });
       queryClient.invalidateQueries({ queryKey: [queryKeys.appointments] });
+      queryClient.invalidateQueries({ queryKey: [queryKeys.allAppointments] });
     },
   });
 }

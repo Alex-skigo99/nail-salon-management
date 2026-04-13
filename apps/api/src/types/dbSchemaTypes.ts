@@ -99,6 +99,11 @@ export type AppointmentRetrieveOfUser = Appointment & {
   master_data: Master;
 };
 
+export type AppointmentRetrieveFull = Appointment & {
+  user_data: UserData | null;
+  master_data: { id: number; name: string; description: string | null };
+};
+
 /**
  * @openapi
  * components:
@@ -189,6 +194,26 @@ export type AppointmentRetrieveOfUser = Appointment & {
  *           properties:
  *             master_data:
  *               $ref: '#/components/schemas/Master'
+ *     AppointmentRetrieveFull:
+ *       allOf:
+ *         - $ref: '#/components/schemas/Appointment'
+ *         - type: object
+ *           properties:
+ *             user_data:
+ *               nullable: true
+ *               oneOf:
+ *                 - $ref: '#/components/schemas/UserData'
+ *                 - type: 'null'
+ *             master_data:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 name:
+ *                   type: string
+ *                 description:
+ *                   type: string
+ *                   nullable: true
  */
 
 export type Setting = {
