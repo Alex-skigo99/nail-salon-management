@@ -58,7 +58,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   session: {
     strategy: "jwt",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: process.env.JWT_EXPIRES_IN ? parseInt(process.env.JWT_EXPIRES_IN) * 24 * 60 * 60 : 7 * 24 * 60 * 60, // Convert days to seconds
   },
 
   callbacks: {

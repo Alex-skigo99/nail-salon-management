@@ -15,6 +15,12 @@ export class NailSalonStack extends cdk.Stack {
       throw new Error("DATABASE_URL must be set when deploying the NailSalonStack");
     }
 
+    const JWT_SECRET = process.env.JWT_SECRET;
+    const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
+    if (!JWT_SECRET) {
+      throw new Error("JWT_SECRET must be set when deploying the NailSalonStack");
+    }
+
     const node_env = process.env.NODE_ENV || "development";
     const frontendUrl = process.env.FRONTEND_URL?.trim().replace(/\/+$/, "");
     if (!frontendUrl) {
@@ -67,6 +73,8 @@ export class NailSalonStack extends cdk.Stack {
         ADMIN_NAME: ADMIN_NAME,
         S3_BUCKET_NAME: imagesBucket.bucketName,
         SES_FROM_EMAIL: process.env.SES_FROM_EMAIL || "noreply@example.com",
+        JWT_SECRET,
+        JWT_EXPIRES_IN,
       },
     };
 
