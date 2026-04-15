@@ -34,48 +34,48 @@ A full-stack web application designed to automate operations for beauty business
 
 ### Backend (`apps/api`)
 
-| Layer | Technology |
-|---|---|
-| Runtime | Node.js 24 |
-| Framework | Express 5 + TypeScript |
-| Database | PostgreSQL |
-| Query builder | Knex.js + knex-paginate |
-| Migrations | Knex migrations (append-only, chronological) |
-| Validation | Zod |
-| Auth | JWT (cookie + `Authorization: Bearer`) + Google OAuth |
-| Email | AWS SES (`@aws-sdk/client-ses`) |
-| File storage | AWS S3 (presigned PUT/GET URLs) |
-| Deployment | AWS Lambda via `serverless-http` |
-| IaC | AWS CDK (TypeScript) |
-| API docs | OpenAPI 3 (swagger-jsdoc, generated spec) |
+| Layer         | Technology                                            |
+| ------------- | ----------------------------------------------------- |
+| Runtime       | Node.js 24                                            |
+| Framework     | Express 5 + TypeScript                                |
+| Database      | PostgreSQL                                            |
+| Query builder | Knex.js + knex-paginate                               |
+| Migrations    | Knex migrations (append-only, chronological)          |
+| Validation    | Zod                                                   |
+| Auth          | JWT (cookie + `Authorization: Bearer`) + Google OAuth |
+| Email         | AWS SES (`@aws-sdk/client-ses`)                       |
+| File storage  | AWS S3 (presigned PUT/GET URLs)                       |
+| Deployment    | AWS Lambda via `serverless-http`                      |
+| IaC           | AWS CDK (TypeScript)                                  |
+| API docs      | OpenAPI 3 (swagger-jsdoc, generated spec)             |
 
 ### Frontend (`apps/web`)
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16 (App Router) + React 19 |
-| Language | TypeScript |
-| Styling | Tailwind CSS v4 |
-| UI components | shadcn/ui (Radix UI primitives) |
-| Icons | lucide-react |
-| Server state | TanStack Query v5 |
-| Forms | React Hook Form + Zod (`zodResolver`) |
-| Auth | next-auth v5 (credentials + Google provider) |
-| i18n | next-intl v4 (en / ru / he, RTL support) |
-| HTTP client | Axios (`withCredentials: true`) |
+| Layer         | Technology                                   |
+| ------------- | -------------------------------------------- |
+| Framework     | Next.js 16 (App Router) + React 19           |
+| Language      | TypeScript                                   |
+| Styling       | Tailwind CSS v4                              |
+| UI components | shadcn/ui (Radix UI primitives)              |
+| Icons         | lucide-react                                 |
+| Server state  | TanStack Query v5                            |
+| Forms         | React Hook Form + Zod (`zodResolver`)        |
+| Auth          | next-auth v5 (credentials + Google provider) |
+| i18n          | next-intl v4 (en / ru / he, RTL support)     |
+| HTTP client   | Axios (`withCredentials: true`)              |
 
 ### Infrastructure
 
-| Concern | Solution |
-|---|---|
-| Compute | AWS Lambda (Node.js 24.x, 512 MB) |
-| API Gateway | AWS API Gateway HTTP API |
-| Database | PostgreSQL (RDS-backed, `DATABASE_URL`) |
-| Migrations | Dedicated Migration Lambda (1 GB, 5 min timeout) |
-| File storage | AWS S3 (private bucket, presigned URLs, CORS) |
-| Email | AWS SES |
-| IaC | AWS CDK |
-| CI/CD | GitHub Actions |
+| Concern      | Solution                                         |
+| ------------ | ------------------------------------------------ |
+| Compute      | AWS Lambda (Node.js 24.x, 512 MB)                |
+| API Gateway  | AWS API Gateway HTTP API                         |
+| Database     | PostgreSQL (RDS-backed, `DATABASE_URL`)          |
+| Migrations   | Dedicated Migration Lambda (1 GB, 5 min timeout) |
+| File storage | AWS S3 (private bucket, presigned URLs, CORS)    |
+| Email        | AWS SES                                          |
+| IaC          | AWS CDK                                          |
+| CI/CD        | GitHub Actions                                   |
 
 ---
 
@@ -142,12 +142,12 @@ All secrets (AWS credentials, `DATABASE_URL`, `JWT_SECRET`, `FRONTEND_URL`) are 
 
 ## Testing
 
-| Layer | Framework | Scope |
-|---|---|---|
-| API integration | Vitest + Supertest | Route-level HTTP tests (`src/__tests__/routes/`) |
-| API unit | Vitest | Service-level logic tests (`src/__tests__/services/`) |
-| Frontend unit | Jest + Testing Library | Component and hook tests (`apps/web/__tests__/`) |
-| Frontend e2e | Playwright (Chromium) | Full browser flows (`apps/web/__e2e__/`) |
+| Layer           | Framework              | Scope                                                 |
+| --------------- | ---------------------- | ----------------------------------------------------- |
+| API integration | Vitest + Supertest     | Route-level HTTP tests (`src/__tests__/routes/`)      |
+| API unit        | Vitest                 | Service-level logic tests (`src/__tests__/services/`) |
+| Frontend unit   | Jest + Testing Library | Component and hook tests (`apps/web/__tests__/`)      |
+| Frontend e2e    | Playwright (Chromium)  | Full browser flows (`apps/web/__e2e__/`)              |
 
 ---
 
