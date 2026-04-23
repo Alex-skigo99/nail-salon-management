@@ -47,7 +47,7 @@ jobs:
           node-version: 24
           cache: "npm"
 
-      - name: Install production deps to dist
+      - name: Install production deps to api/dist
         working-directory: ./apps/api
         run: |
           mkdir -p dist
@@ -65,6 +65,14 @@ jobs:
       - name: Build apps/api
         working-directory: ./apps/api
         run: npm run build
+
+      - name: Install production deps to reminder/dist
+        working-directory: ./apps/reminder
+        run: |
+          mkdir -p dist
+          cp package.json dist/
+          cd dist
+          npm install --omit=dev
 
       - name: Install deps for apps/reminder
         working-directory: ./apps/reminder
