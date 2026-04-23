@@ -6,12 +6,23 @@ import { useSettings, useUpdateSetting } from "@/hooks/useSettings";
 import EditableMultiInputField from "@/components/inputs/EditableMultiInputField";
 import { toast } from "sonner";
 import { getCreatedAtString } from "@/utils/dateUtils";
+import { useState } from "react";
 
 export default function SettingsPage() {
   const { data: settings, isLoading, error } = useSettings();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState<string | null>(null);
   const updateSetting = useUpdateSetting();
 
-  const handleSave = (key: string, value: string) => {
+  const handleSave = (key: string, value: string, validation: (value: string | number) => string | null) => {
+    const error = validation(value);
+    if (error) {
+      setErrorMessage(error);
+      setErrorKey(key);
+      return;
+    }
+    setErrorMessage(null);
+    setErrorKey(null);
     updateSetting.mutate(
       { key, value },
       {
@@ -52,17 +63,18 @@ export default function SettingsPage() {
             <p className="text-muted-foreground text-sm">Please try refreshing the page</p>
           </div>
         ) : (
-          <div className="max-w-lg space-y-6">
+          <div className="flex flex-wrap gap-6">
             {settings?.map((setting) => {
               return (
-                <div key={setting.key} className="max-w-xl rounded-lg border p-4">
+                <div key={setting.key} className="w-xl rounded-lg border p-4">
                   <EditableMultiInputField
                     label={setting.label}
                     value={setting.value}
                     type={setting.type}
                     inputClassName="font-bold text-primary"
-                    onSave={(value) => handleSave(setting.key, value)}
+                    onSave={(value) => handleSave(setting.key, value, setting.validation)}
                     placeholder={setting.description ?? undefined}
+                    errorMessage={errorKey === setting.key ? (errorMessage ?? undefined) : undefined}
                   />
                   {setting.description && <p className="text-muted-foreground mt-1 text-xs">{setting.description}</p>}
                   {setting.updated_at && (
