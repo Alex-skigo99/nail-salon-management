@@ -41,6 +41,18 @@ export class NailSalonStack extends cdk.Stack {
       console.log(`Admin user will be created with email: ${ADMIN_EMAIL}`);
     }
 
+    const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
+    const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+    const TWILIO_WHATSAPP_FROM = process.env.TWILIO_WHATSAPP_FROM;
+    const TWILIO_CONTENT_SID = process.env.TWILIO_CONTENT_SID;
+    if (node_env === "production") {
+      if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_WHATSAPP_FROM || !TWILIO_CONTENT_SID) {
+        throw new Error(
+          "TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM, and TWILIO_CONTENT_SID must be set in production"
+        );
+      }
+    }
+
     // ── S3 bucket for image uploads ──
     const imagesBucket = new s3.Bucket(this, "ImagesBucket", {
       bucketName: `nail-salon-images-${node_env}`,
@@ -101,6 +113,40 @@ export class NailSalonStack extends cdk.Stack {
       handler: "src/migrate.handler",
       memorySize: 1024,
       timeout: cdk.Duration.minutes(5),
+    });
+
+    // ── Reminder Lambda (triggered by EventBridge Scheduler) ──
+    const reminderLambda = new lambda.Function(this, "ReminderLambda", {
+      runtime: lambda.Runtime.NODEJS_24_X,
+      code: lambda.Code.fromAsset("../apps/reminder/dist"),
+      handler: "src/index.handler",
+      memorySize: 256,
+      timeout: cdk.Duration.minutes(2),
+      environment: {
+        DATABASE_URL: databaseUrl,
+        NODE_ENV: node_env,
+        TWILIO_ACCOUNT_SID: TWILIO_ACCOUNT_SID ?? "",
+        TWILIO_AUTH_TOKEN: TWILIO_AUTH_TOKEN ?? "",
+        TWILIO_WHATSAPP_FROM: TWILIO_WHATSAPP_FROM ?? "",
+        TWILIO_CONTENT_SID: TWILIO_CONTENT_SID ?? "",
+      },
+    });
+
+    // IAM role that EventBridge Scheduler can assume to invoke the reminder Lambda.
+    // Admin uses the ReminderSchedulerRoleArn output when creating a schedule in the AWS console.
+    const reminderSchedulerRole = new iam.Role(this, "ReminderSchedulerRole", {
+      assumedBy: new iam.ServicePrincipal("scheduler.amazonaws.com"),
+      description: "Allows EventBridge Scheduler to invoke the ReminderLambda",
+    });
+    reminderLambda.grantInvoke(reminderSchedulerRole);
+
+    new cdk.CfnOutput(this, "ReminderLambdaArn", {
+      value: reminderLambda.functionArn,
+      description: "ARN of the Reminder Lambda — use as EventBridge Scheduler target",
+    });
+    new cdk.CfnOutput(this, "ReminderSchedulerRoleArn", {
+      value: reminderSchedulerRole.roleArn,
+      description: "IAM Role ARN for EventBridge Scheduler to invoke the Reminder Lambda",
     });
 
     const httpApi = new apigateway.HttpApi(this, "HttpApi", {
