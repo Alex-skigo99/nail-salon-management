@@ -17,3 +17,5 @@ export async function updateSetting(key: string, value: string): Promise<Setting
     .returning("*");
   return updated ?? null;
 }
+
+/* helper functions and utils for specific settings */
