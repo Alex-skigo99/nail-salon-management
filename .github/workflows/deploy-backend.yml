@@ -66,6 +66,14 @@ jobs:
         working-directory: ./apps/api
         run: npm run build
 
+      - name: Install deps for apps/reminder
+        working-directory: ./apps/reminder
+        run: npm ci
+
+      - name: Build apps/reminder
+        working-directory: ./apps/reminder
+        run: npm run build
+
       - run: |
           cd infra
           npm install
@@ -84,6 +92,10 @@ jobs:
           ADMIN_NAME: ${{ secrets.ADMIN_NAME }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_WHATSAPP_FROM: ${{ secrets.TWILIO_WHATSAPP_FROM }}
+          TWILIO_CONTENT_SID: ${{ secrets.TWILIO_CONTENT_SID }}
           NODE_ENV: production
 
       # Invoke migration lambda — resolve actual function name from CloudFormation
