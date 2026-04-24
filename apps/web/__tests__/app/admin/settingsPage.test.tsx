@@ -20,6 +20,7 @@ const mockSettings = [
     updated_at: "2026-01-01",
     label: "Slot Duration (minutes)",
     type: "number",
+    validation: (value: string) => null,
   },
   {
     id: 2,
@@ -30,6 +31,7 @@ const mockSettings = [
     updated_at: "2026-01-01",
     label: "Booking Period (days)",
     type: "number",
+    validation: (value: string) => null,
   },
 ];
 
