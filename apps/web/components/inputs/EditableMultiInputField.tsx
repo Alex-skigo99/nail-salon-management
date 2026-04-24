@@ -5,13 +5,12 @@ import { Pencil, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-
-type FieldType = "text" | "email" | "tel" | "number";
+import { EditableFieldType } from "@/types/editableFieldType";
 
 type EditableMultiInputFieldProps = {
   label: string;
   value: string;
-  type?: FieldType;
+  type?: EditableFieldType;
   onSave: (value: string) => void;
   errorMessage?: string;
   disabled?: boolean;

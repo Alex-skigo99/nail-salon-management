@@ -5,10 +5,49 @@ services:
     ports:
       - "4566:4566"
     environment:
-      SERVICES: s3
+      SERVICES: s3,scheduler
       DEFAULT_REGION: us-east-1
     volumes:
       - localstack-data:/var/lib/localstack
       - ./localstack-init:/etc/localstack/init/ready.d
 volumes:
   localstack-data:
+
+# To list schedules in the localstack scheduler service, you can use the following AWS CLI command:
+# aws --endpoint-url=http://localhost:4566 scheduler list-schedules --region us-east-1
+
+# Create
+# aws --endpoint-url=http://localhost:4566 scheduler create-schedule \
+#   --name NailSalonReminderScheduler_development \
+#   --schedule-expression "cron(0 9 * * ? *)" \
+#   --flexible-time-window Mode=OFF \
+#   --target Arn=arn:aws:lambda:us-east-1:000000000000:function:my-fn,RoleArn=arn:aws:iam::000000000000:role/dummy,Input='{"reminderBefore":1}' \
+#   --region us-east-1
+
+# Get one
+# aws --endpoint-url=http://localhost:4566 scheduler get-schedule \
+#   --name NailSalonReminderScheduler_development \
+#   --region us-east-1
+
+# Update (also used to enable/disable by state)
+# aws --endpoint-url=http://localhost:4566 scheduler update-schedule \
+#   --name NailSalonReminderScheduler_development \
+#   --schedule-expression "cron(30 9 * * ? *)" \
+#   --state ENABLED \
+#   --flexible-time-window Mode=OFF \
+#   --target Arn=arn:aws:lambda:us-east-1:000000000000:function:my-fn,RoleArn=arn:aws:iam::000000000000:role/dummy,Input='{"reminderBefore":2}' \
+#   --region us-east-1
+
+# Pause
+# aws --endpoint-url=http://localhost:4566 scheduler update-schedule \
+#   --name NailSalonReminderScheduler_development \
+#   --state DISABLED \
+#   --schedule-expression "cron(30 9 * * ? *)" \
+#   --flexible-time-window Mode=OFF \
+#   --target Arn=arn:aws:lambda:us-east-1:000000000000:function:my-fn,RoleArn=arn:aws:iam::000000000000:role/dummy,Input='{"reminderBefore":2}' \
+#   --region us-east-1
+
+# Delete
+# aws --endpoint-url=http://localhost:4566 scheduler delete-schedule \
+#   --name NailSalonReminderScheduler_development \
+#   --region us-east-1

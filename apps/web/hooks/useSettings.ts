@@ -27,6 +27,7 @@ export function useSettings() {
         label: SETTING_LABELS[setting.key]?.label ?? setting.key,
         description: SETTING_LABELS[setting.key]?.description ?? setting.description ?? "",
         type: SETTING_LABELS[setting.key]?.type ?? "text",
+        validation: SETTING_LABELS[setting.key]?.validation ?? (() => null),
       }));
       return settings;
     },
@@ -45,6 +46,7 @@ export function useSetting(key: string) {
         label: SETTING_LABELS[setting.key]?.label ?? setting.key,
         description: SETTING_LABELS[setting.key]?.description ?? setting.description ?? "",
         type: SETTING_LABELS[setting.key]?.type ?? "text",
+        validation: SETTING_LABELS[setting.key]?.validation ?? (() => null),
       };
     },
     staleTime: CACHE_TIME,
@@ -62,6 +64,7 @@ export function useUpdateSetting() {
         label: SETTING_LABELS[res.data.key]?.label ?? res.data.key,
         description: SETTING_LABELS[res.data.key]?.description ?? res.data.description ?? "",
         type: SETTING_LABELS[res.data.key]?.type ?? "text",
+        validation: SETTING_LABELS[res.data.key]?.validation ?? (() => null),
       };
     },
     onSuccess: (_, { key }) => {
