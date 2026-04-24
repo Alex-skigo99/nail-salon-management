@@ -140,6 +140,36 @@ export class NailSalonStack extends cdk.Stack {
     });
     reminderLambda.grantInvoke(reminderSchedulerRole);
 
+    const reminderScheduleName = `NailSalonReminderScheduler_${node_env}`;
+    const reminderScheduleArn = this.formatArn({
+      service: "scheduler",
+      resource: "schedule",
+      resourceName: `default/${reminderScheduleName}`,
+    });
+    const defaultScheduleGroupArn = this.formatArn({
+      service: "scheduler",
+      resource: "schedule-group",
+      resourceName: "default",
+    });
+
+    // Allows API Lambda settingsService to read/create/update the EventBridge schedule.
+    apiLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["scheduler:GetSchedule", "scheduler:CreateSchedule", "scheduler:UpdateSchedule"],
+        resources: [reminderScheduleArn, defaultScheduleGroupArn],
+      })
+    );
+
+    // Required by Scheduler Create/UpdateSchedule when setting Target.RoleArn.
+    apiLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["iam:PassRole"],
+        resources: [reminderSchedulerRole.roleArn],
+      })
+    );
+
     new cdk.CfnOutput(this, "ReminderLambdaArn", {
       value: reminderLambda.functionArn,
       description: "ARN of the Reminder Lambda — use as EventBridge Scheduler target",
