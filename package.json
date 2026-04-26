@@ -6,6 +6,7 @@
     "apps/web",
     "apps/api",
     "apps/reminder",
+    "apps/syncCalendar",
     "infra"
   ],
   "scripts": {

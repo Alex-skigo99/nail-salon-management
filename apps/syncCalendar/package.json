@@ -1,0 +1,23 @@
+{
+  "name": "sync-calendar",
+  "version": "1.0.0",
+  "description": "iCloud CalDAV calendar sync Lambda",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "test": "echo \"No tests yet\"",
+    "lint": "echo \"No linting rules yet\""
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "knex": "^3.1.0",
+    "node-ical": "^0.19.0",
+    "pg": "^8.18.0",
+    "tsdav": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.33",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
