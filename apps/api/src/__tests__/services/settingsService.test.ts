@@ -18,7 +18,17 @@ const { mockKnex, chain } = vi.hoisted(() => {
   chain.update.mockReturnValue(chain);
   chain.select.mockReturnValue(chain);
 
-  const fn: any = Object.assign(vi.fn().mockReturnValue(chain), { fn: { now: vi.fn().mockReturnValue("now()") } });
+  const trx: any = Object.assign(vi.fn().mockReturnValue(chain), {
+    commit: vi.fn().mockResolvedValue(undefined),
+    rollback: vi.fn().mockResolvedValue(undefined),
+  });
+  // make trx proxy chain methods so trx(table).where(...) works
+  trx.mockReturnValue(chain);
+
+  const fn: any = Object.assign(vi.fn().mockReturnValue(chain), {
+    fn: { now: vi.fn().mockReturnValue("now()") },
+    transaction: vi.fn().mockResolvedValue(trx),
+  });
   return { mockKnex: fn, chain };
 });
 

@@ -5,6 +5,8 @@ export const SETTING_KEYS = {
   BOOKING_PERIOD: "booking_period",
   REMINDING_BEFORE: "reminding_before", // 0 means disabled, otherwise must be between 1 and 10
   REMINDING_TIME: "reminding_time", // Time of day to send reminders, in HH:mm 24-hour format (e.g. "09:00" or "18:30")
+  ACTIVE_CALENDAR: "active_calendar", // "internal" or "icloud"
+  CALENDAR_SYNC_EXP: "calendar_sync_exp", // EventBridge Scheduler expression, e.g. "rate(1 day)" or "cron(0 3 * * ? *)"
 };
 
 type SettingLabel = {
@@ -68,6 +70,31 @@ export const SETTING_LABELS: Record<string, SettingLabel> = {
         return null;
       }
       return "Reminding time must be a string in HH:mm format";
+    },
+  },
+  [SETTING_KEYS.ACTIVE_CALENDAR]: {
+    label: "Active Calendar",
+    description: "Calendar source used for appointments: 'internal' (app only) or 'icloud' (sync from iCloud)",
+    type: "text",
+    validation: (value) => {
+      if (value !== "internal" && value !== "icloud") {
+        return "Active calendar must be 'internal' or 'icloud'";
+      }
+      return null;
+    },
+  },
+  [SETTING_KEYS.CALENDAR_SYNC_EXP]: {
+    label: "Calendar Sync Schedule",
+    description: "EventBridge Scheduler expression for iCloud sync, e.g. 'rate(1 day)' or 'cron(0 3 * * ? *)'",
+    type: "text",
+    validation: (value) => {
+      if (typeof value !== "string") return "Must be a string";
+      const ratePattern = /^rate\(\d+\s+(minute|minutes|hour|hours|day|days)\)$/;
+      const cronPattern = /^cron\(\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\)$/;
+      if (!ratePattern.test(value) && !cronPattern.test(value)) {
+        return "Must be a valid rate expression (e.g. 'rate(1 day)') or cron expression (e.g. 'cron(0 9 * * ? *)')";
+      }
+      return null;
     },
   },
 };

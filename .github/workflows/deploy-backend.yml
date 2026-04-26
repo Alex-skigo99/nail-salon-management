@@ -82,6 +82,22 @@ jobs:
         working-directory: ./apps/reminder
         run: npm run build
 
+      - name: Install production deps to syncCalendar/dist
+        working-directory: ./apps/syncCalendar
+        run: |
+          mkdir -p dist
+          cp package.json dist/
+          cd dist
+          npm install --omit=dev
+
+      - name: Install deps for apps/syncCalendar
+        working-directory: ./apps/syncCalendar
+        run: npm ci
+
+      - name: Build apps/syncCalendar
+        working-directory: ./apps/syncCalendar
+        run: npm run build
+
       - run: |
           cd infra
           npm install
@@ -98,6 +114,11 @@ jobs:
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           ADMIN_NAME: ${{ secrets.ADMIN_NAME }}
+          ICLOUD_EMAIL: ${{ vars.ICLOUD_EMAIL }}
+          ICLOUD_APP_PASSWORD: ${{ secrets.ICLOUD_APP_PASSWORD }}
+          ICLOUD_CALENDAR_NAME: ${{ vars.ICLOUD_CALENDAR_NAME }}
+          ICLOUD_DAYS_TO_SYNC: ${{ vars.ICLOUD_DAYS_TO_SYNC }}
+          ICLOUD_DEFAULT_MASTER_ID: ${{ vars.ICLOUD_DEFAULT_MASTER_ID }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRES_IN: ${{ vars.JWT_EXPIRES_IN }}
           TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}

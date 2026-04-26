@@ -53,6 +53,12 @@ export class NailSalonStack extends cdk.Stack {
       }
     }
 
+    const ICLOUD_EMAIL = process.env.ICLOUD_EMAIL ?? "";
+    const ICLOUD_APP_PASSWORD = process.env.ICLOUD_APP_PASSWORD ?? "";
+    const ICLOUD_CALENDAR_NAME = process.env.ICLOUD_CALENDAR_NAME ?? "Work";
+    const ICLOUD_DAYS_TO_SYNC = process.env.ICLOUD_DAYS_TO_SYNC ?? "60";
+    const ICLOUD_DEFAULT_MASTER_ID = process.env.ICLOUD_DEFAULT_MASTER_ID ?? "1";
+
     // ── S3 bucket for image uploads ──
     const imagesBucket = new s3.Bucket(this, "ImagesBucket", {
       bucketName: `nail-salon-images-${node_env}`,
@@ -132,6 +138,24 @@ export class NailSalonStack extends cdk.Stack {
       },
     });
 
+    // ── SyncCalendar Lambda (triggered by EventBridge Scheduler) ──
+    const syncCalendarLambda = new lambda.Function(this, "SyncCalendarLambda", {
+      runtime: lambda.Runtime.NODEJS_24_X,
+      code: lambda.Code.fromAsset("../apps/syncCalendar/dist"),
+      handler: "src/index.handler",
+      memorySize: 256,
+      timeout: cdk.Duration.minutes(3),
+      environment: {
+        DATABASE_URL: databaseUrl,
+        NODE_ENV: node_env,
+        ICLOUD_EMAIL,
+        ICLOUD_APP_PASSWORD,
+        ICLOUD_CALENDAR_NAME,
+        ICLOUD_DAYS_TO_SYNC,
+        ICLOUD_DEFAULT_MASTER_ID,
+      },
+    });
+
     // IAM role that EventBridge Scheduler can assume to invoke the reminder Lambda.
     // Admin uses the ReminderSchedulerRoleArn output when creating a schedule in the AWS console.
     const reminderSchedulerRole = new iam.Role(this, "ReminderSchedulerRole", {
@@ -139,6 +163,13 @@ export class NailSalonStack extends cdk.Stack {
       description: "Allows EventBridge Scheduler to invoke the ReminderLambda",
     });
     reminderLambda.grantInvoke(reminderSchedulerRole);
+
+    // IAM role that EventBridge Scheduler can assume to invoke the syncCalendar Lambda.
+    const syncCalendarSchedulerRole = new iam.Role(this, "SyncCalendarSchedulerRole", {
+      assumedBy: new iam.ServicePrincipal("scheduler.amazonaws.com"),
+      description: "Allows EventBridge Scheduler to invoke the SyncCalendarLambda",
+    });
+    syncCalendarLambda.grantInvoke(syncCalendarSchedulerRole);
 
     const reminderScheduleName = `NailSalonReminderScheduler_${node_env}`;
     const reminderScheduleArn = this.formatArn({
@@ -152,7 +183,14 @@ export class NailSalonStack extends cdk.Stack {
       resourceName: "default",
     });
 
-    // Allows API Lambda settingsService to read/create/update the EventBridge schedule.
+    const syncCalendarScheduleName = `NailSalonSyncCalendarScheduler_${node_env}`;
+    const syncCalendarScheduleArn = this.formatArn({
+      service: "scheduler",
+      resource: "schedule",
+      resourceName: `default/${syncCalendarScheduleName}`,
+    });
+
+    // Allows API Lambda settingsService to read/create/update the EventBridge reminder schedule.
     apiLambda.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
@@ -170,6 +208,29 @@ export class NailSalonStack extends cdk.Stack {
       })
     );
 
+    // Allows API Lambda settingsService to create/update/delete the iCloud sync schedule.
+    apiLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "scheduler:GetSchedule",
+          "scheduler:CreateSchedule",
+          "scheduler:UpdateSchedule",
+          "scheduler:DeleteSchedule",
+        ],
+        resources: [syncCalendarScheduleArn, defaultScheduleGroupArn],
+      })
+    );
+
+    // Required for SyncCalendar Scheduler Create/UpdateSchedule when setting Target.RoleArn.
+    apiLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["iam:PassRole"],
+        resources: [syncCalendarSchedulerRole.roleArn],
+      })
+    );
+
     new cdk.CfnOutput(this, "ReminderLambdaArn", {
       value: reminderLambda.functionArn,
       description: "ARN of the Reminder Lambda — use as EventBridge Scheduler target",
@@ -177,6 +238,15 @@ export class NailSalonStack extends cdk.Stack {
     new cdk.CfnOutput(this, "ReminderSchedulerRoleArn", {
       value: reminderSchedulerRole.roleArn,
       description: "IAM Role ARN for EventBridge Scheduler to invoke the Reminder Lambda",
+    });
+
+    new cdk.CfnOutput(this, "SyncCalendarLambdaArn", {
+      value: syncCalendarLambda.functionArn,
+      description: "ARN of the SyncCalendar Lambda — use as EventBridge Scheduler target",
+    });
+    new cdk.CfnOutput(this, "SyncCalendarSchedulerRoleArn", {
+      value: syncCalendarSchedulerRole.roleArn,
+      description: "IAM Role ARN for EventBridge Scheduler to invoke the SyncCalendar Lambda",
     });
 
     const httpApi = new apigateway.HttpApi(this, "HttpApi", {
