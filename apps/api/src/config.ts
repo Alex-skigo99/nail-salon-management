@@ -7,9 +7,9 @@ export const REMINDER_SCHEDULER_NAME = "NailSalonReminderScheduler"; // + _NODE_
 
 /* syncCalendar scheduler settings: */
 export const SYNC_CALENDAR_LAMBDA_ARN =
-  "arn:aws:lambda:us-east-1:214745598862:function:NailSalonStack-SyncCalendarLambdaB9F3C8B7-1n2XoVh5sKjP"; //fake
+  "arn:aws:lambda:us-east-1:214745598862:function:NailSalonStack-SyncCalendarLambda2494F835-yydGmbwQmNmZ";
 export const SYNC_CALENDAR_SCHEDULER_ROLE_ARN =
-  "arn:aws:iam::214745598862:role/NailSalonStack-SyncCalendarSchedulerRoleC0E4A9B6-1mLhHqjvXo2e"; //fake
+  "arn:aws:iam::214745598862:role/NailSalonStack-SyncCalendarSchedulerRole3E0C63A3-9mK4PB3Y77L4";
 export const SYNC_CALENDAR_SCHEDULER_NAME = "NailSalonSyncCalendarScheduler"; // + _NODE_ENV for dev/prod
 
 /* iCloud calendar sync settings: */
